@@ -17,6 +17,12 @@ This is the same design principle used by event sourcing in production systems, 
 ┌─────────────────────────────────────────────────────────┐
 │                     Relay V1 Stack                       │
 ├─────────────────────────────────────────────────────────┤
+│  CLI Command Layer       relay/cli/main.py              │
+│  (init, install, doctor) Bootstraps and configures repos│
+├─────────────────────────────────────────────────────────┤
+│  Extraction Package      relay/extraction/              │
+│  (extractor, suggestor)  Factual parser & event maps    │
+├─────────────────────────────────────────────────────────┤
 │  AgentCompilers          relay/compilers/               │
 │  (ClaudeCompiler, ...)   Format state for each agent    │
 ├─────────────────────────────────────────────────────────┤
@@ -97,25 +103,24 @@ Agent resumes work
 | PostgreSQL 17 | Reliable, uuid-ossp, JSONB, BIGSERIAL, advisory locks |
 | Docker Compose | Reproducible local environment; no bare-metal setup required |
 
-## Sprint Plan
+## Evolving Sprint Roadmap
 
-| Sprint | Goal | Key Deliverable |
-|--------|------|-----------------|
-| A | Event Ledger | `append_event`, `replay_stream`, 1000-event test |
-| B | Cognitive Head + Compiler | `compile_cognitive_head`, `ClaudeCompiler` |
-| C | Real Experiment | Claude → Relay → ChatGPT → Relay → Hermes |
-| D | Based on failures | Add only what Sprint C failures demand |
+| Sprint | Goal | Key Deliverable | Status |
+|--------|------|-----------------|--------|
+| **A** | Event Ledger | `append_event`, `replay_stream`, 1000-event test | Completed ✅ |
+| **B** | Cognitive Head + Compiler | `compile_cognitive_head`, `ClaudeCompiler` | Completed ✅ |
+| **C** | Handoff Validation | Claude → Relay → ChatGPT → Relay → Hermes | Completed ✅ |
+| **D1** | Event Extraction Engine | `relay/extraction/` (observations vs suggestions) | Completed ✅ |
+| **D2** | Agent Protocol | `.relay/RELAY_SKILL.md`, `relay_protocol.yaml` | Completed ✅ |
+| **D3** | CLI Installation | `relay init`, `relay install --platform`, `relay doctor` | Completed ✅ |
+| **E** | Stress Test & Benchmarking | 50+ event validation loops across 5+ agents | Roadmapped ⏳ |
+| **E1** | Confidence-Gated Ingestion | Auto-accept events with confidence >= 0.95 | Roadmapped ⏳ |
+| **E2** | MCP Server Integration | Native Relay protocol MCP endpoints | Roadmapped ⏳ |
 
-## What Relay V1 Does NOT Build
+---
 
-By design, Relay V1 defers until Sprint D or later:
+## Convergence with Universal Graph-RAG
 
-- Knowledge Compiler (R3)
-- Context Assembly Planner / Graph-RAG retrieval (R4)
-- Validation Engine (R6)
-- Audit Dashboard (R7)
-- Reflection Engine (R8)
-- Embeddings, vector search
-- Cursor / Hermes / ChatGPT / OpenCode specific compilers
-
-These are added only when real Sprint C failures demonstrate they are needed.
+Relay (Short-Term/Working Memory) and Universal Graph-RAG (Long-Term/Knowledge Memory) converge to construct a complete cognitive architecture:
+* **Universal Graph-RAG**: Handles semantic indexing, retrieval, and code relationship discovery ("What does the repository know?").
+* **Relay**: Manages task priority lifecycle, active blockers, and architectural guardrails ("What is the team doing right now?").
