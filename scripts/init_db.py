@@ -61,17 +61,17 @@ def apply_migration(conn: psycopg.Connection, filename: str, sql: str) -> None:
             (filename,),
         )
     conn.commit()
-    print("✓")
+    print("OK")
 
 
 def reset_database(conn: psycopg.Connection) -> None:
     """Drop all Relay tables. Destroys all data."""
-    print("  ⚠️  Resetting database — dropping all Relay tables...")
+    print("  [WARNING] Resetting database -- dropping all Relay tables...")
     with conn.cursor() as cur:
         cur.execute("DROP TABLE IF EXISTS relay_events CASCADE")
         cur.execute("DROP TABLE IF EXISTS relay_migrations CASCADE")
     conn.commit()
-    print("  ✓ Tables dropped.")
+    print("  Tables dropped.")
 
 
 def main() -> None:
@@ -113,8 +113,8 @@ def main() -> None:
             apply_migration(conn, filename, migration_path.read_text())
             applied_count += 1
 
-        print(f"\n✅ Database ready.")
-        print(f"   Applied: {applied_count}  Skipped: {skipped}")
+        print(f"\nDatabase ready.")
+        print(f"  Applied: {applied_count}  Skipped: {skipped}")
         print()
     finally:
         conn.close()

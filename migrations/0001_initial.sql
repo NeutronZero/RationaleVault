@@ -78,12 +78,5 @@ COMMENT ON COLUMN relay_events.version IS
 COMMENT ON COLUMN relay_events.stream_id IS
     'Logical sub-stream grouping. Reducers load all streams. Use for targeted queries only.';
 
--- ── Migration Tracking ────────────────────────────────────────────────────────
-
-CREATE TABLE relay_migrations (
-    filename    TEXT        PRIMARY KEY,
-    applied_at  TIMESTAMPTZ NOT NULL DEFAULT now()
-);
-
-COMMENT ON TABLE relay_migrations IS
-    'Tracks applied SQL migrations. Managed by scripts/init_db.py.';
+-- relay_migrations is created and managed exclusively by scripts/init_db.py.
+-- Do not add it here.

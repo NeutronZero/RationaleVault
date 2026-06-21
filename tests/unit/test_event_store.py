@@ -19,9 +19,17 @@ from __future__ import annotations
 import uuid
 from uuid import UUID
 
+import os
 import pytest
 
-from tests.conftest import DB_REQUIRED
+# DB_REQUIRED marker — defined here so it can be used without importing conftest
+DB_REQUIRED = pytest.mark.skipif(
+    os.environ.get("RELAY_DB_TEST_ENABLED") != "1",
+    reason=(
+        "Set RELAY_DB_TEST_ENABLED=1 and ensure the database is initialized "
+        "to run database integration tests."
+    ),
+)
 from relay.db.event_store import EventStore
 from relay.schema.events import EventMetadata, EventType
 
@@ -147,7 +155,7 @@ class TestOrdering:
         )
 
         print(f"\nEventStore Ordering Tests")
-        print(f"{'─' * 44}")
+        print("-" * 44)
         print(f"Events Written:        1000")
         print(f"Events Replayed:       {len(events)}")
         print(f"Ordering Violations:   {seq_violations}")

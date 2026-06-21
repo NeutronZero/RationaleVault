@@ -45,7 +45,7 @@ def seed(project_name: str) -> uuid.UUID:
     human = _meta("Human")
     claude = _meta("Claude")
 
-    print(f"\n🌱 Seeding: {project_name}")
+    print(f"\n[SEED] Seeding: {project_name}")
     print(f"   ID: {pid}\n")
 
     # ── Bootstrap ────────────────────────────────────────────────────────────
@@ -53,21 +53,21 @@ def seed(project_name: str) -> uuid.UUID:
         "name": project_name,
         "description": "Event-sourced memory layer for multi-agent AI workflows",
     }, human)
-    print("✓ PROJECT_CREATED")
+    print("OK: PROJECT_CREATED")
 
     store.append_event(pid, "main", EventType.PROJECT_GOAL_SET, {
         "goal": (
             "Build a persistent, event-sourced project memory layer that allows any AI agent "
             "(Claude, Cursor, Hermes, ChatGPT, OpenCode) to resume work with full context "
-            "continuity within 30 seconds — without manual summarization."
+            "continuity within 30 seconds - without manual summarization."
         ),
     }, human)
-    print("✓ PROJECT_GOAL_SET")
+    print("OK: PROJECT_GOAL_SET")
 
     store.append_event(pid, "main", EventType.PROJECT_FOCUS_CHANGED, {
         "focus": "Sprint C: running the first real multi-agent handoff experiment",
     }, human)
-    print("✓ PROJECT_FOCUS_CHANGED")
+    print("OK: PROJECT_FOCUS_CHANGED")
 
     # ── Decisions ────────────────────────────────────────────────────────────
     for decision_id, title, description, rationale in [
@@ -92,7 +92,7 @@ def seed(project_name: str) -> uuid.UUID:
         }, claude)
         store.append_event(pid, "decisions", EventType.DECISION_ACCEPTED,
                            {"decision_id": decision_id}, human)
-        print(f"✓ DECISION_ACCEPTED: {title[:50]}")
+        print(f"OK: DECISION_ACCEPTED: {title[:50]}")
 
     # ── Completed Sprint A tasks ─────────────────────────────────────────────
     sprint_a_tasks = [
@@ -121,7 +121,7 @@ def seed(project_name: str) -> uuid.UUID:
         }, claude)
         store.append_event(pid, "tasks", EventType.TASK_COMPLETED,
                            {"task_id": task_id}, claude)
-        print(f"✓ TASK_COMPLETED: {title[:50]}")
+        print(f"OK: TASK_COMPLETED: {title[:50]}")
 
     # ── Completed Sprint B tasks ─────────────────────────────────────────────
     sprint_b_tasks = [
@@ -146,7 +146,7 @@ def seed(project_name: str) -> uuid.UUID:
         }, claude)
         store.append_event(pid, "tasks", EventType.TASK_COMPLETED,
                            {"task_id": task_id}, claude)
-        print(f"✓ TASK_COMPLETED: {title[:50]}")
+        print(f"OK: TASK_COMPLETED: {title[:50]}")
 
     # ── Open Sprint C tasks ──────────────────────────────────────────────────
     store.append_event(pid, "tasks", EventType.TASK_CREATED, {
@@ -160,7 +160,7 @@ def seed(project_name: str) -> uuid.UUID:
         "priority": "high",
         "tags": ["sprint-c", "experiment"],
     }, human)
-    print("✓ TASK_CREATED: Sprint C experiment (OPEN)")
+    print("OK: TASK_CREATED: Sprint C experiment (OPEN)")
 
     store.append_event(pid, "tasks", EventType.TASK_CREATED, {
         "task_id": "task_14",
@@ -173,7 +173,7 @@ def seed(project_name: str) -> uuid.UUID:
         "tags": ["sprint-c", "metrics"],
         "blocked_by": ["q_02"],
     }, human)
-    print("✓ TASK_CREATED: Record metrics (OPEN, blocked by q_02)")
+    print("OK: TASK_CREATED: Record metrics (OPEN, blocked by q_02)")
 
     store.append_event(pid, "tasks", EventType.TASK_CREATED, {
         "task_id": "task_15",
@@ -186,7 +186,7 @@ def seed(project_name: str) -> uuid.UUID:
         "tags": ["sprint-c", "planning"],
         "blocked_by": ["q_01", "q_02"],
     }, human)
-    print("✓ TASK_CREATED: Plan Sprint D (OPEN, blocked)")
+    print("OK: TASK_CREATED: Plan Sprint D (OPEN, blocked)")
 
     # ── Open Questions ────────────────────────────────────────────────────────
     store.append_event(pid, "questions", EventType.OPEN_QUESTION_RAISED, {
@@ -202,7 +202,7 @@ def seed(project_name: str) -> uuid.UUID:
         "priority": "high",
         "blocks_task_ids": ["task_15"],
     }, human)
-    print("✓ OPEN_QUESTION_RAISED: Real vs synthetic (HIGH)")
+    print("OK: OPEN_QUESTION_RAISED: Real vs synthetic (HIGH)")
 
     store.append_event(pid, "questions", EventType.OPEN_QUESTION_RAISED, {
         "question_id": "q_02",
@@ -216,7 +216,7 @@ def seed(project_name: str) -> uuid.UUID:
         "priority": "high",
         "blocks_task_ids": ["task_14", "task_15"],
     }, human)
-    print("✓ OPEN_QUESTION_RAISED: Baseline measurement (HIGH)")
+    print("OK: OPEN_QUESTION_RAISED: Baseline measurement (HIGH)")
 
     # ── Knowledge stubs ───────────────────────────────────────────────────────
     store.append_event(pid, "knowledge", EventType.FACT_RECORDED, {
@@ -238,10 +238,10 @@ def seed(project_name: str) -> uuid.UUID:
         "confidence": "agent_claim",
         "source": "implementation_review",
     }, claude)
-    print("✓ FACT_RECORDED: 2 knowledge stubs")
+    print("OK: FACT_RECORDED: 2 knowledge stubs")
 
     count = store.get_event_count(pid)
-    print(f"\n📦 Total events seeded: {count}")
+    print(f"\nTotal events seeded: {count}")
     return pid
 
 
@@ -258,7 +258,7 @@ def main() -> None:
     store = EventStore()
     head = compile_cognitive_head(project_id, store=store)
 
-    print(f"\n📊 Cognitive Head:")
+    print(f"\nCognitive Head:")
     print(f"   Project:      {head.project_name}")
     print(f"   Ledger v:     {head.ledger_version}")
     print(f"   Active Tasks: {len(head.active_tasks)}")
@@ -272,7 +272,7 @@ def main() -> None:
     compiler = ClaudeCompiler()
     print(compiler.compile(head))
     print("\n" + "=" * 60)
-    print(f"\n✅ Done. Project ID: {project_id}")
+    print(f"\n[SUCCESS] Done. Project ID: {project_id}")
     print(f"   Run Sprint C: python scripts/handoff_metrics.py --project-id {project_id}")
 
 
