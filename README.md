@@ -57,37 +57,65 @@ Continuity Validation (Handoff Integrity Verification)
 
 ### 1. Install RationaleVault
 
-Install RationaleVault in editable developer mode:
+Install the package directly from PyPI:
+```bash
+pip install rationalevault
+```
+
+Or for development / running from source:
 ```bash
 pip install -e ".[dev]"
 ```
 
-### 2. Verify Installation
+### 2. Initialize a Project
 
-Run the system diagnostics tool to verify that the environment, active databases, registry, and projection chains are fully functional:
+Initialize RationaleVault in your current project workspace:
+```bash
+rationalevault init
+```
+This bootstraps the local configuration and state tracking directory (`.rationalevault/`).
+
+### 3. Verify Installation
+
+Run the system diagnostics tool to verify that the databases, compiler registry, and projection chains are fully functional:
 ```bash
 rationalevault doctor
 ```
 
-### 3. Run the Unified Evaluation Suite
+### 4. Run the Unified Evaluation Suite
 
-Execute the full evaluation pipeline, checking all exit gates (Memory, Knowledge, Context, Compilers, Continuity, Graph, and Examples):
+Execute the full evaluation pipeline, verifying all layers of the cognitive continuity loop (Memory, Knowledge, Context, Compilers, Continuity, Graph, and Examples):
 ```bash
 rationalevault evaluate
 ```
+This writes a machine-readable snapshot to `.rationalevault/reports/release_manifest.json` and a human-readable summary to `.rationalevault/reports/report.md`.
 
-This generates a PEP 440-compliant release manifest at `.rationalevault/reports/release_manifest.json` and a markdown summary at `.rationalevault/reports/report.md`.
-
-### 4. Run tests
+### 5. Run Tests
+For developers running from source:
 ```bash
 pytest
 ```
-All 283 tests will run (269 pass; 14 are skipped as they require a live PostgreSQL database connection).
+All 283 tests will execute (269 pass; 14 require a live PostgreSQL database and are skipped by default).
+
+---
+
+## CLI Reference
+
+RationaleVault provides a unified command-line toolset for inspecting and managing the cognitive ledger and projections:
+
+- **`rationalevault init`**: Initialize RationaleVault configs and adapters in the current directory.
+- **`rationalevault doctor`**: Run active diagnostics checks on storage, thresholds, registry, and projection chains.
+- **`rationalevault evaluate`**: Run the self-verifying exit-gate evaluation suite across all subsystems.
+- **`rationalevault memory`**: Query and manage the memory layer.
+- **`rationalevault knowledge`**: Inspect synthesized project invariants, rules, and architecture guidelines.
+- **`rationalevault context`**: Compile queries into formatted context packages ready for agent consumption.
+- **`rationalevault graph`**: Build, serialization (Mermaid, GraphML), and check statistics on the derived knowledge projection.
 
 ---
 
 ## Design Principles
-- **Ledger Invariance**: `event_sequence` is the only authoritative ordering key.
-- **Determinism**: Same events always project to the identical memory, knowledge, and graph states.
-- **Provenance Traceability**: Every context citation must trace back to original event ledger records.
+- **Ledger Invariance**: The immutable event sequence is the only authoritative source of truth.
+- **Determinism**: Identical event streams project to identical memory, knowledge, and graph states.
+- **Provenance Traceability**: Every context citation carries strict lineage back to the originating event IDs.
 - **Zero-Dependency Core**: Standard configuration runs local-first on SQLite with zero external database setup.
+
