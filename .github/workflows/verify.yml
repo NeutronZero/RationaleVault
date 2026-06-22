@@ -42,4 +42,4 @@ jobs:
         rationalevault evaluate
     - name: Verify release manifest version
       run: |
-        python -c "import json; manifest = json.load(open('.rationalevault/reports/release_manifest.json')); assert manifest['rationalevault_version'] == '1.0.0', f'Invalid version: {manifest[\"rationalevault_version\"]}'; assert manifest['schema_version'] == '1.0', f'Invalid schema: {manifest[\"schema_version\"]}'"
+        python -c "import json, rationalevault; manifest = json.load(open('.rationalevault/reports/release_manifest.json')); assert manifest['rationalevault_version'] == rationalevault.__version__, f'Invalid version: {manifest[\"rationalevault_version\"]}'; assert manifest['schema_version'] == '1.0', f'Invalid schema: {manifest[\"schema_version\"]}'"
