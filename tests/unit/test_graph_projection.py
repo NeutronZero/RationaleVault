@@ -1,4 +1,4 @@
-"""Unit tests for Relay Knowledge Graph Projection (Sprint I7.5)."""
+"""Unit tests for RationaleVault Knowledge Graph Projection (Sprint I7.5)."""
 from __future__ import annotations
 
 import hashlib

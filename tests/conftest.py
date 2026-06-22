@@ -1,5 +1,5 @@
 """
-Relay test suite — conftest.py
+RationaleVault test suite — conftest.py
 
 Database tests are skipped unless RELAY_DB_TEST_ENABLED=1 is set.
 This allows pure-Python tests (reducers, compilers) to run without

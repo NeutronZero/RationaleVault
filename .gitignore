@@ -37,7 +37,7 @@ htmlcov/
 # Docker volumes (local data)
 docker/postgres/data/
 
-# Relay scratch
+# RationaleVault scratch
 scratch/
 
 # RationaleVault runtime data (generated — do not commit)

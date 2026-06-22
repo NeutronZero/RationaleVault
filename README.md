@@ -1,31 +1,31 @@
-# Relay (v1.0.0rc2)
+# RationaleVault (v1.0.0)
 
 **Event-sourced cognitive continuity and memory layer for multi-agent AI workflows.**
 
-Relay enables any AI agent — Claude, OpenCode, ChatGPT, Cursor, Copilot — to resume work on a project with full context continuity, within 30 seconds, without manual summarization.
+RationaleVault enables any AI agent — Claude, OpenCode, ChatGPT, Cursor, Copilot — to resume work on a project with full context continuity, within 30 seconds, without manual summarization.
 
 ---
 
-## Why Relay Exists
+## Why RationaleVault Exists
 
 LLM agents lose context. As projects evolve over weeks or months, they accumulate decisions, lessons, failures, architectural constraints, and rationale. Standard RAG tools and vector databases fail to preserve these because they lack structural temporal order, resulting in context drift, memory duplication, and decision degradation.
 
-Relay provides an event-sourced cognitive continuity layer. By treating events as the immutable source of truth and compiling memory, knowledge, and graphs as deterministic projections, Relay ensures agents can reconstruct state and continue work with zero cognitive loss.
+RationaleVault provides an event-sourced cognitive continuity layer. By treating events as the immutable source of truth and compiling memory, knowledge, and graphs as deterministic projections, RationaleVault ensures agents can reconstruct state and continue work with zero cognitive loss.
 
-## What Relay Is Not
+## What RationaleVault Is Not
 
-To understand Relay, it is helpful to clarify what it is not:
-- **Not a vector database**: Relay uses structured keyword, domain, and profile-based slot allocation for deterministic context compilation.
-- **Not a graph database**: The knowledge graph in Relay is a derived view (a projection), not a storage database.
-- **Not a workflow engine**: Relay does not execute agent loops or handle tasks; it provides cognitive memory infrastructure.
-- **Not an agent framework**: Relay is agent-agnostic and interfaces via standardized compiler adapters.
-- **Not a memory database**: Relay is event-sourced; the immutable event ledger is the sole source of truth.
+To understand RationaleVault, it is helpful to clarify what it is not:
+- **Not a vector database**: RationaleVault uses structured keyword, domain, and profile-based slot allocation for deterministic context compilation.
+- **Not a graph database**: The knowledge graph in RationaleVault is a derived view (a projection), not a storage database.
+- **Not a workflow engine**: RationaleVault does not execute agent loops or handle tasks; it provides cognitive memory infrastructure.
+- **Not an agent framework**: RationaleVault is agent-agnostic and interfaces via standardized compiler adapters.
+- **Not a memory database**: RationaleVault is event-sourced; the immutable event ledger is the sole source of truth.
 
 ---
 
 ## Architecture Flow
 
-Every layer of Relay has an implementation, evaluation metrics, and validation exit gates.
+Every layer of RationaleVault has an implementation, evaluation metrics, and validation exit gates.
 
 ```text
 Events (Ledger)
@@ -55,9 +55,9 @@ Continuity Validation (Handoff Integrity Verification)
 
 ## Quick Start
 
-### 1. Install Relay
+### 1. Install RationaleVault
 
-Install Relay in editable developer mode:
+Install RationaleVault in editable developer mode:
 ```bash
 pip install -e ".[dev]"
 ```
@@ -76,7 +76,7 @@ Execute the full evaluation pipeline, checking all exit gates (Memory, Knowledge
 rationalevault evaluate
 ```
 
-This generates a PEP 440-compliant release manifest at `.relay/reports/release_manifest.json` and a markdown summary at `.relay/reports/report.md`.
+This generates a PEP 440-compliant release manifest at `.rationalevault/reports/release_manifest.json` and a markdown summary at `.rationalevault/reports/report.md`.
 
 ### 4. Run tests
 ```bash

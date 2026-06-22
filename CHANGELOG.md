@@ -1,6 +1,6 @@
 # Changelog
 
-All notable changes to Relay will be documented in this file.
+All notable changes to RationaleVault will be documented in this file.
 This project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 ---

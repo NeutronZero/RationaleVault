@@ -1,4 +1,4 @@
-"""Unit tests for Relay Release Hardening & Diagnostics (Sprint I8)."""
+"""Unit tests for RationaleVault Release Hardening & Diagnostics (Sprint I8)."""
 from __future__ import annotations
 
 import json
