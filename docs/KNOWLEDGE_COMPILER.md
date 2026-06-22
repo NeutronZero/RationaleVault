@@ -1,4 +1,4 @@
-# Relay Knowledge Compiler
+# RationaleVault Knowledge Compiler
 
 ## Status: DEFERRED to Sprint D
 

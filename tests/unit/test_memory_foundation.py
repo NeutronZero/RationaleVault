@@ -3,14 +3,14 @@ from __future__ import annotations
 import os
 import uuid
 from pathlib import Path
-from relay.db.event_store import EventStore
-from relay.schema.events import EventMetadata, EventRecord, EventType
-from relay.memory.models import MemoryRecord, MemoryType, generate_memory_id
-from relay.memory.factory import get_memory_provider
-from relay.memory.markdown_provider import MarkdownMemoryProvider
-from relay.memory.sqlite_provider import SQLiteMemoryProvider
-from relay.memory.extractor import extract_memories_from_event
-from relay.memory.compiler import compile_memory_context
+from rationalevault.db.event_store import EventStore
+from rationalevault.schema.events import EventMetadata, EventRecord, EventType
+from rationalevault.memory.models import MemoryRecord, MemoryType, generate_memory_id
+from rationalevault.memory.factory import get_memory_provider
+from rationalevault.memory.markdown_provider import MarkdownMemoryProvider
+from rationalevault.memory.sqlite_provider import SQLiteMemoryProvider
+from rationalevault.memory.extractor import extract_memories_from_event
+from rationalevault.memory.compiler import compile_memory_context
 
 def test_memory_record_id_and_priority() -> None:
     content = "SQLite chosen for simplicity."
@@ -155,8 +155,8 @@ def test_compile_memory_context(tmp_path: Path, monkeypatch) -> None:
     provider.add_record(rec)
     
     # Patch get_memory_provider to return our provider
-    monkeypatch.setattr("relay.memory.factory.get_memory_provider", lambda: provider)
-    monkeypatch.setattr("relay.memory.retrieval.get_memory_provider", lambda: provider)
+    monkeypatch.setattr("rationalevault.memory.factory.get_memory_provider", lambda: provider)
+    monkeypatch.setattr("rationalevault.memory.retrieval.get_memory_provider", lambda: provider)
     
     ctx = compile_memory_context("architecture")
     assert len(ctx["ARCHITECTURE"]) == 1

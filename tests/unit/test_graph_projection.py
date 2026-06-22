@@ -5,7 +5,7 @@ import hashlib
 import json
 import xml.etree.ElementTree as ET
 
-from relay.knowledge.models import (
+from rationalevault.knowledge.models import (
     KnowledgeObject,
     KnowledgeType,
     KnowledgeDomain,
@@ -13,8 +13,8 @@ from relay.knowledge.models import (
     ProvenanceChain,
     KnowledgeRelation,
 )
-from relay.knowledge.graph import GraphProjection, KnowledgeNode, KnowledgeEdge
-from relay.knowledge.graph_evaluation import evaluate_graph_projection, check_graph_gates
+from rationalevault.knowledge.graph import GraphProjection, KnowledgeNode, KnowledgeEdge
+from rationalevault.knowledge.graph_evaluation import evaluate_graph_projection, check_graph_gates
 
 
 def _create_mock_knowledge(

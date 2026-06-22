@@ -3,8 +3,8 @@ from __future__ import annotations
 
 import pytest
 
-from relay.evaluation.context_benchmark_schema import ContextBenchmark
-from relay.evaluation.context_evaluator import (
+from rationalevault.evaluation.context_benchmark_schema import ContextBenchmark
+from rationalevault.evaluation.context_evaluator import (
     ContextEvaluator,
     ContextEvalResult,
     ContextEvaluationThresholds,
@@ -12,8 +12,8 @@ from relay.evaluation.context_evaluator import (
     _compute_f1,
     _compute_count_recall,
 )
-from relay.knowledge.context_compiler import ContextPackage
-from relay.knowledge.context_types import ContextCitation
+from rationalevault.knowledge.context_compiler import ContextPackage
+from rationalevault.knowledge.context_types import ContextCitation
 
 
 # ── Helpers ────────────────────────────────────────────────────────────────
@@ -430,7 +430,7 @@ def test_context_evaluation_thresholds() -> None:
 
 def test_global_thresholds_include_context() -> None:
     """Global EvaluationThresholds must include context thresholds."""
-    from relay.evaluation.thresholds import EvaluationThresholds
+    from rationalevault.evaluation.thresholds import EvaluationThresholds
     t = EvaluationThresholds()
     assert t.MIN_CONTEXT_COMPLETENESS == 0.67
     assert t.MIN_CONTEXT_PRECISION == 0.70

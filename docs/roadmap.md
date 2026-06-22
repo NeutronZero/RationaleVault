@@ -1,4 +1,4 @@
-# Relay Roadmap
+# RationaleVault Roadmap
 
 This roadmap outlines current architectural freeze zones and plans for upcoming releases.
 
@@ -9,7 +9,7 @@ This roadmap outlines current architectural freeze zones and plans for upcoming 
 - **Cognitive Head**: Real-time project tracking (goals, decisions, rationales, tasks, questions).
 - **Projections**: Independent memory deduplication, knowledge synthesis, and graph projection pipelines.
 - **Context Compilation**: Slot-blended context packages based on query profiles.
-- **Unified Evaluation**: Authorities system checks and diagnostics via CLI (`relay doctor`, `relay evaluate`).
+- **Unified Evaluation**: Authorities system checks and diagnostics via CLI (`rationalevault doctor`, `rationalevault evaluate`).
 
 ---
 

@@ -1,12 +1,12 @@
-# Relay Architectural Architecture
+# RationaleVault Architectural Architecture
 
-This document details the data transitions, pipelines, and projections that drive Relay's cognitive memory framework.
+This document details the data transitions, pipelines, and projections that drive RationaleVault's cognitive memory framework.
 
 ---
 
 ## Complete Evolutionary Flow
 
-Relay tracks project status by processing data through a sequence of projections:
+RationaleVault tracks project status by processing data through a sequence of projections:
 
 ```text
 Event Stream
@@ -64,7 +64,7 @@ graph TD
 ```
 
 ### 4. Graph → Context
-Using the query keywords and the target profile (e.g. `DECISION_LOOKUP`), Relay determines source weights and retrieves items into slots.
+Using the query keywords and the target profile (e.g. `DECISION_LOOKUP`), RationaleVault determines source weights and retrieves items into slots.
 
 ```mermaid
 graph TD

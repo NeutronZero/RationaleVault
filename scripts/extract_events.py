@@ -16,11 +16,11 @@ sys.path.insert(0, str(Path(__file__).parent.parent))
 from dotenv import load_dotenv
 load_dotenv()
 
-from relay.db.event_store import EventStore
-from relay.schema.events import EventMetadata, EventType
-from relay.extraction.extractor import extract_observations
-from relay.extraction.suggestor import suggest_events
-from relay.extraction.validator import validate_candidate_event
+from rationalevault.db.event_store import EventStore
+from rationalevault.schema.events import EventMetadata, EventType
+from rationalevault.extraction.extractor import extract_observations
+from rationalevault.extraction.suggestor import suggest_events
+from rationalevault.extraction.validator import validate_candidate_event
 
 
 def main() -> None:

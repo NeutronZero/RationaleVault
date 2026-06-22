@@ -1,4 +1,4 @@
-"""Relay Example: Basic Memory.
+"""RationaleVault Example: Basic Memory.
 
 Demonstrates events → memories → retrieval pipeline.
 """
@@ -9,15 +9,15 @@ import tempfile
 import uuid
 from pathlib import Path
 
-from relay.schema.events import EventType, EventMetadata
-from relay.db.sqlite_store import SQLiteEventStore
-from relay.memory.models import MemoryRecord, MemoryType
-from relay.memory.sqlite_provider import SQLiteMemoryProvider
-from relay.memory.retrieval import retrieve_ranked_citations
+from rationalevault.schema.events import EventType, EventMetadata
+from rationalevault.db.sqlite_store import SQLiteEventStore
+from rationalevault.memory.models import MemoryRecord, MemoryType
+from rationalevault.memory.sqlite_provider import SQLiteMemoryProvider
+from rationalevault.memory.retrieval import retrieve_ranked_citations
 
 
 def main() -> None:
-    print("--- Running Relay Example: Basic Memory ---")
+    print("--- Running RationaleVault Example: Basic Memory ---")
     
     # 1. Setup temp database
     temp_dir = Path(tempfile.gettempdir())

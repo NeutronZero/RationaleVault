@@ -6,7 +6,7 @@ from pathlib import Path
 
 import pytest
 
-from relay.knowledge.models import (
+from rationalevault.knowledge.models import (
     ArchitecturePrinciple,
     KnowledgeConfidence,
     KnowledgeDomain,
@@ -18,20 +18,20 @@ from relay.knowledge.models import (
     ProvenanceChain,
     generate_knowledge_id,
 )
-from relay.knowledge.evaluation import (
+from rationalevault.knowledge.evaluation import (
     KnowledgeMetrics,
     compute_knowledge_metrics,
     MAX_ORPHAN_KNOWLEDGE,
     MIN_KNOWLEDGE_DETERMINISM,
     MIN_KNOWLEDGE_PROVENANCE_PCT,
 )
-from relay.knowledge.relations import find_contradictions, detect_relations
-from relay.knowledge.lineage import (
+from rationalevault.knowledge.relations import find_contradictions, detect_relations
+from rationalevault.knowledge.lineage import (
     build_provenance_chain,
     compute_provenance_depth,
     verify_provenance,
 )
-from relay.memory.models import MemoryRecord, MemoryType
+from rationalevault.memory.models import MemoryRecord, MemoryType
 
 
 # ── Helper Functions ──────────────────────────────────────────────────────────
@@ -327,7 +327,7 @@ def test_provenance_depth() -> None:
 
 def test_sqlite_knowledge_store_crud(tmp_path: Path) -> None:
     """SQLiteKnowledgeProvider must support full CRUD."""
-    from relay.knowledge.store import SQLiteKnowledgeProvider
+    from rationalevault.knowledge.store import SQLiteKnowledgeProvider
 
     db_path = tmp_path / "test_knowledge.db"
     provider = SQLiteKnowledgeProvider(db_path=db_path)
@@ -353,7 +353,7 @@ def test_sqlite_knowledge_store_crud(tmp_path: Path) -> None:
 
 def test_markdown_knowledge_store_crud(tmp_path: Path) -> None:
     """MarkdownKnowledgeProvider must support full CRUD."""
-    from relay.knowledge.store import MarkdownKnowledgeProvider
+    from rationalevault.knowledge.store import MarkdownKnowledgeProvider
 
     file_path = tmp_path / "test_knowledge.md"
     provider = MarkdownKnowledgeProvider(file_path=file_path)
@@ -370,7 +370,7 @@ def test_markdown_knowledge_store_crud(tmp_path: Path) -> None:
 
 def test_knowledge_store_lifecycle_update(tmp_path: Path) -> None:
     """Lifecycle status must be updatable."""
-    from relay.knowledge.store import SQLiteKnowledgeProvider
+    from rationalevault.knowledge.store import SQLiteKnowledgeProvider
 
     db_path = tmp_path / "test_lifecycle.db"
     provider = SQLiteKnowledgeProvider(db_path=db_path)
@@ -388,8 +388,8 @@ def test_knowledge_store_lifecycle_update(tmp_path: Path) -> None:
 
 def test_deterministic_synthesis(tmp_path: Path) -> None:
     """Same input must produce identical knowledge output."""
-    from relay.knowledge.store import MarkdownKnowledgeProvider
-    from relay.memory.markdown_provider import MarkdownMemoryProvider
+    from rationalevault.knowledge.store import MarkdownKnowledgeProvider
+    from rationalevault.memory.markdown_provider import MarkdownMemoryProvider
 
     # Setup memory provider
     mem_file = tmp_path / "memory.md"
@@ -407,7 +407,7 @@ def test_deterministic_synthesis(tmp_path: Path) -> None:
     # Synthesize twice using the same memories
     # Note: This test requires mocking the factory to use our test provider
     # For now, we test that the synthesizer functions are deterministic
-    from relay.knowledge.synthesizer import (
+    from rationalevault.knowledge.synthesizer import (
         _cluster_by_similarity,
         _compute_confidence,
     )

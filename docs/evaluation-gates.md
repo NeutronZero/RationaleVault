@@ -1,6 +1,6 @@
-# Relay Evaluation Gates Reference
+# RationaleVault Evaluation Gates Reference
 
-Every logical layer in Relay enforces quality thresholds and exit gates. During `relay evaluate` runs, these metrics are computed and checked against hard limits.
+Every logical layer in RationaleVault enforces quality thresholds and exit gates. During `rationalevault evaluate` runs, these metrics are computed and checked against hard limits.
 
 | Layer | Gate / Metric | Threshold | Purpose |
 |---|---|---|---|

@@ -1,8 +1,8 @@
-# Relay Cognitive Head
+# RationaleVault Cognitive Head
 
 ## What Is the Cognitive Head?
 
-The Cognitive Head is the compiled current state of a project. It is Relay's equivalent of `git HEAD` — a snapshot of where the project is right now, derived entirely from the immutable event ledger.
+The Cognitive Head is the compiled current state of a project. It is RationaleVault's equivalent of `git HEAD` — a snapshot of where the project is right now, derived entirely from the immutable event ledger.
 
 Unlike `git HEAD`, the Cognitive Head contains *semantic* state:
 
@@ -73,7 +73,7 @@ critical → high → normal → low
 ```json
 {
   "project_id": "uuid",
-  "project_name": "Relay V1",
+  "project_name": "RationaleVault V1",
   "project_goal": "Build continuity...",
   "current_focus": "Sprint C: first handoff experiment",
   "ledger_version": 42,
@@ -118,11 +118,11 @@ Implement snapshots when `compile_cognitive_head()` takes more than ~500ms.
 ## API
 
 ```python
-from relay.cognitive_head.compiler import compile_cognitive_head
+from rationalevault.cognitive_head.compiler import compile_cognitive_head
 
 head = compile_cognitive_head(project_id)
 
-print(head.project_name)          # "Relay V1"
+print(head.project_name)          # "RationaleVault V1"
 print(head.ledger_version)        # 42
 print(len(head.active_tasks))     # 3
 print(len(head.open_questions))   # 2

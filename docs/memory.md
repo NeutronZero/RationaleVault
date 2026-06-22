@@ -1,4 +1,4 @@
-# Relay Memory Layer
+# RationaleVault Memory Layer
 
 The Memory Layer converts ledger events into clean memory records.
 

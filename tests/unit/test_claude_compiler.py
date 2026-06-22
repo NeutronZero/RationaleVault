@@ -23,9 +23,9 @@ from datetime import datetime, timezone
 
 import pytest
 
-from relay.cognitive_head.compiler import CognitiveHead
-from relay.cognitive_head.reducers import DecisionState, QuestionState, TaskState
-from relay.compilers.claude import ClaudeCompiler
+from rationalevault.cognitive_head.compiler import CognitiveHead
+from rationalevault.cognitive_head.reducers import DecisionState, QuestionState, TaskState
+from rationalevault.compilers.claude import ClaudeCompiler
 
 
 # ── Helpers ────────────────────────────────────────────────────────────────────

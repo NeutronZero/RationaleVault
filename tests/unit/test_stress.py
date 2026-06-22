@@ -3,8 +3,8 @@ from __future__ import annotations
 import subprocess
 import sys
 from pathlib import Path
-from relay.evaluation.run_handoff_suite import get_memory_mb, classify_complexity_curve, run_benchmark_simulation
-from relay.evaluation.benchmark_schema import HandoffBenchmark
+from rationalevault.evaluation.run_handoff_suite import get_memory_mb, classify_complexity_curve, run_benchmark_simulation
+from rationalevault.evaluation.benchmark_schema import HandoffBenchmark
 
 
 def test_memory_measurement() -> None:
@@ -33,7 +33,7 @@ def test_classify_complexity_curve() -> None:
 
 def test_run_handoff_suite_stress_execution() -> None:
     project_root = Path(__file__).resolve().parent.parent.parent
-    runner_path = project_root / "relay" / "evaluation" / "run_handoff_suite.py"
+    runner_path = project_root / "rationalevault" / "evaluation" / "run_handoff_suite.py"
 
     # Running suite normally should pass validation
     res = subprocess.run(

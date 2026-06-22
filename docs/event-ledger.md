@@ -1,6 +1,6 @@
-# Relay Event Ledger
+# RationaleVault Event Ledger
 
-The immutable ledger is the source of truth for Relay.
+The immutable ledger is the source of truth for RationaleVault.
 
 ---
 

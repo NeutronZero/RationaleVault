@@ -1,4 +1,4 @@
-"""Relay Example: Knowledge Synthesis.
+"""RationaleVault Example: Knowledge Synthesis.
 
 Demonstrates knowledge synthesis, relationship detection, and graph projections.
 """
@@ -9,7 +9,7 @@ import tempfile
 import uuid
 from pathlib import Path
 
-from relay.knowledge.models import (
+from rationalevault.knowledge.models import (
     KnowledgeObject,
     KnowledgeType,
     KnowledgeDomain,
@@ -17,13 +17,13 @@ from relay.knowledge.models import (
     ProvenanceChain,
     KnowledgeRelation,
 )
-from relay.knowledge.relations import detect_relations
-from relay.knowledge.graph import GraphProjection
-from relay.knowledge.store import SQLiteKnowledgeProvider
+from rationalevault.knowledge.relations import detect_relations
+from rationalevault.knowledge.graph import GraphProjection
+from rationalevault.knowledge.store import SQLiteKnowledgeProvider
 
 
 def main() -> None:
-    print("--- Running Relay Example: Knowledge Synthesis ---")
+    print("--- Running RationaleVault Example: Knowledge Synthesis ---")
     
     # 1. Setup temp database
     temp_dir = Path(tempfile.gettempdir())
@@ -40,7 +40,7 @@ def main() -> None:
         id="k1",
         version=1,
         title="Architecture Principle: Event Sourcing",
-        content="All state changes in Relay must be projected from an immutable event ledger.",
+        content="All state changes in RationaleVault must be projected from an immutable event ledger.",
         knowledge_type=KnowledgeType.ARCHITECTURE_PRINCIPLE,
         knowledge_domain=KnowledgeDomain.ARCHITECTURE,
         confidence=conf,

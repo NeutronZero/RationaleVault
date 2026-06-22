@@ -4,9 +4,9 @@ import uuid
 import pytest
 from uuid import UUID
 
-from relay.db.sqlite_store import SQLiteEventStore
-from relay.schema.events import EventMetadata, EventType
-from relay.cognitive_head.compiler import compile_cognitive_head
+from rationalevault.db.sqlite_store import SQLiteEventStore
+from rationalevault.schema.events import EventMetadata, EventType
+from rationalevault.cognitive_head.compiler import compile_cognitive_head
 
 
 def meta() -> EventMetadata:

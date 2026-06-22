@@ -1,6 +1,6 @@
 from __future__ import annotations
 
-from relay.evaluation.continuity_metrics import resolve_decision_state, compute_metrics, IdentityStatus, SemanticStatus, DecisionIntegrityState
+from rationalevault.evaluation.continuity_metrics import resolve_decision_state, compute_metrics, IdentityStatus, SemanticStatus, DecisionIntegrityState
 
 
 def test_resolve_decision_state_preserved() -> None:

@@ -6,40 +6,40 @@ from datetime import datetime
 
 import pytest
 
-from relay.memory.models import MemoryRecord, MemoryType
-from relay.memory.query_analyzer import analyze_query, RetrievalProfile
-from relay.knowledge.models import (
+from rationalevault.memory.models import MemoryRecord, MemoryType
+from rationalevault.memory.query_analyzer import analyze_query, RetrievalProfile
+from rationalevault.knowledge.models import (
     KnowledgeObject,
     KnowledgeType,
     KnowledgeDomain,
     KnowledgeConfidence,
     ProvenanceChain,
 )
-from relay.knowledge.context_types import (
+from rationalevault.knowledge.context_types import (
     EventContext,
     MemoryContext,
     KnowledgeContext,
     ContextCitation,
 )
-from relay.knowledge.knowledge_citation import (
+from rationalevault.knowledge.knowledge_citation import (
     KnowledgeScore,
     KnowledgeCitation,
     build_knowledge_citation,
     compute_knowledge_score,
     extract_keywords,
 )
-from relay.knowledge.knowledge_retrieval import (
+from rationalevault.knowledge.knowledge_retrieval import (
     search_knowledge_rrf,
     execute_knowledge_plan,
     retrieve_ranked_knowledge_citations,
 )
-from relay.knowledge.context_compiler import (
+from rationalevault.knowledge.context_compiler import (
     ContextPackage,
     compile_context,
     _get_slot_allocation,
     PROFILE_SOURCE_WEIGHTS,
 )
-from relay.knowledge.evaluation_i5 import (
+from rationalevault.knowledge.evaluation_i5 import (
     ContextMetrics,
     compute_context_metrics,
     MIN_CONTEXT_COMPLETENESS,
@@ -199,7 +199,7 @@ def test_search_knowledge_rrf_empty_query() -> None:
 
 def test_execute_knowledge_plan() -> None:
     """Profile weights must affect ranking."""
-    from relay.memory.query_analyzer import QueryIntent
+    from rationalevault.memory.query_analyzer import QueryIntent
 
     k1 = _make_knowledge(
         "k1", "Architecture Principle",
@@ -461,7 +461,7 @@ def test_timing_budget_enforcement() -> None:
 
 def test_source_balance_computation() -> None:
     """Source balance must compute correctly."""
-    from relay.knowledge.evaluation_i5 import _compute_source_balance
+    from rationalevault.knowledge.evaluation_i5 import _compute_source_balance
 
     # Perfect balance for GENERAL_SEARCH
     pkg = ContextPackage(
@@ -481,7 +481,7 @@ def test_source_balance_computation() -> None:
 
 def test_redundancy_computation() -> None:
     """Redundancy must detect duplicate content."""
-    from relay.knowledge.evaluation_i5 import _compute_redundancy
+    from rationalevault.knowledge.evaluation_i5 import _compute_redundancy
 
     citations = [
         ContextCitation("memory", "m1", "Title", "Same content", 1.0, 1.0, [], []),

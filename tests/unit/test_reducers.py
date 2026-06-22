@@ -20,7 +20,7 @@ from uuid import UUID
 
 import pytest
 
-from relay.cognitive_head.reducers import (
+from rationalevault.cognitive_head.reducers import (
     DecisionReducer,
     DecisionState,
     ProjectReducer,
@@ -29,7 +29,7 @@ from relay.cognitive_head.reducers import (
     TaskReducer,
     TaskState,
 )
-from relay.schema.events import EventMetadata, EventRecord, EventType
+from rationalevault.schema.events import EventMetadata, EventRecord, EventType
 
 
 # ── Test helpers ───────────────────────────────────────────────────────────────

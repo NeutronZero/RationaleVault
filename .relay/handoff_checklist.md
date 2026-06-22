@@ -1,4 +1,4 @@
-# Relay Handoff Checklist
+# RationaleVault Handoff Checklist
 - What changed?
 - What decisions were made?
 - What questions were resolved?

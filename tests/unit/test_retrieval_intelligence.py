@@ -4,14 +4,14 @@ import os
 import uuid
 from pathlib import Path
 from datetime import datetime
-from relay.memory.models import MemoryRecord, MemoryType
-from relay.memory.query_analyzer import analyze_query, RetrievalProfile
-from relay.memory.retrieval_planner import execute_retrieval_plan, RetrievalExecution
-from relay.memory.semantic_search import search_memories_rrf, perform_rrf_blending
-from relay.memory.citation_builder import build_citation, MemoryCitation
-from relay.memory.retrieval_audit import audit_retrieval_execution, RetrievalFailure
-from relay.memory.retrieval import retrieve_ranked_citations
-from relay.memory.markdown_provider import MarkdownMemoryProvider
+from rationalevault.memory.models import MemoryRecord, MemoryType
+from rationalevault.memory.query_analyzer import analyze_query, RetrievalProfile
+from rationalevault.memory.retrieval_planner import execute_retrieval_plan, RetrievalExecution
+from rationalevault.memory.semantic_search import search_memories_rrf, perform_rrf_blending
+from rationalevault.memory.citation_builder import build_citation, MemoryCitation
+from rationalevault.memory.retrieval_audit import audit_retrieval_execution, RetrievalFailure
+from rationalevault.memory.retrieval import retrieve_ranked_citations
+from rationalevault.memory.markdown_provider import MarkdownMemoryProvider
 
 
 def test_query_analyzer_profiles() -> None:

@@ -3,10 +3,10 @@ from __future__ import annotations
 import subprocess
 import sys
 from pathlib import Path
-from relay.evaluation.benchmark_schema import HandoffBenchmark
-from relay.evaluation.continuity_metrics import calculate_recall, calculate_drift, compute_metrics
-from relay.evaluation.degradation_metrics import calculate_degradation, calculate_event_rates
-from relay.evaluation.failure_taxonomy import FailureAttribution, FailureType
+from rationalevault.evaluation.benchmark_schema import HandoffBenchmark
+from rationalevault.evaluation.continuity_metrics import calculate_recall, calculate_drift, compute_metrics
+from rationalevault.evaluation.degradation_metrics import calculate_degradation, calculate_event_rates
+from rationalevault.evaluation.failure_taxonomy import FailureAttribution, FailureType
 
 
 def test_handoff_benchmark_serialization() -> None:
@@ -75,7 +75,7 @@ def test_failure_taxonomy() -> None:
 def test_run_handoff_suite_execution() -> None:
     # Run run_handoff_suite.py via subprocess to test exit codes
     project_root = Path(__file__).resolve().parent.parent.parent
-    runner_path = project_root / "relay" / "evaluation" / "run_handoff_suite.py"
+    runner_path = project_root / "rationalevault" / "evaluation" / "run_handoff_suite.py"
 
     # Default run should pass the regression gate (exit code 0)
     result = subprocess.run(

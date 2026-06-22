@@ -1,8 +1,8 @@
 import pytest
-from relay.extraction.models import Observation, CandidateEvent
-from relay.extraction.extractor import extract_observations
-from relay.extraction.suggestor import suggest_events
-from relay.extraction.validator import validate_candidate_event
+from rationalevault.extraction.models import Observation, CandidateEvent
+from rationalevault.extraction.extractor import extract_observations
+from rationalevault.extraction.suggestor import suggest_events
+from rationalevault.extraction.validator import validate_candidate_event
 
 
 def test_extract_observations_from_json():

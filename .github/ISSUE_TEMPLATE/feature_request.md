@@ -1,6 +1,6 @@
 ---
 name: Feature request
-about: Suggest an idea or enhancement for Relay
+about: Suggest an idea or enhancement for RationaleVault
 title: '[FEATURE] '
 labels: enhancement
 assignees: ''

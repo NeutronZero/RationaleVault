@@ -1,21 +1,21 @@
-# Relay Quickstart
+# RationaleVault Quickstart
 
-Welcome to Relay! This guide will get you set up and running with event-sourced cognitive memory in less than 5 minutes.
+Welcome to RationaleVault! This guide will get you set up and running with event-sourced cognitive memory in less than 5 minutes.
 
 ---
 
 ## 1. Installation
 
-Install Relay in development mode:
+Install RationaleVault in development mode:
 ```bash
 pip install -e ".[dev]"
 ```
 
 ## 2. Initialize a Project
 
-Initialize the Relay directory structure inside your workspace:
+Initialize the RationaleVault directory structure inside your workspace:
 ```bash
-relay init
+rationalevault init
 ```
 This initializes a local `.relay/` folder containing the default SQLite memory store (`relay.db`), rule engines, and configuration files.
 
@@ -23,12 +23,12 @@ This initializes a local `.relay/` folder containing the default SQLite memory s
 
 Run active diagnostics to verify that everything is configured correctly and the end-to-end projection chain is functioning:
 ```bash
-relay doctor
+rationalevault doctor
 ```
 Expected output:
 ```text
-=== Relay Doctor ===
-Relay version: 1.0.0rc2
+=== RationaleVault Doctor ===
+RationaleVault version: 1.0.0rc2
 Generated at:  ...
 
   Event Store            [PASS]   : Connected to SQLiteEventStore
@@ -47,9 +47,9 @@ Overall Result: PASS
 
 Run the full unified evaluation suite to measure the quality metrics of the memory ledger:
 ```bash
-relay evaluate
+rationalevault evaluate
 ```
-This builds and checks quality scores (such as completeness, keyword precision, redundancy, and graph density) against hard exit gates. A report summary will be created in `.relay/reports/release_manifest.json` and `.relay/reports/report.md`.
+This builds and checks quality scores (such as completeness, keyword precision, redundancy, and graph density) against hard exit gates. A report summary will be created in `.rationalevault/reports/release_manifest.json` and `.rationalevault/reports/report.md`.
 
 ## 5. Execute Examples
 

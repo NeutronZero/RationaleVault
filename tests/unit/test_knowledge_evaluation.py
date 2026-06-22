@@ -6,8 +6,8 @@ from pathlib import Path
 
 import pytest
 
-from relay.knowledge.benchmark_schema import KnowledgeBenchmark
-from relay.knowledge.evaluator import (
+from rationalevault.knowledge.benchmark_schema import KnowledgeBenchmark
+from rationalevault.knowledge.evaluator import (
     KnowledgeEvalResult,
     KnowledgeEvaluator,
     KnowledgeEvaluationThresholds,
@@ -15,7 +15,7 @@ from relay.knowledge.evaluator import (
     KnowledgeSemanticStatus,
     check_knowledge_gates,
 )
-from relay.knowledge.models import (
+from rationalevault.knowledge.models import (
     KnowledgeConfidence,
     KnowledgeDomain,
     KnowledgeLifecycle,

@@ -66,14 +66,14 @@ pip install -e ".[dev]"
 
 Run the system diagnostics tool to verify that the environment, active databases, registry, and projection chains are fully functional:
 ```bash
-relay doctor
+rationalevault doctor
 ```
 
 ### 3. Run the Unified Evaluation Suite
 
 Execute the full evaluation pipeline, checking all exit gates (Memory, Knowledge, Context, Compilers, Continuity, Graph, and Examples):
 ```bash
-relay evaluate
+rationalevault evaluate
 ```
 
 This generates a PEP 440-compliant release manifest at `.relay/reports/release_manifest.json` and a markdown summary at `.relay/reports/report.md`.

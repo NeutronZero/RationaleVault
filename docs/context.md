@@ -1,11 +1,11 @@
-# Relay Context Construction
+# RationaleVault Context Construction
 
-Relay compiles a unified context package from multiple sources.
+RationaleVault compiles a unified context package from multiple sources.
 
 ---
 
 ## Blending Weights Matrix
-Using the detected `RetrievalProfile`, Relay maps source allocation ratios:
+Using the detected `RetrievalProfile`, RationaleVault maps source allocation ratios:
 
 | Profile | Events Ratio | Memories Ratio | Knowledge Ratio |
 |---|---|---|---|

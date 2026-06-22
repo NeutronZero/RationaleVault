@@ -81,8 +81,8 @@ Have Claude resolve one open question (e.g., "Should Sprint C use a real or synt
 
 When Claude resolves it, record the event manually:
 ```python
-from relay.db.event_store import EventStore
-from relay.schema.events import EventMetadata, EventType
+from rationalevault.db.event_store import EventStore
+from rationalevault.schema.events import EventMetadata, EventType
 import uuid
 
 store = EventStore()
@@ -111,8 +111,8 @@ store.append_event(
 After Claude's work session, recompile:
 
 ```python
-from relay.cognitive_head.compiler import compile_cognitive_head
-from relay.compilers.claude import ClaudeCompiler
+from rationalevault.cognitive_head.compiler import compile_cognitive_head
+from rationalevault.compilers.claude import ClaudeCompiler
 import uuid
 
 head = compile_cognitive_head(uuid.UUID("<YOUR_PROJECT_ID>"))
@@ -168,8 +168,8 @@ python scripts/handoff_metrics.py --project-id <UUID> --agent "Hermes"
 After all three handoffs, retrieve metrics from the ledger:
 
 ```python
-from relay.db.event_store import EventStore
-from relay.schema.events import EventType
+from rationalevault.db.event_store import EventStore
+from rationalevault.schema.events import EventType
 import uuid
 
 store = EventStore()

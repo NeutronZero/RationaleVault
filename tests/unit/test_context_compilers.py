@@ -3,18 +3,18 @@ from __future__ import annotations
 
 import pytest
 
-from relay.compilers.compiler_output import CompilerMetadata, CompilerOutput
-from relay.compilers.context_compiler_base import ContextPackageCompiler
-from relay.compilers.claude_context import ClaudeContextCompiler
-from relay.compilers.opencode_context import OpenCodeContextCompiler
-from relay.compilers.cursor_context import CursorContextCompiler
-from relay.compilers.registry import (
+from rationalevault.compilers.compiler_output import CompilerMetadata, CompilerOutput
+from rationalevault.compilers.context_compiler_base import ContextPackageCompiler
+from rationalevault.compilers.claude_context import ClaudeContextCompiler
+from rationalevault.compilers.opencode_context import OpenCodeContextCompiler
+from rationalevault.compilers.cursor_context import CursorContextCompiler
+from rationalevault.compilers.registry import (
     get_context_compiler,
     available_agents,
     reset_registry,
 )
-from relay.knowledge.context_compiler import ContextPackage
-from relay.knowledge.context_types import ContextCitation
+from rationalevault.knowledge.context_compiler import ContextPackage
+from rationalevault.knowledge.context_types import ContextCitation
 
 
 # ── Helpers ────────────────────────────────────────────────────────────────
@@ -484,7 +484,7 @@ def test_cursor_is_context_compiler() -> None:
 
 def test_evaluator_basic() -> None:
     """CompilerEvaluator must evaluate a basic compilation."""
-    from relay.evaluation.compiler_evaluator import CompilerEvaluator
+    from rationalevault.evaluation.compiler_evaluator import CompilerEvaluator
     citations = [_make_citation("memory", "m1", "Title", "Content")]
     package = _make_package(citations=citations)
     compiler = ClaudeContextCompiler()
@@ -501,7 +501,7 @@ def test_evaluator_basic() -> None:
 
 def test_evaluator_empty_package() -> None:
     """CompilerEvaluator must handle empty packages."""
-    from relay.evaluation.compiler_evaluator import CompilerEvaluator
+    from rationalevault.evaluation.compiler_evaluator import CompilerEvaluator
     package = _make_package(citations=[])
     compiler = ClaudeContextCompiler()
     evaluator = CompilerEvaluator()
@@ -514,7 +514,7 @@ def test_evaluator_empty_package() -> None:
 
 def test_evaluator_section_coverage() -> None:
     """CompilerEvaluator must check section coverage."""
-    from relay.evaluation.compiler_evaluator import CompilerEvaluator
+    from rationalevault.evaluation.compiler_evaluator import CompilerEvaluator
     citations = [
         _make_citation("memory", "m1", "Decision", "R", reasons=["memory_type:DECISION"]),
         _make_knowledge_citation("PROJECT_INVARIANT", "Constraint", "Never X"),
@@ -530,7 +530,7 @@ def test_evaluator_section_coverage() -> None:
 
 def test_evaluator_all_compilers() -> None:
     """CompilerEvaluator must work with all compiler types."""
-    from relay.evaluation.compiler_evaluator import CompilerEvaluator
+    from rationalevault.evaluation.compiler_evaluator import CompilerEvaluator
     citations = [_make_citation("memory", "m1", "Title", "Content")]
     package = _make_package(citations=citations)
     evaluator = CompilerEvaluator()
@@ -547,7 +547,7 @@ def test_evaluator_all_compilers() -> None:
 
 def test_check_compiler_gates() -> None:
     """check_compiler_gates must return correct results."""
-    from relay.evaluation.compiler_evaluator import CompilerEvaluator, check_compiler_gates
+    from rationalevault.evaluation.compiler_evaluator import CompilerEvaluator, check_compiler_gates
     citations = [_make_citation("memory", "m1", "Title", "Content")]
     package = _make_package(citations=citations)
     compiler = ClaudeContextCompiler()
@@ -561,7 +561,7 @@ def test_check_compiler_gates() -> None:
 
 def test_evaluator_memory_preservation() -> None:
     """CompilerEvaluator must compute memory preservation correctly."""
-    from relay.evaluation.compiler_evaluator import CompilerEvaluator
+    from rationalevault.evaluation.compiler_evaluator import CompilerEvaluator
     citations = [
         _make_citation("memory", "mem-001", "Memory One", "Content A"),
         _make_citation("memory", "mem-002", "Memory Two", "Content B"),
@@ -577,7 +577,7 @@ def test_evaluator_memory_preservation() -> None:
 
 def test_evaluator_knowledge_preservation() -> None:
     """CompilerEvaluator must compute knowledge preservation correctly."""
-    from relay.evaluation.compiler_evaluator import CompilerEvaluator
+    from rationalevault.evaluation.compiler_evaluator import CompilerEvaluator
     citations = [
         _make_knowledge_citation("ARCHITECTURE_PRINCIPLE", "No ORM", "Direct SQL"),
         _make_knowledge_citation("PROJECT_INVARIANT", "No Vector DB", "Never"),
@@ -593,7 +593,7 @@ def test_evaluator_knowledge_preservation() -> None:
 
 def test_evaluator_event_preservation() -> None:
     """CompilerEvaluator must compute event preservation correctly."""
-    from relay.evaluation.compiler_evaluator import CompilerEvaluator
+    from rationalevault.evaluation.compiler_evaluator import CompilerEvaluator
     citations = [
         _make_citation("event", "evt-001", "Event One", "Deployed version one to production"),
         _make_citation("event", "evt-002", "Event Two", "Migrated database schema"),
@@ -609,7 +609,7 @@ def test_evaluator_event_preservation() -> None:
 
 def test_evaluator_source_event_preservation() -> None:
     """CompilerEvaluator must compute source event preservation correctly."""
-    from relay.evaluation.compiler_evaluator import CompilerEvaluator
+    from rationalevault.evaluation.compiler_evaluator import CompilerEvaluator
     citations = [
         _make_citation("memory", "m1", "Title", "Content", source_event_ids=["src-001", "src-002"]),
         _make_citation("event", "e1", "Event Details", "Something happened here", source_event_ids=["src-003"]),
@@ -625,7 +625,7 @@ def test_evaluator_source_event_preservation() -> None:
 
 def test_evaluator_claude_source_event_preservation() -> None:
     """ClaudeContextCompiler must preserve source events in traceability section."""
-    from relay.evaluation.compiler_evaluator import CompilerEvaluator
+    from rationalevault.evaluation.compiler_evaluator import CompilerEvaluator
     citations = [
         _make_citation("memory", "m1", "Memory Title", "Content here", source_event_ids=["evt-abc", "evt-def"]),
     ]
@@ -641,7 +641,7 @@ def test_evaluator_claude_source_event_preservation() -> None:
 
 def test_evaluator_compression_ratio() -> None:
     """CompilerEvaluator must compute compression ratio correctly."""
-    from relay.evaluation.compiler_evaluator import CompilerEvaluator
+    from rationalevault.evaluation.compiler_evaluator import CompilerEvaluator
     citations = [
         _make_citation("memory", "m1", "Short", "Hi"),
     ]
@@ -656,7 +656,7 @@ def test_evaluator_compression_ratio() -> None:
 
 def test_evaluator_keyword_coverage() -> None:
     """CompilerEvaluator must compute keyword coverage correctly."""
-    from relay.evaluation.compiler_evaluator import CompilerEvaluator
+    from rationalevault.evaluation.compiler_evaluator import CompilerEvaluator
     citations = [_make_citation("memory", "m1", "SQLite Decision", "Use SQLite for storage")]
     package = _make_package(citations=citations)
     compiler = ClaudeContextCompiler()
@@ -669,7 +669,7 @@ def test_evaluator_keyword_coverage() -> None:
 
 def test_evaluator_determinism_check() -> None:
     """CompilerEvaluator must verify determinism across two compilations."""
-    from relay.evaluation.compiler_evaluator import CompilerEvaluator
+    from rationalevault.evaluation.compiler_evaluator import CompilerEvaluator
     citations = [_make_citation("memory", "m1", "Title", "Content")]
     package = _make_package(citations=citations)
     compiler = ClaudeContextCompiler()
@@ -681,7 +681,7 @@ def test_evaluator_determinism_check() -> None:
 
 def test_evaluator_mixed_sources() -> None:
     """CompilerEvaluator must handle mixed source types correctly."""
-    from relay.evaluation.compiler_evaluator import CompilerEvaluator
+    from rationalevault.evaluation.compiler_evaluator import CompilerEvaluator
     citations = [
         _make_citation("memory", "m1", "Memory Title", "This is memory content"),
         _make_knowledge_citation("LESSON", "Lesson Learned", "Important lesson content here"),
@@ -701,7 +701,7 @@ def test_evaluator_mixed_sources() -> None:
 
 def test_evaluator_result_serialization() -> None:
     """CompilerEvalResult must be serializable."""
-    from relay.evaluation.compiler_evaluator import CompilerEvaluator
+    from rationalevault.evaluation.compiler_evaluator import CompilerEvaluator
     citations = [_make_citation("memory", "m1", "Title", "Content")]
     package = _make_package(citations=citations)
     compiler = ClaudeContextCompiler()
@@ -717,8 +717,8 @@ def test_evaluator_result_serialization() -> None:
 
 def test_evaluator_benchmark_mode() -> None:
     """CompilerEvaluator must support benchmark-specific thresholds."""
-    from relay.evaluation.compiler_evaluator import CompilerEvaluator
-    from relay.evaluation.compiler_benchmark_schema import CompilerBenchmark
+    from rationalevault.evaluation.compiler_evaluator import CompilerEvaluator
+    from rationalevault.evaluation.compiler_benchmark_schema import CompilerBenchmark
     citations = [_make_citation("memory", "m1", "Title", "Content")]
     package = _make_package(citations=citations)
     compiler = ClaudeContextCompiler()

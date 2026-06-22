@@ -4,9 +4,9 @@ from __future__ import annotations
 import json
 from pathlib import Path
 
-from relay.diagnostics.doctor import run_diagnostics
-from relay.evaluation.evaluator import run_full_evaluation
-from relay.evaluation.validate_install import validate_all_imports
+from rationalevault.diagnostics.doctor import run_diagnostics
+from rationalevault.evaluation.evaluator import run_full_evaluation
+from rationalevault.evaluation.validate_install import validate_all_imports
 
 
 def test_diagnostics_doctor() -> None:
@@ -14,7 +14,7 @@ def test_diagnostics_doctor() -> None:
     report = run_diagnostics()
 
     # 2. Check structure
-    assert report.relay_version == "1.0.0rc2"
+    assert report.rationalevault_version == "1.0.0"
     assert len(report.checks) > 0
     assert report.overall_passed is True
 
@@ -29,7 +29,7 @@ def test_unified_evaluator_and_manifest() -> None:
     result = run_full_evaluation()
 
     # 2. Verify result fields
-    assert result.relay_version == "1.0.0rc2"
+    assert result.rationalevault_version == "1.0.0"
     assert result.schema_version == "1.0"
     assert result.overall_passed is True
 
@@ -40,7 +40,7 @@ def test_unified_evaluator_and_manifest() -> None:
     with open(manifest_path, "r", encoding="utf-8") as f:
         manifest = json.load(f)
 
-    assert manifest["relay_version"] == "1.0.0rc2"
+    assert manifest["rationalevault_version"] == "1.0.0"
     assert manifest["schema_version"] == "1.0"
     assert "evaluations" in manifest
     assert "examples" in manifest

@@ -24,12 +24,12 @@ from uuid import UUID
 
 import pytest
 
-from relay.cognitive_head.compiler import (
+from rationalevault.cognitive_head.compiler import (
     CognitiveHead,
     MissingProjectBootstrapError,
     compile_cognitive_head,
 )
-from relay.schema.events import EventMetadata, EventRecord, EventType
+from rationalevault.schema.events import EventMetadata, EventRecord, EventType
 
 
 # ── Helpers ────────────────────────────────────────────────────────────────────

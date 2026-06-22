@@ -4,16 +4,16 @@ from __future__ import annotations
 import json
 import pytest
 
-from relay.evaluation.continuity_benchmark_schema import (
+from rationalevault.evaluation.continuity_benchmark_schema import (
     ContinuityBenchmark,
     ExpectedArtifact,
 )
-from relay.evaluation.continuity_evaluator import (
+from rationalevault.evaluation.continuity_evaluator import (
     ContinuityEvaluator,
     ContinuityResult,
     check_continuity_gates,
 )
-from relay.compilers.compiler_output import CompilerOutput
+from rationalevault.compilers.compiler_output import CompilerOutput
 
 
 # ── Helpers ────────────────────────────────────────────────────────────────
@@ -353,7 +353,7 @@ def test_check_continuity_gates_failure() -> None:
 def test_load_all_benchmarks() -> None:
     """All benchmark JSON files must load and be valid."""
     from pathlib import Path
-    benchmark_dir = Path(__file__).parent.parent.parent / "relay" / "evaluation" / "continuity_benchmarks"
+    benchmark_dir = Path(__file__).parent.parent.parent / "rationalevault" / "evaluation" / "continuity_benchmarks"
     if not benchmark_dir.exists():
         pytest.skip("continuity_benchmarks directory not found")
 
@@ -369,11 +369,11 @@ def test_load_all_benchmarks() -> None:
 def test_all_benchmarks_compile() -> None:
     """All benchmarks must produce valid evaluations with Claude compiler."""
     from pathlib import Path
-    from relay.compilers.claude_context import ClaudeContextCompiler
-    from relay.knowledge.context_compiler import ContextPackage
-    from relay.knowledge.context_types import ContextCitation
+    from rationalevault.compilers.claude_context import ClaudeContextCompiler
+    from rationalevault.knowledge.context_compiler import ContextPackage
+    from rationalevault.knowledge.context_types import ContextCitation
 
-    benchmark_dir = Path(__file__).parent.parent.parent / "relay" / "evaluation" / "continuity_benchmarks"
+    benchmark_dir = Path(__file__).parent.parent.parent / "rationalevault" / "evaluation" / "continuity_benchmarks"
     if not benchmark_dir.exists():
         pytest.skip("continuity_benchmarks directory not found")
 

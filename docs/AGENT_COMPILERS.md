@@ -1,4 +1,4 @@
-# Relay Agent Compilers
+# RationaleVault Agent Compilers
 
 ## Overview
 
@@ -12,13 +12,13 @@ class AgentCompiler(ABC):
     def agent_name(self) -> str: ...
 ```
 
-**Compilers are output-only.** They do not call any LLM API. Relay is model-agnostic. Context blocks are injected by the user.
+**Compilers are output-only.** They do not call any LLM API. RationaleVault is model-agnostic. Context blocks are injected by the user.
 
 ---
 
 ## ClaudeCompiler (V1 — Implemented)
 
-**File:** `relay/compilers/claude.py`
+**File:** `rationalevault/compilers/claude.py`
 
 Optimized for: narrative reasoning, architecture analysis, research, multi-agent handoffs.
 
@@ -52,8 +52,8 @@ Else:
 ### Usage
 
 ```python
-from relay.cognitive_head.compiler import compile_cognitive_head
-from relay.compilers.claude import ClaudeCompiler
+from rationalevault.cognitive_head.compiler import compile_cognitive_head
+from rationalevault.compilers.claude import ClaudeCompiler
 
 head = compile_cognitive_head(project_id)
 compiler = ClaudeCompiler()
@@ -100,10 +100,10 @@ Optimized for: direct code execution.
 ## Adding a New Compiler
 
 ```python
-# relay/compilers/my_agent.py
+# rationalevault/compilers/my_agent.py
 
-from relay.compilers.base import AgentCompiler
-from relay.cognitive_head.compiler import CognitiveHead
+from rationalevault.compilers.base import AgentCompiler
+from rationalevault.cognitive_head.compiler import CognitiveHead
 
 class MyAgentCompiler(AgentCompiler):
 

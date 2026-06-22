@@ -11,8 +11,8 @@ from uuid import UUID
 
 import pytest
 
-from relay.db.sqlite_store import SQLiteEventStore
-from relay.schema.events import EventMetadata, EventType
+from rationalevault.db.sqlite_store import SQLiteEventStore
+from rationalevault.schema.events import EventMetadata, EventType
 
 
 def meta(actor: str = "TestAgent", session: str = "test_session") -> EventMetadata:

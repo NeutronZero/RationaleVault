@@ -4,15 +4,15 @@ import os
 import uuid
 from pathlib import Path
 from datetime import datetime, timedelta
-from relay.memory.models import MemoryRecord, MemoryType
-from relay.memory.ranking import compute_retrieval_score, RetrievalScore
-from relay.memory.reference_tracker import record_memory_reference
-from relay.memory.lifecycle import handle_lifecycle_transitions
-from relay.memory.consolidation import detect_consolidation_candidates, ConsolidationCandidate, jaccard_similarity
-from relay.memory.retrieval import retrieve_ranked_memories
-from relay.memory.markdown_provider import MarkdownMemoryProvider
-from relay.db.event_store import EventStore
-from relay.schema.events import EventMetadata, EventRecord, EventType
+from rationalevault.memory.models import MemoryRecord, MemoryType
+from rationalevault.memory.ranking import compute_retrieval_score, RetrievalScore
+from rationalevault.memory.reference_tracker import record_memory_reference
+from rationalevault.memory.lifecycle import handle_lifecycle_transitions
+from rationalevault.memory.consolidation import detect_consolidation_candidates, ConsolidationCandidate, jaccard_similarity
+from rationalevault.memory.retrieval import retrieve_ranked_memories
+from rationalevault.memory.markdown_provider import MarkdownMemoryProvider
+from rationalevault.db.event_store import EventStore
+from rationalevault.schema.events import EventMetadata, EventRecord, EventType
 
 
 def test_jaccard_similarity() -> None:
@@ -71,7 +71,7 @@ def test_reference_tracker(tmp_path: Path, monkeypatch) -> None:
     )
     provider.add_record(rec)
     
-    monkeypatch.setattr("relay.memory.reference_tracker.get_memory_provider", lambda: provider)
+    monkeypatch.setattr("rationalevault.memory.reference_tracker.get_memory_provider", lambda: provider)
     
     # Trigger reference tracking
     record_memory_reference("mem-ref", uuid.uuid4(), actor="tester")
@@ -99,7 +99,7 @@ def test_automatic_supersession(tmp_path: Path, monkeypatch) -> None:
     )
     provider.add_record(rec1)
     
-    monkeypatch.setattr("relay.memory.lifecycle.get_memory_provider", lambda: provider)
+    monkeypatch.setattr("rationalevault.memory.lifecycle.get_memory_provider", lambda: provider)
     
     # Simulate a superseding event acceptance
     evt = EventRecord(
@@ -155,7 +155,7 @@ def test_consolidation_candidates_detection(tmp_path: Path, monkeypatch) -> None
     provider.add_record(rec1)
     provider.add_record(rec2)
     
-    monkeypatch.setattr("relay.memory.consolidation.get_memory_provider", lambda: provider)
+    monkeypatch.setattr("rationalevault.memory.consolidation.get_memory_provider", lambda: provider)
     
     candidates = detect_consolidation_candidates()
     assert len(candidates) == 1

@@ -1,4 +1,4 @@
-# Relay Context Assembly Planner
+# RationaleVault Context Assembly Planner
 
 ## Status: DEFERRED to Sprint D
 
@@ -45,7 +45,7 @@ Rank by:
 
 ## Lessons from Graph-RAG
 
-The RTOS-Graph-RAG platform's retrieval system evolved from Sprint 7 through Sprint 23 by adding targeted retrieval only in response to observed accuracy failures. Relay should follow the same pattern.
+The RTOS-Graph-RAG platform's retrieval system evolved from Sprint 7 through Sprint 23 by adding targeted retrieval only in response to observed accuracy failures. RationaleVault should follow the same pattern.
 
 V1's full-head compilation is correct and sufficient until:
 - Token budget is exceeded (context block > 8K tokens)

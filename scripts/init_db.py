@@ -21,7 +21,7 @@ from dotenv import load_dotenv
 load_dotenv()
 
 import psycopg
-from relay.db.connection import get_dsn
+from rationalevault.db.connection import get_dsn
 
 MIGRATIONS_DIR = Path(__file__).parent.parent / "migrations"
 
@@ -68,7 +68,7 @@ def reset_database(conn: psycopg.Connection) -> None:
     """Drop all Relay tables. Destroys all data."""
     print("  [WARNING] Resetting database -- dropping all Relay tables...")
     with conn.cursor() as cur:
-        cur.execute("DROP TABLE IF EXISTS relay_events CASCADE")
+        cur.execute("DROP TABLE IF EXISTS rationalevault_events CASCADE")
         cur.execute("DROP TABLE IF EXISTS relay_migrations CASCADE")
     conn.commit()
     print("  Tables dropped.")

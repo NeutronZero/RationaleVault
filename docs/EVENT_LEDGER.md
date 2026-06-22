@@ -1,8 +1,8 @@
-# Relay Event Ledger
+# RationaleVault Event Ledger
 
 ## Purpose
 
-The Event Ledger is the foundation of Relay. It is a PostgreSQL-backed, append-only table of events. Every fact, task, decision, and question in Relay is ultimately derived from events in this table.
+The Event Ledger is the foundation of RationaleVault. It is a PostgreSQL-backed, append-only table of events. Every fact, task, decision, and question in RationaleVault is ultimately derived from events in this table.
 
 ## Immutability Contract
 

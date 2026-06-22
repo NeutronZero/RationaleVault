@@ -1,17 +1,17 @@
-"""Relay Example: Multi-Agent Handoff.
+"""RationaleVault Example: Multi-Agent Handoff.
 
 Demonstrates context packages, compilation, and adapter rendering.
 """
 from __future__ import annotations
 
-from relay.knowledge.context_compiler import ContextPackage
-from relay.knowledge.context_types import ContextCitation
-from relay.memory.models import MemoryRecord, MemoryType
-from relay.compilers.registry import get_context_compiler
+from rationalevault.knowledge.context_compiler import ContextPackage
+from rationalevault.knowledge.context_types import ContextCitation
+from rationalevault.memory.models import MemoryRecord, MemoryType
+from rationalevault.compilers.registry import get_context_compiler
 
 
 def main() -> None:
-    print("--- Running Relay Example: Multi-Agent Handoff ---")
+    print("--- Running RationaleVault Example: Multi-Agent Handoff ---")
     
     # 1. Setup mock memory
     mem = MemoryRecord(

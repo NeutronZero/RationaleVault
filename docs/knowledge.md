@@ -1,4 +1,4 @@
-# Relay Knowledge Layer
+# RationaleVault Knowledge Layer
 
 Knowledge represents synthesized facts distilled from memories and events.
 
@@ -10,4 +10,4 @@ Knowledge synthesis merges fragmented memories into high-level facts.
 - **Evidence strength** is derived from supporting memory counts.
 
 ## Contradiction Checking
-When new knowledge is synthesized, Relay scans the store for logical conflicts (e.g. conflicting architectural principles). If a contradiction is detected, a `KNOWLEDGE_CONTRADICTION` event is appended to the ledger, flagging it for agent resolution.
+When new knowledge is synthesized, RationaleVault scans the store for logical conflicts (e.g. conflicting architectural principles). If a contradiction is detected, a `KNOWLEDGE_CONTRADICTION` event is appended to the ledger, flagging it for agent resolution.

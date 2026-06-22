@@ -1,6 +1,6 @@
-# Contributing to Relay
+# Contributing to RationaleVault
 
-Thank you for your interest in contributing to Relay!
+Thank you for your interest in contributing to RationaleVault!
 
 ---
 
@@ -12,8 +12,8 @@ Thank you for your interest in contributing to Relay!
 
 1. Clone the repository and navigate to the directory:
    ```bash
-   git clone https://github.com/your-username/Relay.git
-   cd Relay
+   git clone https://github.com/your-username/RationaleVault.git
+   cd RationaleVault
    ```
 2. Create and activate a virtual environment:
    ```bash
@@ -32,7 +32,7 @@ Thank you for your interest in contributing to Relay!
   Before submitting a PR, verify all components are fully functional:
   ```bash
   pytest
-  relay doctor
-  relay evaluate
+  rationalevault doctor
+  rationalevault evaluate
   ```
-- **central versioning**: Respect the centralized versioning schema in `relay/__init__.py`.
+- **central versioning**: Respect the centralized versioning schema in `rationalevault/__init__.py`.

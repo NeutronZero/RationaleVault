@@ -1,6 +1,6 @@
-# Relay Release Validation Checklist
+# RationaleVault Release Validation Checklist
 
-Before releasing a new version of Relay (e.g. `v1.0.0`), the following checks must be executed and validated.
+Before releasing a new version of RationaleVault (e.g. `v1.0.0`), the following checks must be executed and validated.
 
 ---
 
@@ -12,11 +12,11 @@ Before releasing a new version of Relay (e.g. `v1.0.0`), the following checks mu
   ```
 - [ ] **Run CLI Doctor**: Checks database connectivity, assets, and active projection chain.
   ```bash
-  relay doctor
+  rationalevault doctor
   ```
 - [ ] **Run CLI Evaluator**: Ensures all metrics (completeness, precision, density) pass exit gates.
   ```bash
-  relay evaluate
+  rationalevault evaluate
   ```
 
 ---
@@ -38,12 +38,12 @@ Before releasing a new version of Relay (e.g. `v1.0.0`), the following checks mu
 - [ ] **Clean Install Verification**: Installs the built wheel locally in a clean virtual environment and runs doctor.
   ```bash
   pip install dist/*.whl
-  relay doctor
+  rationalevault doctor
   ```
-- [ ] **Release Manifest Verification**: Confirms that `.relay/reports/release_manifest.json` contains:
+- [ ] **Release Manifest Verification**: Confirms that `.rationalevault/reports/release_manifest.json` contains:
   ```json
   {
-    "relay_version": "1.0.0rc2",
+    "rationalevault_version": "1.0.0rc2",
     "schema_version": "1.0"
   }
   ```
@@ -52,7 +52,7 @@ Before releasing a new version of Relay (e.g. `v1.0.0`), the following checks mu
 
 ## 4. Documentation & Metadata
 
-- [ ] Centralized version in `relay/__init__.py` is updated.
+- [ ] Centralized version in `rationalevault/__init__.py` is updated.
 - [ ] `CHANGELOG.md` is updated with changes for the release.
 - [ ] `README.md` positioning and installation steps are verified.
 - [ ] Architecture diagrams match the current system layout.

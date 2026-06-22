@@ -1,6 +1,6 @@
 ---
 name: Bug report
-about: Create a report to help us improve Relay
+about: Create a report to help us improve RationaleVault
 title: '[BUG] '
 labels: bug
 assignees: ''
@@ -18,13 +18,13 @@ A clear and concise description of what the bug is.
 **System Diagnostics (Required)**
 Please run the diagnostics tool and attach the output below:
 ```bash
-relay doctor
+rationalevault doctor
 ```
 
 **Environment details:**
 - OS: [e.g. macOS, Windows, Linux]
 - Python version: [e.g. 3.12]
-- Relay version: [e.g. 1.0.0rc2]
+- RationaleVault version: [e.g. 1.0.0rc2]
 - Database backend: [SQLite, PostgreSQL]
 
 **Additional context**

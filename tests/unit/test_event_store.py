@@ -30,8 +30,8 @@ DB_REQUIRED = pytest.mark.skipif(
         "to run database integration tests."
     ),
 )
-from relay.db.event_store import EventStore
-from relay.schema.events import EventMetadata, EventType
+from rationalevault.db.event_store import EventStore
+from rationalevault.schema.events import EventMetadata, EventType
 
 pytestmark = DB_REQUIRED
 

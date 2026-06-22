@@ -27,10 +27,10 @@ sys.path.insert(0, str(Path(__file__).parent.parent))
 from dotenv import load_dotenv
 load_dotenv()
 
-from relay.db.event_store import EventStore
-from relay.cognitive_head.compiler import compile_cognitive_head
-from relay.compilers.claude import ClaudeCompiler
-from relay.schema.events import EventMetadata, EventType
+from rationalevault.db.event_store import EventStore
+from rationalevault.cognitive_head.compiler import compile_cognitive_head
+from rationalevault.compilers.claude import ClaudeCompiler
+from rationalevault.schema.events import EventMetadata, EventType
 
 
 def _meta(actor: str, source: str = "seed_demo",

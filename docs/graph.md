@@ -1,4 +1,4 @@
-# Relay Graph Projection
+# RationaleVault Graph Projection
 
 The Knowledge Graph projects objects and relations into a structured topological map.
 
@@ -10,7 +10,7 @@ The Knowledge Graph projects objects and relations into a structured topological
 - **Deterministic ID**: The graph ID is a SHA-256 hash computed over sorted nodes and edges, guaranteeing reproducibility.
 
 ## Exports
-Relay supports exporting graphs for analysis:
+RationaleVault supports exporting graphs for analysis:
 - **Mermaid**: Flowcharts for markdown documentation.
 - **GraphML**: Standard XML format for tools like Gephi.
 - **JSON**: Native serialization format.
