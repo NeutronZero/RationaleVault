@@ -1,0 +1,12 @@
+{
+  "benchmark_id": "f1a_scale_1000",
+  "benchmark_type": "synthetic",
+  "expected_goal": "Stress test scaling to 1000 events",
+  "expected_tasks": ["Task 1", "Task 2", "Task 3"],
+  "expected_decisions": ["Decision 1"],
+  "expected_questions": ["Question 1"],
+  "expected_blockers": [],
+  "expected_next_action": "Task 1",
+  "handoff_chain": ["agent"],
+  "metadata": {"simulated_events": 1000}
+}

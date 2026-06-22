@@ -1,0 +1,75 @@
+{
+  "benchmark_id": "multi_sprint_handoff",
+  "benchmark_version": 1,
+  "scenario_name": "Multi-Sprint Goal and Task Retention",
+  "description": "Agent A works across multiple sprints accumulating tasks and decisions. Agent B must recover the full project state.",
+  "query": "What is the current project state and what needs to happen next?",
+  "expected_goals": [
+    {
+      "artifact_type": "goal",
+      "canonical_value": "Launch the product by end of quarter",
+      "aliases": ["Q3 launch", "End of quarter launch", "Product launch"],
+      "severity": "critical"
+    }
+  ],
+  "expected_decisions": [
+    {
+      "artifact_type": "decision",
+      "canonical_value": "Defer mobile app to phase 2",
+      "aliases": ["Mobile deferred", "Phase 2 mobile", "No mobile yet"],
+      "severity": "high",
+      "rationale": "Team capacity limits require focused delivery on web platform first"
+    },
+    {
+      "artifact_type": "decision",
+      "canonical_value": "Use feature flags for gradual rollout",
+      "aliases": ["Feature flags", "Gradual rollout", "Feature flag system"],
+      "severity": "medium",
+      "rationale": "Risk mitigation for production deployment"
+    }
+  ],
+  "expected_rationales": [
+    {
+      "artifact_type": "rationale",
+      "canonical_value": "Team capacity limits",
+      "aliases": ["Capacity constraints", "Resource limitations"],
+      "severity": "high"
+    }
+  ],
+  "expected_tasks": [
+    {
+      "artifact_type": "task",
+      "canonical_value": "Complete user authentication module",
+      "aliases": ["Auth module", "Authentication feature", "User auth"],
+      "severity": "critical"
+    },
+    {
+      "artifact_type": "task",
+      "canonical_value": "Set up CI/CD pipeline",
+      "aliases": ["CI/CD", "Pipeline setup", "Deployment pipeline"],
+      "severity": "high"
+    },
+    {
+      "artifact_type": "task",
+      "canonical_value": "Write API documentation",
+      "aliases": ["API docs", "Documentation", "API documentation"],
+      "severity": "medium"
+    }
+  ],
+  "expected_knowledge": [],
+  "expected_questions": [
+    {
+      "artifact_type": "question",
+      "canonical_value": "Which OAuth provider to use?",
+      "aliases": ["OAuth provider choice", "Auth provider selection"],
+      "severity": "medium"
+    }
+  ],
+  "min_goal_recall": 1.0,
+  "min_decision_recall": 1.0,
+  "min_rationale_recall": 0.95,
+  "min_task_recall": 0.95,
+  "min_knowledge_recall": 0.80,
+  "min_overall_continuity": 0.90,
+  "min_context_gain": 0.10
+}

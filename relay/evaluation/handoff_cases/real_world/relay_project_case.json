@@ -1,0 +1,33 @@
+{
+  "benchmark_id": "relay_project_case",
+  "benchmark_type": "real_world",
+  "expected_goal": "Validate Relay can preserve project continuity across agent switches without manual summaries",
+  "expected_tasks": [
+    "Sprint A: Event Ledger",
+    "Sprint B: Cognitive Head",
+    "Sprint C: Real Handoff Validation",
+    "Sprint D1: Event Extraction",
+    "Sprint D2: Agent Protocol",
+    "Sprint D3: Installation Framework",
+    "Sprint D4: Storage Abstraction",
+    "Sprint E: Evaluation & Failure Analysis",
+    "Sprint F: Scale & Stress Testing"
+  ],
+  "expected_decisions": [
+    {"decision": "Use SQLite as default storage engine", "severity": "high"},
+    {"decision": "Keep postgres optional and supported", "severity": "medium"},
+    {"decision": "Implement BaseEventStore abstraction", "severity": "critical"},
+    {"decision": "Store backend config in project.yaml", "severity": "medium"},
+    {"decision": "Build run_handoff_suite to enforce regression gates", "severity": "high"}
+  ],
+  "expected_questions": [
+    "At what event scaling scale is SnapshotStore justified?",
+    "How does handoff continuity decay over 50 hops?"
+  ],
+  "expected_blockers": [
+    "Sprint E: Evaluation & Failure Analysis blocks Sprint F: Scale & Stress Testing"
+  ],
+  "expected_next_action": "Sprint F: Scale & Stress Testing",
+  "handoff_chain": ["antigravity", "opencode", "claude", "cursor", "copilot", "chatgpt"],
+  "metadata": {}
+}

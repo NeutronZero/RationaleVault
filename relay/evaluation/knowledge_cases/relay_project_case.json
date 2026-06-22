@@ -1,0 +1,89 @@
+{
+  "benchmark_id": "relay_project_case",
+  "benchmark_type": "real_world",
+  "benchmark_version": 1,
+  "expected_architecture_principles": [
+    {
+      "title": "SQLite First",
+      "content": "Use SQLite for simplicity and local-first approach",
+      "domain": "ARCHITECTURE"
+    },
+    {
+      "title": "Derived State",
+      "content": "State is derived from events through reducers",
+      "domain": "ARCHITECTURE"
+    },
+    {
+      "title": "Measure First",
+      "content": "Every cognitive layer has measurement and evaluation",
+      "domain": "ARCHITECTURE"
+    }
+  ],
+  "expected_project_invariants": [
+    {
+      "title": "Events Are Truth",
+      "content": "Events are the immutable source of truth for all state",
+      "domain": "ARCHITECTURE"
+    },
+    {
+      "title": "Knowledge Is Derived",
+      "content": "Knowledge is derived state, never primary state",
+      "domain": "ARCHITECTURE"
+    },
+    {
+      "title": "100% Provenance",
+      "content": "All knowledge must be traceable to source events",
+      "domain": "ARCHITECTURE"
+    },
+    {
+      "title": "No Orphan Memories",
+      "content": "Every memory must have source event IDs",
+      "domain": "ARCHITECTURE"
+    }
+  ],
+  "expected_lessons": [
+    {
+      "title": "Deterministic Synthesis",
+      "content": "Same input must produce same knowledge output for reproducibility",
+      "domain": "PROCESS"
+    }
+  ],
+  "expected_failure_patterns": [],
+  "expected_workflow_patterns": [
+    {
+      "title": "Event-Sourced Projection",
+      "content": "Events to Memories to Knowledge is the canonical pipeline",
+      "domain": "PROCESS"
+    }
+  ],
+  "expected_research_findings": [],
+  "expected_decision_lineages": [
+    {
+      "title": "Decision Lineage: Database Choice",
+      "content": "Decision: Use SQLite for local-first simplicity and reliability"
+    },
+    {
+      "title": "Decision Lineage: Memory Provider",
+      "content": "Decision: Markdown provider for human readability and version control"
+    }
+  ],
+  "expected_contradictions": [],
+  "expected_supports": [
+    ["SQLite First", "Derived State"],
+    ["Events Are Truth", "Knowledge Is Derived"],
+    ["100% Provenance", "No Orphan Memories"]
+  ],
+  "expected_memory_count": 20,
+  "expected_memory_types": ["ARCHITECTURE", "DECISION", "DECISION_RATIONALE", "LESSON_LEARNED"],
+  "expected_knowledge_types": [
+    "ARCHITECTURE_PRINCIPLE",
+    "PROJECT_INVARIANT",
+    "LESSON",
+    "WORKFLOW_PATTERN",
+    "DECISION_LINEAGE"
+  ],
+  "metadata": {
+    "description": "Real-world benchmark from Relay's own development history (Sprints A-I4)",
+    "source": "Relay project"
+  }
+}

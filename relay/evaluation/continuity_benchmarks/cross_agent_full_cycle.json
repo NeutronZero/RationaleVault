@@ -1,0 +1,101 @@
+{
+  "benchmark_id": "cross_agent_full_cycle",
+  "benchmark_version": 1,
+  "scenario_name": "Full Pipeline Continuity",
+  "description": "Agent A builds up a complex project state across multiple sessions. Agent B must recover the full picture from context alone.",
+  "query": "Give me a complete overview of the project: goals, decisions, rationale, tasks, and lessons learned.",
+  "expected_goals": [
+    {
+      "artifact_type": "goal",
+      "canonical_value": "Build a real-time collaboration platform",
+      "aliases": ["Collaboration platform", "Real-time collaboration", "Collab platform"],
+      "severity": "critical"
+    }
+  ],
+  "expected_decisions": [
+    {
+      "artifact_type": "decision",
+      "canonical_value": "Use WebSocket for real-time sync",
+      "aliases": ["WebSocket sync", "Real-time via WebSocket", "WebSocket for real-time"],
+      "severity": "critical",
+      "rationale": "WebSocket provides bidirectional communication needed for conflict-free real-time editing"
+    },
+    {
+      "artifact_type": "decision",
+      "canonical_value": "Implement OT for conflict resolution",
+      "aliases": ["Operational Transform", "OT conflict resolution", "OT for editing"],
+      "severity": "high",
+      "rationale": "OT is battle-tested by Google Docs and provides consistent convergence"
+    },
+    {
+      "artifact_type": "decision",
+      "canonical_value": "Use event sourcing for document state",
+      "aliases": ["Event sourced documents", "Event sourcing for state", "ES for documents"],
+      "severity": "high",
+      "rationale": "Event sourcing enables audit trail and time-travel debugging for document edits"
+    }
+  ],
+  "expected_rationales": [
+    {
+      "artifact_type": "rationale",
+      "canonical_value": "bidirectional communication needed for conflict-free real-time editing",
+      "aliases": ["Bidirectional for real-time", "Full duplex for sync"],
+      "severity": "critical"
+    },
+    {
+      "artifact_type": "rationale",
+      "canonical_value": "OT is battle-tested by Google Docs",
+      "aliases": ["Google Docs uses OT", "Proven by Google Docs"],
+      "severity": "high"
+    }
+  ],
+  "expected_tasks": [
+    {
+      "artifact_type": "task",
+      "canonical_value": "Implement WebSocket connection manager",
+      "aliases": ["WebSocket manager", "Connection manager", "WS connection layer"],
+      "severity": "critical"
+    },
+    {
+      "artifact_type": "task",
+      "canonical_value": "Build OT transform engine",
+      "aliases": ["OT engine", "Transform engine", "OT implementation"],
+      "severity": "high"
+    },
+    {
+      "artifact_type": "task",
+      "canonical_value": "Design document event schema",
+      "aliases": ["Event schema", "Document events", "Event design"],
+      "severity": "high"
+    }
+  ],
+  "expected_knowledge": [
+    {
+      "artifact_type": "knowledge",
+      "canonical_value": "Event sourcing requires immutable event log",
+      "aliases": ["Immutable events", "Event immutability", "Append-only event log"],
+      "severity": "high"
+    },
+    {
+      "artifact_type": "knowledge",
+      "canonical_value": "OT convergence depends on transformation property",
+      "aliases": ["OT convergence", "Transformation property", "OT correctness"],
+      "severity": "critical"
+    }
+  ],
+  "expected_questions": [
+    {
+      "artifact_type": "question",
+      "canonical_value": "How to handle offline editing conflicts?",
+      "aliases": ["Offline conflicts", "Conflict resolution offline", "Offline sync"],
+      "severity": "high"
+    }
+  ],
+  "min_goal_recall": 1.0,
+  "min_decision_recall": 1.0,
+  "min_rationale_recall": 0.95,
+  "min_task_recall": 0.95,
+  "min_knowledge_recall": 0.80,
+  "min_overall_continuity": 0.90,
+  "min_context_gain": 0.10
+}

@@ -1,40 +1,15 @@
-name: "Relay Agent Protocol"
+name: "Relay Project"
 version: "1.0"
-description: "Machine-readable rules for agent behavior in event-sourced workflows."
-
+description: "Rules for agent behavior in this repository."
 execution_priority:
   - "OPEN_QUESTION"
   - "BLOCKER"
   - "TASK"
   - "DECISION"
-
 rules:
   - id: "resolve_questions_first"
     description: "Always address open questions blocking active tasks before starting new work."
     severity: "error"
-
   - id: "respect_accepted_decisions"
     description: "Do not reverse accepted decisions without a DECISION_SUPERSEDED event."
     severity: "error"
-
-  - id: "emit_candidate_events"
-    description: "All state mutations must output structured RELAY_EVENT_CANDIDATES format."
-    severity: "warning"
-
-  - id: "continue_from_current_focus"
-    description: "Respect the current focus block and Goal set in the context header."
-    severity: "info"
-
-supported_event_types:
-  - "PROJECT_CREATED"
-  - "PROJECT_GOAL_SET"
-  - "PROJECT_FOCUS_CHANGED"
-  - "TASK_CREATED"
-  - "TASK_MUTATED"
-  - "TASK_COMPLETED"
-  - "DECISION_PROPOSED"
-  - "DECISION_ACCEPTED"
-  - "DECISION_SUPERSEDED"
-  - "OPEN_QUESTION_RAISED"
-  - "OPEN_QUESTION_RESOLVED"
-  - "FACT_RECORDED"

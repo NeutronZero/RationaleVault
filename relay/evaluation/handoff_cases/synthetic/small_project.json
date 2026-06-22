@@ -1,0 +1,26 @@
+{
+  "benchmark_id": "synthetic_small",
+  "benchmark_type": "synthetic",
+  "expected_goal": "Validate small project continuity",
+  "expected_tasks": [
+    "Task 1: Setup database",
+    "Task 2: Define routes",
+    "Task 3: Implement validation",
+    "Task 4: Add logging",
+    "Task 5: Write tests"
+  ],
+  "expected_decisions": [
+    "Decision 1: Use FastAPI",
+    "Decision 2: Use SQLite"
+  ],
+  "expected_questions": [
+    "Question 1: Support async connections?",
+    "Question 2: Store connection pools?"
+  ],
+  "expected_blockers": [
+    "Task 1 blocks Task 2"
+  ],
+  "expected_next_action": "Task 1: Setup database",
+  "handoff_chain": ["antigravity", "opencode", "claude"],
+  "metadata": {}
+}

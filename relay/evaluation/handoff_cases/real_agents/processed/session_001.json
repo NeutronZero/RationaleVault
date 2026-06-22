@@ -1,0 +1,26 @@
+{
+  "benchmark_id": "real_session_001",
+  "benchmark_type": "real_world",
+  "benchmark_version": 1,
+  "expected_goal": "Implement SQLite Default Store",
+  "expected_tasks": [
+    "Task 1: Setup sqlite_store.py",
+    "Task 2: Implement factory"
+  ],
+  "expected_decisions": [
+    "Decision: Use SQLite as default backend"
+  ],
+  "expected_questions": [],
+  "expected_blockers": [],
+  "expected_next_action": "Task 1: Setup sqlite_store.py",
+  "handoff_chain": [
+    "claude",
+    "opencode"
+  ],
+  "metadata": {
+    "session_id": "session_001",
+    "expected_rationales": [
+      "Avoid Docker setup complexity for local developer flow."
+    ]
+  }
+}

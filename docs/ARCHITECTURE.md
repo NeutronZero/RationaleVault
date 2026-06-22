@@ -1,126 +1,88 @@
-# Relay Architecture
+# Relay Architectural Architecture
 
-## Overview
-
-Relay is a persistent, event-sourced project memory layer. It allows any AI agent — Claude, ChatGPT, Hermes, Cursor, OpenCode — to resume work on a project with full context continuity, without manual summarization.
-
-## Core Principle
-
-> Every fact, decision, task, and relationship is derived from an immutable event ledger.
-> State is never stored directly — always compiled from events.
-
-This is the same design principle used by event sourcing in production systems, applied to the problem of AI agent context continuity.
-
-## System Components
-
-```
-┌─────────────────────────────────────────────────────────┐
-│                     Relay V1 Stack                       │
-├─────────────────────────────────────────────────────────┤
-│  CLI Command Layer       relay/cli/main.py              │
-│  (init, install, doctor) Bootstraps and configures repos│
-├─────────────────────────────────────────────────────────┤
-│  Extraction Package      relay/extraction/              │
-│  (extractor, suggestor)  Factual parser & event maps    │
-├─────────────────────────────────────────────────────────┤
-│  AgentCompilers          relay/compilers/               │
-│  (ClaudeCompiler, ...)   Format state for each agent    │
-├─────────────────────────────────────────────────────────┤
-│  Cognitive Head          relay/cognitive_head/           │
-│  (compile_cognitive_head) Pure replay from events       │
-│  (reducers)              State folds — no I/O           │
-│  (SnapshotStore)         Placeholder for future caching │
-├─────────────────────────────────────────────────────────┤
-│  Event Store             relay/db/event_store.py        │
-│  (append_event)          Immutable append-only ledger   │
-│  (get_project_stream)    Replay by event_sequence ASC   │
-├─────────────────────────────────────────────────────────┤
-│  PostgreSQL 17           docker/postgres/               │
-│  (relay_events table)    uuid-ossp, BIGSERIAL           │
-└─────────────────────────────────────────────────────────┘
-```
-
-## Event Ordering
-
-`event_sequence` (BIGSERIAL, assigned by PostgreSQL) is the **only** authoritative replay ordering key.
-
-```sql
--- Always:
-SELECT ... FROM relay_events WHERE project_id = %s ORDER BY event_sequence ASC
-
--- Never:
-ORDER BY version          -- concurrency guard only
-ORDER BY recorded_at      -- wall clock, not causal order
-```
-
-Per-project `version` exists only for optimistic concurrency control via `UNIQUE (project_id, version)`. Application code assigns `version` under a PostgreSQL advisory lock.
-
-## Project Bootstrap Requirement
-
-Every project stream **must** begin with:
-
-```
-PROJECT_CREATED → PROJECT_GOAL_SET → PROJECT_FOCUS_CHANGED
-```
-
-`compile_cognitive_head()` raises `MissingProjectBootstrapError` if any of these are absent.
-
-## Data Flow
-
-```
-Agent Action
-     ↓
-EventStore.append_event()
-     ↓
-relay_events (PostgreSQL)
-     ↓
-EventStore.get_project_stream()  [ORDER BY event_sequence ASC]
-     ↓
-Reducers (pure folds — no I/O)
-  ProjectReducer → ProjectState
-  TaskReducer    → dict[task_id, TaskState]
-  DecisionReducer → dict[decision_id, DecisionState]
-  QuestionReducer → dict[question_id, QuestionState]
-     ↓
-compile_cognitive_head()
-  → derives active_tasks, active_decisions, open_questions, blockers
-  → returns CognitiveHead
-     ↓
-AgentCompiler.compile(head)
-  → formatted context string for target agent
-     ↓
-Agent resumes work
-```
-
-## Technology Decisions
-
-| Decision | Rationale |
-|----------|-----------|
-| Python 3.12 | Matches RTOS-Graph-RAG platform; modern type hints |
-| psycopg3 (sync) | Low-volume local workload; async adds complexity without benefit |
-| No ORM | Event ledger must be fully auditable; every query explicit |
-| No Alembic | Plain SQL + init_db.py sufficient for V1; introduce later |
-| PostgreSQL 17 | Reliable, uuid-ossp, JSONB, BIGSERIAL, advisory locks |
-| Docker Compose | Reproducible local environment; no bare-metal setup required |
-
-## Evolving Sprint Roadmap
-
-| Sprint | Goal | Key Deliverable | Status |
-|--------|------|-----------------|--------|
-| **A** | Event Ledger | `append_event`, `replay_stream`, 1000-event test | Completed ✅ |
-| **B** | Cognitive Head + Compiler | `compile_cognitive_head`, `ClaudeCompiler` | Completed ✅ |
-| **C** | Handoff Validation | Claude → Relay → ChatGPT → Relay → Hermes | Completed ✅ |
-| **D1** | Event Extraction Engine | `relay/extraction/` (observations vs suggestions) | Completed ✅ |
-| **D2** | Agent Protocol | `.relay/RELAY_SKILL.md`, `relay_protocol.yaml` | Completed ✅ |
-| **D3** | CLI Installation | `relay init`, `relay install --platform`, `relay doctor` | Completed ✅ |
-| **E** | Stress Test & Benchmarking | 50+ event validation loops across 5+ agents | Roadmapped ⏳ |
-| **E1** | Confidence-Gated Ingestion | Auto-accept events with confidence >= 0.95 | Roadmapped ⏳ |
-| **E2** | MCP Server Integration | Native Relay protocol MCP endpoints | Roadmapped ⏳ |
+This document details the data transitions, pipelines, and projections that drive Relay's cognitive memory framework.
 
 ---
 
-## Convergence with Universal Graph-RAG
+## Complete Evolutionary Flow
 
-Relay (Short-Term/Working Memory) and Universal Graph-RAG (Long-Term/Knowledge Memory) converge to construct a complete cognitive architecture:
-* **Universal Graph-RAG**: Handles semantic indexing, retrieval, and code relationship discovery ("What does the repository know?").
-* **Relay**: Manages task priority lifecycle, active blockers, and architectural guardrails ("What is the team doing right now?").
+Relay tracks project status by processing data through a sequence of projections:
+
+```text
+Event Stream
+  ↓  (Memory Extraction & Deduplication)
+Memory Store
+  ↓  (Knowledge Synthesis & Contradiction Checking)
+Knowledge Store
+  ↓  (Semantic Relations & Topological Projection)
+Knowledge Graph
+  ↓  (Profile Blending & Slot Allocation)
+Context Package
+  ↓  (Prompt Formatting & Adapter Registries)
+Agent Compiler Output
+```
+
+---
+
+## Layer-by-Layer Projections
+
+### 1. Events → Memories
+Events are captured in the immutable ledger. When an event is appended, memory extraction rules parse it, check for duplicates, and record corresponding memory records.
+
+```mermaid
+graph TD
+    A[Event Store Ledger] -->|Ingest EventRecord| B[Memory Extractor]
+    B -->|Check Duplicates| C{Already Exists?}
+    C -->|No| D[Create MemoryRecord]
+    C -->|Yes| E[Increment Reference Count]
+    D -->|Write| F[Memory Store]
+    E -->|Update| F
+```
+
+### 2. Memories → Knowledge
+Memory records are synthesized into high-level, declarative knowledge objects (project invariants, architectural decisions) while analyzing for contradictions.
+
+```mermaid
+graph TD
+    A[Memory Store] -->|Aggregate Records| B[Knowledge Synthesizer]
+    B -->|Scan for Conflicts| C{Contradictions Detected?}
+    C -->|Yes| D[Emit Contradiction Event]
+    C -->|No| E[Create/Update KnowledgeObject]
+    E -->|Commit| F[Knowledge Store]
+```
+
+### 3. Knowledge → Graph
+Knowledge objects and detected semantic relationships are projected into a topological knowledge graph projection.
+
+```mermaid
+graph TD
+    A[Knowledge Store] -->|Load Objects| B[Relations Detector]
+    B -->|Detect Domain/Tag overlap| C[Build KnowledgeRelations]
+    A -->|Node Data| D[Graph Projection Builder]
+    C -->|Edge Data| D
+    D -->|Hash sorted nodes/edges| E[Deterministic Graph ID]
+```
+
+### 4. Graph → Context
+Using the query keywords and the target profile (e.g. `DECISION_LOOKUP`), Relay determines source weights and retrieves items into slots.
+
+```mermaid
+graph TD
+    A[Query + Profile] -->|Analyze Intent| B[Slot Allocator]
+    B -->|Retrieve Events| C[Context Blending Engine]
+    B -->|Retrieve Memories| C
+    B -->|Retrieve Knowledge| C
+    C -->|Sort by Relevance Score| D[Unified ContextPackage]
+```
+
+### 5. Context → Compiler → Agent
+The unified context package is passed to the compiler registry where adapter-specific formatting prepares the prompt context block for a target LLM.
+
+```mermaid
+graph TD
+    A[ContextPackage] -->|Registry Lookup| B[Agent Compiler Adapter]
+    B -->|Claude Adapter| C[Format Markdown Context Block]
+    B -->|Cursor Adapter| D[Format XML Context Block]
+    C -->|Pass Prompt| E[Target Agent Ingestion]
+    D -->|Pass Prompt| E
+```

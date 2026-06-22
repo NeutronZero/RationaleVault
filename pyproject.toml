@@ -4,7 +4,7 @@ build-backend = "hatchling.build"
 
 [project]
 name = "relay"
-version = "0.1.0"
+version = "1.0.0rc2"
 description = "Event-sourced memory layer for multi-agent AI workflows"
 readme = "README.md"
 requires-python = ">=3.12"

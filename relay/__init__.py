@@ -1,3 +1,5 @@
-"""
-Relay — Event-sourced memory layer for multi-agent AI workflows.
-"""
+"""Relay — Event-sourced cognitive continuity and memory platform for multi-agent workflows."""
+from __future__ import annotations
+
+__version__ = "1.0.0rc2"
+SCHEMA_VERSION = "1.0"

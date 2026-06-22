@@ -1,0 +1,28 @@
+{
+  "benchmark_id": "relay_validation_real",
+  "benchmark_type": "real_world",
+  "expected_goal": "Validate that Relay can preserve project continuity across agent switches without manual summaries",
+  "expected_tasks": [
+    "Verify event ledger",
+    "Verify cognitive head",
+    "Verify cross-agent handoff",
+    "Verify event extraction",
+    "Verify agent protocol",
+    "Verify installation framework",
+    "Verify SQLite-first database abstraction layer"
+  ],
+  "expected_decisions": [
+    "SQLite is default database",
+    "Maintain postgres optional support",
+    "Dedicated factory for backend selection"
+  ],
+  "expected_questions": [
+    "How to manage schema changes in SQLite vs Postgres?"
+  ],
+  "expected_blockers": [
+    "Verify SQLite-first database abstraction layer blocks Verify installation framework"
+  ],
+  "expected_next_action": "Verify SQLite-first database abstraction layer",
+  "handoff_chain": ["antigravity", "opencode", "claude", "cursor", "copilot"],
+  "metadata": {}
+}

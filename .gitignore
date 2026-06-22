@@ -39,3 +39,12 @@ docker/postgres/data/
 
 # Relay scratch
 scratch/
+
+# Relay runtime data (generated — do not commit)
+.relay/relay.db
+.relay/relay.db-shm
+.relay/relay.db-wal
+.relay/reports/
+.relay/memory.md
+.relay/knowledge.md
+.relay/adapters/

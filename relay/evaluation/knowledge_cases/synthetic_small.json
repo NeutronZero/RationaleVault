@@ -1,0 +1,31 @@
+{
+  "benchmark_id": "knowledge_synthetic_small",
+  "benchmark_type": "synthetic",
+  "benchmark_version": 1,
+  "expected_architecture_principles": [
+    {
+      "title": "SQLite First",
+      "content": "Use SQLite for simplicity and local-first approach",
+      "domain": "ARCHITECTURE"
+    }
+  ],
+  "expected_project_invariants": [],
+  "expected_lessons": [],
+  "expected_failure_patterns": [],
+  "expected_workflow_patterns": [],
+  "expected_research_findings": [],
+  "expected_decision_lineages": [
+    {
+      "title": "Decision Lineage: Database Choice",
+      "content": "Decision: Use SQLite for local-first simplicity"
+    }
+  ],
+  "expected_contradictions": [],
+  "expected_supports": [],
+  "expected_memory_count": 5,
+  "expected_memory_types": ["ARCHITECTURE", "DECISION"],
+  "expected_knowledge_types": ["ARCHITECTURE_PRINCIPLE", "DECISION_LINEAGE"],
+  "metadata": {
+    "description": "Small synthetic benchmark for knowledge evaluation"
+  }
+}

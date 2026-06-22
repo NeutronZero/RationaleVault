@@ -1,0 +1,2729 @@
+{
+  "run_id": "1782129918",
+  "timestamp": 1782129918.8096519,
+  "replay_complexity": "LINEAR",
+  "results": [
+    {
+      "benchmark_id": "relay_project_case",
+      "benchmark_type": "real_world",
+      "final_metrics": {
+        "goal_recall": 1.0,
+        "task_recall": 1.0,
+        "decision_recall": 0.8,
+        "question_recall": 0.5,
+        "blocker_recall": 0.0,
+        "next_action_accuracy": 1.0,
+        "rationale_recall": 1.0,
+        "decision_contradiction_rate": 0.0,
+        "overall_decision_integrity": 0.9,
+        "weighted_decision_integrity": 0.9,
+        "weighted_contradiction_rate": 0.0,
+        "decision_drift": 0.2,
+        "goal_drift": 0.0,
+        "next_action_drift": 0.0,
+        "overall_continuity": 0.8800000000000001,
+        "overall_fidelity": 0.9333333333333333,
+        "decision_states": [
+          {
+            "expected": "Use SQLite as default storage engine",
+            "severity": "high",
+            "identity_status": "ALIASED",
+            "semantic_status": "DRIFTED",
+            "integrity_state": "MUTATED",
+            "observed": "{'decision': 'Use SQLite as default storage engine', 'severity': 'high'} - mutated by agent"
+          },
+          {
+            "expected": "Keep postgres optional and supported",
+            "severity": "medium",
+            "identity_status": "PRESERVED",
+            "semantic_status": "CONSISTENT",
+            "integrity_state": "HEALTHY",
+            "observed": "Keep postgres optional and supported"
+          },
+          {
+            "expected": "Implement BaseEventStore abstraction",
+            "severity": "critical",
+            "identity_status": "PRESERVED",
+            "semantic_status": "CONSISTENT",
+            "integrity_state": "HEALTHY",
+            "observed": "Implement BaseEventStore abstraction"
+          },
+          {
+            "expected": "Store backend config in project.yaml",
+            "severity": "medium",
+            "identity_status": "PRESERVED",
+            "semantic_status": "CONSISTENT",
+            "integrity_state": "HEALTHY",
+            "observed": "Store backend config in project.yaml"
+          },
+          {
+            "expected": "Build run_handoff_suite to enforce regression gates",
+            "severity": "high",
+            "identity_status": "PRESERVED",
+            "semantic_status": "CONSISTENT",
+            "integrity_state": "HEALTHY",
+            "observed": "Build run_handoff_suite to enforce regression gates"
+          }
+        ],
+        "agent_breakout": {
+          "antigravity": {
+            "goal_recall": 1.0,
+            "task_recall": 1.0,
+            "decision_recall": 0.8,
+            "question_recall": 0.5,
+            "blocker_recall": 0.0,
+            "next_action_accuracy": 1.0,
+            "rationale_recall": 1.0,
+            "decision_contradiction_rate": 0.0,
+            "overall_decision_integrity": 1.0,
+            "weighted_decision_integrity": 1.0,
+            "weighted_contradiction_rate": 0.0,
+            "decision_drift": 0.2,
+            "goal_drift": 0.0,
+            "next_action_drift": 0.0,
+            "overall_continuity": 0.8800000000000001,
+            "overall_fidelity": 0.9333333333333333,
+            "decision_states": [],
+            "agent_breakout": {}
+          },
+          "opencode": {
+            "goal_recall": 1.0,
+            "task_recall": 1.0,
+            "decision_recall": 0.8,
+            "question_recall": 0.5,
+            "blocker_recall": 0.0,
+            "next_action_accuracy": 1.0,
+            "rationale_recall": 1.0,
+            "decision_contradiction_rate": 0.0,
+            "overall_decision_integrity": 1.0,
+            "weighted_decision_integrity": 1.0,
+            "weighted_contradiction_rate": 0.0,
+            "decision_drift": 0.2,
+            "goal_drift": 0.0,
+            "next_action_drift": 0.0,
+            "overall_continuity": 0.8800000000000001,
+            "overall_fidelity": 0.9333333333333333,
+            "decision_states": [],
+            "agent_breakout": {}
+          },
+          "claude": {
+            "goal_recall": 1.0,
+            "task_recall": 1.0,
+            "decision_recall": 0.8,
+            "question_recall": 0.5,
+            "blocker_recall": 0.0,
+            "next_action_accuracy": 1.0,
+            "rationale_recall": 1.0,
+            "decision_contradiction_rate": 0.0,
+            "overall_decision_integrity": 1.0,
+            "weighted_decision_integrity": 1.0,
+            "weighted_contradiction_rate": 0.0,
+            "decision_drift": 0.2,
+            "goal_drift": 0.0,
+            "next_action_drift": 0.0,
+            "overall_continuity": 0.8800000000000001,
+            "overall_fidelity": 0.9333333333333333,
+            "decision_states": [],
+            "agent_breakout": {}
+          },
+          "cursor": {
+            "goal_recall": 1.0,
+            "task_recall": 1.0,
+            "decision_recall": 0.8,
+            "question_recall": 0.5,
+            "blocker_recall": 0.0,
+            "next_action_accuracy": 1.0,
+            "rationale_recall": 1.0,
+            "decision_contradiction_rate": 0.0,
+            "overall_decision_integrity": 1.0,
+            "weighted_decision_integrity": 1.0,
+            "weighted_contradiction_rate": 0.0,
+            "decision_drift": 0.2,
+            "goal_drift": 0.0,
+            "next_action_drift": 0.0,
+            "overall_continuity": 0.8800000000000001,
+            "overall_fidelity": 0.9333333333333333,
+            "decision_states": [],
+            "agent_breakout": {}
+          },
+          "copilot": {
+            "goal_recall": 1.0,
+            "task_recall": 1.0,
+            "decision_recall": 0.8,
+            "question_recall": 0.5,
+            "blocker_recall": 0.0,
+            "next_action_accuracy": 1.0,
+            "rationale_recall": 1.0,
+            "decision_contradiction_rate": 0.0,
+            "overall_decision_integrity": 1.0,
+            "weighted_decision_integrity": 1.0,
+            "weighted_contradiction_rate": 0.0,
+            "decision_drift": 0.2,
+            "goal_drift": 0.0,
+            "next_action_drift": 0.0,
+            "overall_continuity": 0.8800000000000001,
+            "overall_fidelity": 0.9333333333333333,
+            "decision_states": [],
+            "agent_breakout": {}
+          },
+          "chatgpt": {
+            "goal_recall": 1.0,
+            "task_recall": 1.0,
+            "decision_recall": 0.8,
+            "question_recall": 0.5,
+            "blocker_recall": 0.0,
+            "next_action_accuracy": 1.0,
+            "rationale_recall": 1.0,
+            "decision_contradiction_rate": 0.0,
+            "overall_decision_integrity": 1.0,
+            "weighted_decision_integrity": 1.0,
+            "weighted_contradiction_rate": 0.0,
+            "decision_drift": 0.2,
+            "goal_drift": 0.0,
+            "next_action_drift": 0.0,
+            "overall_continuity": 0.8800000000000001,
+            "overall_fidelity": 0.9333333333333333,
+            "decision_states": [],
+            "agent_breakout": {}
+          }
+        }
+      },
+      "degradation_rate": 0.01999999999999998,
+      "event_rates": {
+        "human_edit_rate": 0.1,
+        "human_reject_rate": 0.05,
+        "auto_accept_rate": 0.85
+      },
+      "failures": [
+        {
+          "failure_type": "CONTEXT_DRIFT",
+          "source_agent": "antigravity",
+          "target_agent": "opencode",
+          "item_id": {
+            "decision": "Use SQLite as default storage engine",
+            "severity": "high"
+          },
+          "expected": {
+            "decision": "Use SQLite as default storage engine",
+            "severity": "high"
+          },
+          "observed": "{'decision': 'Use SQLite as default storage engine', 'severity': 'high'} - mutated by agent"
+        },
+        {
+          "failure_type": "BLOCKER_BYPASS",
+          "source_agent": "opencode",
+          "target_agent": "claude",
+          "item_id": "Sprint E: Evaluation & Failure Analysis blocks Sprint F: Scale & Stress Testing",
+          "expected": "Sprint E: Evaluation & Failure Analysis blocks Sprint F: Scale & Stress Testing",
+          "observed": "Bypassed / Ignored"
+        },
+        {
+          "failure_type": "QUESTION_LOSS",
+          "source_agent": "claude",
+          "target_agent": "cursor",
+          "item_id": "At what event scaling scale is SnapshotStore justified?",
+          "expected": "At what event scaling scale is SnapshotStore justified?",
+          "observed": "Missing"
+        }
+      ],
+      "events": {
+        "generated": 60,
+        "accepted": 51,
+        "rejected": 3,
+        "edited": 6
+      },
+      "performance": {
+        "compile_time_ms": 0.0006000000212225132,
+        "memory_usage_mb": 24.77734375,
+        "events_processed_per_second": 99999996.4629146,
+        "compression_factor": 18.75,
+        "compression_ratio": 0.05333333333333334
+      },
+      "complexity": {
+        "reducer_metrics": {
+          "task_events": 30,
+          "decision_events": 15,
+          "question_events": 9,
+          "project_events": 6
+        },
+        "state_metrics": {
+          "active_tasks": 9,
+          "active_decisions": 5,
+          "active_questions": 1
+        }
+      }
+    },
+    {
+      "benchmark_id": "relay_validation_real",
+      "benchmark_type": "real_world",
+      "final_metrics": {
+        "goal_recall": 1.0,
+        "task_recall": 1.0,
+        "decision_recall": 0.6666666666666666,
+        "question_recall": 0.0,
+        "blocker_recall": 0.0,
+        "next_action_accuracy": 1.0,
+        "rationale_recall": 1.0,
+        "decision_contradiction_rate": 0.0,
+        "overall_decision_integrity": 0.8333333333333334,
+        "weighted_decision_integrity": 0.8333333333333334,
+        "weighted_contradiction_rate": 0.0,
+        "decision_drift": 0.3333333333333333,
+        "goal_drift": 0.0,
+        "next_action_drift": 0.0,
+        "overall_continuity": 0.7666666666666667,
+        "overall_fidelity": 0.8888888888888888,
+        "decision_states": [
+          {
+            "expected": "SQLite is default database",
+            "severity": "medium",
+            "identity_status": "ALIASED",
+            "semantic_status": "DRIFTED",
+            "integrity_state": "MUTATED",
+            "observed": "SQLite is default database - mutated by agent"
+          },
+          {
+            "expected": "Maintain postgres optional support",
+            "severity": "medium",
+            "identity_status": "PRESERVED",
+            "semantic_status": "CONSISTENT",
+            "integrity_state": "HEALTHY",
+            "observed": "Maintain postgres optional support"
+          },
+          {
+            "expected": "Dedicated factory for backend selection",
+            "severity": "medium",
+            "identity_status": "PRESERVED",
+            "semantic_status": "CONSISTENT",
+            "integrity_state": "HEALTHY",
+            "observed": "Dedicated factory for backend selection"
+          }
+        ],
+        "agent_breakout": {
+          "antigravity": {
+            "goal_recall": 1.0,
+            "task_recall": 1.0,
+            "decision_recall": 0.6666666666666666,
+            "question_recall": 0.0,
+            "blocker_recall": 0.0,
+            "next_action_accuracy": 1.0,
+            "rationale_recall": 1.0,
+            "decision_contradiction_rate": 0.0,
+            "overall_decision_integrity": 1.0,
+            "weighted_decision_integrity": 1.0,
+            "weighted_contradiction_rate": 0.0,
+            "decision_drift": 0.3333333333333333,
+            "goal_drift": 0.0,
+            "next_action_drift": 0.0,
+            "overall_continuity": 0.7666666666666667,
+            "overall_fidelity": 0.8888888888888888,
+            "decision_states": [],
+            "agent_breakout": {}
+          },
+          "opencode": {
+            "goal_recall": 1.0,
+            "task_recall": 1.0,
+            "decision_recall": 0.6666666666666666,
+            "question_recall": 0.0,
+            "blocker_recall": 0.0,
+            "next_action_accuracy": 1.0,
+            "rationale_recall": 1.0,
+            "decision_contradiction_rate": 0.0,
+            "overall_decision_integrity": 1.0,
+            "weighted_decision_integrity": 1.0,
+            "weighted_contradiction_rate": 0.0,
+            "decision_drift": 0.3333333333333333,
+            "goal_drift": 0.0,
+            "next_action_drift": 0.0,
+            "overall_continuity": 0.7666666666666667,
+            "overall_fidelity": 0.8888888888888888,
+            "decision_states": [],
+            "agent_breakout": {}
+          },
+          "claude": {
+            "goal_recall": 1.0,
+            "task_recall": 1.0,
+            "decision_recall": 0.6666666666666666,
+            "question_recall": 0.0,
+            "blocker_recall": 0.0,
+            "next_action_accuracy": 1.0,
+            "rationale_recall": 1.0,
+            "decision_contradiction_rate": 0.0,
+            "overall_decision_integrity": 1.0,
+            "weighted_decision_integrity": 1.0,
+            "weighted_contradiction_rate": 0.0,
+            "decision_drift": 0.3333333333333333,
+            "goal_drift": 0.0,
+            "next_action_drift": 0.0,
+            "overall_continuity": 0.7666666666666667,
+            "overall_fidelity": 0.8888888888888888,
+            "decision_states": [],
+            "agent_breakout": {}
+          },
+          "cursor": {
+            "goal_recall": 1.0,
+            "task_recall": 1.0,
+            "decision_recall": 0.6666666666666666,
+            "question_recall": 0.0,
+            "blocker_recall": 0.0,
+            "next_action_accuracy": 1.0,
+            "rationale_recall": 1.0,
+            "decision_contradiction_rate": 0.0,
+            "overall_decision_integrity": 1.0,
+            "weighted_decision_integrity": 1.0,
+            "weighted_contradiction_rate": 0.0,
+            "decision_drift": 0.3333333333333333,
+            "goal_drift": 0.0,
+            "next_action_drift": 0.0,
+            "overall_continuity": 0.7666666666666667,
+            "overall_fidelity": 0.8888888888888888,
+            "decision_states": [],
+            "agent_breakout": {}
+          },
+          "copilot": {
+            "goal_recall": 1.0,
+            "task_recall": 1.0,
+            "decision_recall": 0.6666666666666666,
+            "question_recall": 0.0,
+            "blocker_recall": 0.0,
+            "next_action_accuracy": 1.0,
+            "rationale_recall": 1.0,
+            "decision_contradiction_rate": 0.0,
+            "overall_decision_integrity": 1.0,
+            "weighted_decision_integrity": 1.0,
+            "weighted_contradiction_rate": 0.0,
+            "decision_drift": 0.3333333333333333,
+            "goal_drift": 0.0,
+            "next_action_drift": 0.0,
+            "overall_continuity": 0.7666666666666667,
+            "overall_fidelity": 0.8888888888888888,
+            "decision_states": [],
+            "agent_breakout": {}
+          }
+        }
+      },
+      "degradation_rate": 0.046666666666666655,
+      "event_rates": {
+        "human_edit_rate": 0.1,
+        "human_reject_rate": 0.04,
+        "auto_accept_rate": 0.86
+      },
+      "failures": [
+        {
+          "failure_type": "CONTEXT_DRIFT",
+          "source_agent": "antigravity",
+          "target_agent": "opencode",
+          "item_id": "SQLite is default database",
+          "expected": "SQLite is default database",
+          "observed": "SQLite is default database - mutated by agent"
+        },
+        {
+          "failure_type": "BLOCKER_BYPASS",
+          "source_agent": "opencode",
+          "target_agent": "claude",
+          "item_id": "Verify SQLite-first database abstraction layer blocks Verify installation framework",
+          "expected": "Verify SQLite-first database abstraction layer blocks Verify installation framework",
+          "observed": "Bypassed / Ignored"
+        },
+        {
+          "failure_type": "QUESTION_LOSS",
+          "source_agent": "claude",
+          "target_agent": "cursor",
+          "item_id": "How to manage schema changes in SQLite vs Postgres?",
+          "expected": "How to manage schema changes in SQLite vs Postgres?",
+          "observed": "Missing"
+        }
+      ],
+      "events": {
+        "generated": 50,
+        "accepted": 43,
+        "rejected": 2,
+        "edited": 5
+      },
+      "performance": {
+        "compile_time_ms": 0.0004999999418942025,
+        "memory_usage_mb": 24.77734375,
+        "events_processed_per_second": 100000011.62116085,
+        "compression_factor": 22.727272727272727,
+        "compression_ratio": 0.044
+      },
+      "complexity": {
+        "reducer_metrics": {
+          "task_events": 25,
+          "decision_events": 12,
+          "question_events": 7,
+          "project_events": 6
+        },
+        "state_metrics": {
+          "active_tasks": 7,
+          "active_decisions": 3,
+          "active_questions": 0
+        }
+      }
+    },
+    {
+      "benchmark_id": "todo_api_real",
+      "benchmark_type": "real_world",
+      "final_metrics": {
+        "goal_recall": 1.0,
+        "task_recall": 1.0,
+        "decision_recall": 0.5,
+        "question_recall": 1.0,
+        "blocker_recall": 1.0,
+        "next_action_accuracy": 1.0,
+        "rationale_recall": 1.0,
+        "decision_contradiction_rate": 0.0,
+        "overall_decision_integrity": 0.75,
+        "weighted_decision_integrity": 0.75,
+        "weighted_contradiction_rate": 0.0,
+        "decision_drift": 0.5,
+        "goal_drift": 0.0,
+        "next_action_drift": 0.0,
+        "overall_continuity": 0.95,
+        "overall_fidelity": 0.8333333333333334,
+        "decision_states": [
+          {
+            "expected": "Use FastAPI",
+            "severity": "medium",
+            "identity_status": "ALIASED",
+            "semantic_status": "DRIFTED",
+            "integrity_state": "MUTATED",
+            "observed": "Use FastAPI - mutated by agent"
+          },
+          {
+            "expected": "Use SQLite",
+            "severity": "medium",
+            "identity_status": "PRESERVED",
+            "semantic_status": "CONSISTENT",
+            "integrity_state": "HEALTHY",
+            "observed": "Use SQLite"
+          }
+        ],
+        "agent_breakout": {
+          "antigravity": {
+            "goal_recall": 1.0,
+            "task_recall": 1.0,
+            "decision_recall": 0.5,
+            "question_recall": 1.0,
+            "blocker_recall": 1.0,
+            "next_action_accuracy": 1.0,
+            "rationale_recall": 1.0,
+            "decision_contradiction_rate": 0.0,
+            "overall_decision_integrity": 1.0,
+            "weighted_decision_integrity": 1.0,
+            "weighted_contradiction_rate": 0.0,
+            "decision_drift": 0.5,
+            "goal_drift": 0.0,
+            "next_action_drift": 0.0,
+            "overall_continuity": 0.95,
+            "overall_fidelity": 0.8333333333333334,
+            "decision_states": [],
+            "agent_breakout": {}
+          },
+          "opencode": {
+            "goal_recall": 1.0,
+            "task_recall": 1.0,
+            "decision_recall": 0.5,
+            "question_recall": 1.0,
+            "blocker_recall": 1.0,
+            "next_action_accuracy": 1.0,
+            "rationale_recall": 1.0,
+            "decision_contradiction_rate": 0.0,
+            "overall_decision_integrity": 1.0,
+            "weighted_decision_integrity": 1.0,
+            "weighted_contradiction_rate": 0.0,
+            "decision_drift": 0.5,
+            "goal_drift": 0.0,
+            "next_action_drift": 0.0,
+            "overall_continuity": 0.95,
+            "overall_fidelity": 0.8333333333333334,
+            "decision_states": [],
+            "agent_breakout": {}
+          }
+        }
+      },
+      "degradation_rate": 0.01666666666666668,
+      "event_rates": {
+        "human_edit_rate": 0.1,
+        "human_reject_rate": 0.03333333333333333,
+        "auto_accept_rate": 0.8666666666666667
+      },
+      "failures": [
+        {
+          "failure_type": "CONTEXT_DRIFT",
+          "source_agent": "antigravity",
+          "target_agent": "opencode",
+          "item_id": "Use FastAPI",
+          "expected": "Use FastAPI",
+          "observed": "Use FastAPI - mutated by agent"
+        }
+      ],
+      "events": {
+        "generated": 30,
+        "accepted": 26,
+        "rejected": 1,
+        "edited": 3
+      },
+      "performance": {
+        "compile_time_ms": 0.0001999999312829459,
+        "memory_usage_mb": 24.78125,
+        "events_processed_per_second": 150000051.53780827,
+        "compression_factor": 21.428571428571427,
+        "compression_ratio": 0.04666666666666667
+      },
+      "complexity": {
+        "reducer_metrics": {
+          "task_events": 15,
+          "decision_events": 7,
+          "question_events": 4,
+          "project_events": 4
+        },
+        "state_metrics": {
+          "active_tasks": 4,
+          "active_decisions": 2,
+          "active_questions": 1
+        }
+      }
+    },
+    {
+      "benchmark_id": "adversarial_drift",
+      "benchmark_type": "synthetic",
+      "final_metrics": {
+        "goal_recall": 1.0,
+        "task_recall": 1.0,
+        "decision_recall": 0.0,
+        "question_recall": 0.5,
+        "blocker_recall": 0.0,
+        "next_action_accuracy": 1.0,
+        "rationale_recall": 1.0,
+        "decision_contradiction_rate": 0.0,
+        "overall_decision_integrity": 0.5,
+        "weighted_decision_integrity": 0.5,
+        "weighted_contradiction_rate": 0.0,
+        "decision_drift": 1.0,
+        "goal_drift": 0.0,
+        "next_action_drift": 0.0,
+        "overall_continuity": 0.8,
+        "overall_fidelity": 0.6666666666666667,
+        "decision_states": [
+          {
+            "expected": "Use SQLite",
+            "severity": "medium",
+            "identity_status": "ALIASED",
+            "semantic_status": "DRIFTED",
+            "integrity_state": "MUTATED",
+            "observed": "Use SQLite - mutated by agent"
+          }
+        ],
+        "agent_breakout": {
+          "claude": {
+            "goal_recall": 1.0,
+            "task_recall": 1.0,
+            "decision_recall": 0.0,
+            "question_recall": 0.5,
+            "blocker_recall": 0.0,
+            "next_action_accuracy": 1.0,
+            "rationale_recall": 1.0,
+            "decision_contradiction_rate": 0.0,
+            "overall_decision_integrity": 1.0,
+            "weighted_decision_integrity": 1.0,
+            "weighted_contradiction_rate": 0.0,
+            "decision_drift": 1.0,
+            "goal_drift": 0.0,
+            "next_action_drift": 0.0,
+            "overall_continuity": 0.8,
+            "overall_fidelity": 0.6666666666666667,
+            "decision_states": [],
+            "agent_breakout": {}
+          },
+          "opencode": {
+            "goal_recall": 1.0,
+            "task_recall": 1.0,
+            "decision_recall": 0.0,
+            "question_recall": 0.5,
+            "blocker_recall": 0.0,
+            "next_action_accuracy": 1.0,
+            "rationale_recall": 1.0,
+            "decision_contradiction_rate": 0.0,
+            "overall_decision_integrity": 1.0,
+            "weighted_decision_integrity": 1.0,
+            "weighted_contradiction_rate": 0.0,
+            "decision_drift": 1.0,
+            "goal_drift": 0.0,
+            "next_action_drift": 0.0,
+            "overall_continuity": 0.8,
+            "overall_fidelity": 0.6666666666666667,
+            "decision_states": [],
+            "agent_breakout": {}
+          },
+          "cursor": {
+            "goal_recall": 1.0,
+            "task_recall": 1.0,
+            "decision_recall": 0.0,
+            "question_recall": 0.5,
+            "blocker_recall": 0.0,
+            "next_action_accuracy": 1.0,
+            "rationale_recall": 1.0,
+            "decision_contradiction_rate": 0.0,
+            "overall_decision_integrity": 1.0,
+            "weighted_decision_integrity": 1.0,
+            "weighted_contradiction_rate": 0.0,
+            "decision_drift": 1.0,
+            "goal_drift": 0.0,
+            "next_action_drift": 0.0,
+            "overall_continuity": 0.8,
+            "overall_fidelity": 0.6666666666666667,
+            "decision_states": [],
+            "agent_breakout": {}
+          }
+        }
+      },
+      "degradation_rate": 0.06666666666666665,
+      "event_rates": {
+        "human_edit_rate": 0.1,
+        "human_reject_rate": 0.03333333333333333,
+        "auto_accept_rate": 0.8666666666666667
+      },
+      "failures": [
+        {
+          "failure_type": "BLOCKER_BYPASS",
+          "source_agent": "initial_state",
+          "target_agent": "claude",
+          "item_id": "Question 1 blocks Task A",
+          "expected": "Question 1 blocks Task A",
+          "observed": "Bypassed / Ignored"
+        },
+        {
+          "failure_type": "CONTEXT_DRIFT",
+          "source_agent": "claude",
+          "target_agent": "opencode",
+          "item_id": "Use SQLite",
+          "expected": "Use SQLite",
+          "observed": "Use SQLite - mutated by agent"
+        },
+        {
+          "failure_type": "QUESTION_LOSS",
+          "source_agent": "opencode",
+          "target_agent": "cursor",
+          "item_id": "Question 1",
+          "expected": "Question 1",
+          "observed": "Missing"
+        }
+      ],
+      "events": {
+        "generated": 30,
+        "accepted": 26,
+        "rejected": 1,
+        "edited": 3
+      },
+      "performance": {
+        "compile_time_ms": 0.0001999999312829459,
+        "memory_usage_mb": 24.7890625,
+        "events_processed_per_second": 150000051.53780827,
+        "compression_factor": 30.0,
+        "compression_ratio": 0.03333333333333333
+      },
+      "complexity": {
+        "reducer_metrics": {
+          "task_events": 15,
+          "decision_events": 7,
+          "question_events": 4,
+          "project_events": 4
+        },
+        "state_metrics": {
+          "active_tasks": 2,
+          "active_decisions": 1,
+          "active_questions": 1
+        }
+      }
+    },
+    {
+      "benchmark_id": "f1a_scale_100",
+      "benchmark_type": "synthetic",
+      "final_metrics": {
+        "goal_recall": 1.0,
+        "task_recall": 1.0,
+        "decision_recall": 1.0,
+        "question_recall": 1.0,
+        "blocker_recall": 1.0,
+        "next_action_accuracy": 1.0,
+        "rationale_recall": 1.0,
+        "decision_contradiction_rate": 0.0,
+        "overall_decision_integrity": 1.0,
+        "weighted_decision_integrity": 1.0,
+        "weighted_contradiction_rate": 0.0,
+        "decision_drift": 0.0,
+        "goal_drift": 0.0,
+        "next_action_drift": 0.0,
+        "overall_continuity": 1.0,
+        "overall_fidelity": 1.0,
+        "decision_states": [
+          {
+            "expected": "Decision 1",
+            "severity": "medium",
+            "identity_status": "PRESERVED",
+            "semantic_status": "CONSISTENT",
+            "integrity_state": "HEALTHY",
+            "observed": "Decision 1"
+          }
+        ],
+        "agent_breakout": {
+          "agent": {
+            "goal_recall": 1.0,
+            "task_recall": 1.0,
+            "decision_recall": 1.0,
+            "question_recall": 1.0,
+            "blocker_recall": 1.0,
+            "next_action_accuracy": 1.0,
+            "rationale_recall": 1.0,
+            "decision_contradiction_rate": 0.0,
+            "overall_decision_integrity": 1.0,
+            "weighted_decision_integrity": 1.0,
+            "weighted_contradiction_rate": 0.0,
+            "decision_drift": 0.0,
+            "goal_drift": 0.0,
+            "next_action_drift": 0.0,
+            "overall_continuity": 1.0,
+            "overall_fidelity": 1.0,
+            "decision_states": [],
+            "agent_breakout": {}
+          }
+        }
+      },
+      "degradation_rate": 0.0,
+      "event_rates": {
+        "human_edit_rate": 0.1,
+        "human_reject_rate": 0.05,
+        "auto_accept_rate": 0.85
+      },
+      "failures": [],
+      "events": {
+        "generated": 100,
+        "accepted": 85,
+        "rejected": 5,
+        "edited": 10
+      },
+      "performance": {
+        "compile_time_ms": 0.0001999999312829459,
+        "memory_usage_mb": 24.7890625,
+        "events_processed_per_second": 500000171.7926943,
+        "compression_factor": 100.0,
+        "compression_ratio": 0.01
+      },
+      "complexity": {
+        "reducer_metrics": {
+          "task_events": 50,
+          "decision_events": 25,
+          "question_events": 15,
+          "project_events": 10
+        },
+        "state_metrics": {
+          "active_tasks": 3,
+          "active_decisions": 1,
+          "active_questions": 1
+        }
+      }
+    },
+    {
+      "benchmark_id": "f1a_scale_1000",
+      "benchmark_type": "synthetic",
+      "final_metrics": {
+        "goal_recall": 1.0,
+        "task_recall": 1.0,
+        "decision_recall": 1.0,
+        "question_recall": 1.0,
+        "blocker_recall": 1.0,
+        "next_action_accuracy": 1.0,
+        "rationale_recall": 1.0,
+        "decision_contradiction_rate": 0.0,
+        "overall_decision_integrity": 1.0,
+        "weighted_decision_integrity": 1.0,
+        "weighted_contradiction_rate": 0.0,
+        "decision_drift": 0.0,
+        "goal_drift": 0.0,
+        "next_action_drift": 0.0,
+        "overall_continuity": 1.0,
+        "overall_fidelity": 1.0,
+        "decision_states": [
+          {
+            "expected": "Decision 1",
+            "severity": "medium",
+            "identity_status": "PRESERVED",
+            "semantic_status": "CONSISTENT",
+            "integrity_state": "HEALTHY",
+            "observed": "Decision 1"
+          }
+        ],
+        "agent_breakout": {
+          "agent": {
+            "goal_recall": 1.0,
+            "task_recall": 1.0,
+            "decision_recall": 1.0,
+            "question_recall": 1.0,
+            "blocker_recall": 1.0,
+            "next_action_accuracy": 1.0,
+            "rationale_recall": 1.0,
+            "decision_contradiction_rate": 0.0,
+            "overall_decision_integrity": 1.0,
+            "weighted_decision_integrity": 1.0,
+            "weighted_contradiction_rate": 0.0,
+            "decision_drift": 0.0,
+            "goal_drift": 0.0,
+            "next_action_drift": 0.0,
+            "overall_continuity": 1.0,
+            "overall_fidelity": 1.0,
+            "decision_states": [],
+            "agent_breakout": {}
+          }
+        }
+      },
+      "degradation_rate": 0.0,
+      "event_rates": {
+        "human_edit_rate": 0.1,
+        "human_reject_rate": 0.05,
+        "auto_accept_rate": 0.85
+      },
+      "failures": [],
+      "events": {
+        "generated": 1000,
+        "accepted": 850,
+        "rejected": 50,
+        "edited": 100
+      },
+      "performance": {
+        "compile_time_ms": 10.6241000000864,
+        "memory_usage_mb": 24.79296875,
+        "events_processed_per_second": 94125.62005175662,
+        "compression_factor": 1000.0,
+        "compression_ratio": 0.001
+      },
+      "complexity": {
+        "reducer_metrics": {
+          "task_events": 500,
+          "decision_events": 250,
+          "question_events": 150,
+          "project_events": 100
+        },
+        "state_metrics": {
+          "active_tasks": 3,
+          "active_decisions": 1,
+          "active_questions": 1
+        }
+      }
+    },
+    {
+      "benchmark_id": "f1a_scale_10000",
+      "benchmark_type": "synthetic",
+      "final_metrics": {
+        "goal_recall": 1.0,
+        "task_recall": 1.0,
+        "decision_recall": 1.0,
+        "question_recall": 1.0,
+        "blocker_recall": 1.0,
+        "next_action_accuracy": 1.0,
+        "rationale_recall": 1.0,
+        "decision_contradiction_rate": 0.0,
+        "overall_decision_integrity": 1.0,
+        "weighted_decision_integrity": 1.0,
+        "weighted_contradiction_rate": 0.0,
+        "decision_drift": 0.0,
+        "goal_drift": 0.0,
+        "next_action_drift": 0.0,
+        "overall_continuity": 1.0,
+        "overall_fidelity": 1.0,
+        "decision_states": [
+          {
+            "expected": "Decision 1",
+            "severity": "medium",
+            "identity_status": "PRESERVED",
+            "semantic_status": "CONSISTENT",
+            "integrity_state": "HEALTHY",
+            "observed": "Decision 1"
+          }
+        ],
+        "agent_breakout": {
+          "agent": {
+            "goal_recall": 1.0,
+            "task_recall": 1.0,
+            "decision_recall": 1.0,
+            "question_recall": 1.0,
+            "blocker_recall": 1.0,
+            "next_action_accuracy": 1.0,
+            "rationale_recall": 1.0,
+            "decision_contradiction_rate": 0.0,
+            "overall_decision_integrity": 1.0,
+            "weighted_decision_integrity": 1.0,
+            "weighted_contradiction_rate": 0.0,
+            "decision_drift": 0.0,
+            "goal_drift": 0.0,
+            "next_action_drift": 0.0,
+            "overall_continuity": 1.0,
+            "overall_fidelity": 1.0,
+            "decision_states": [],
+            "agent_breakout": {}
+          }
+        }
+      },
+      "degradation_rate": 0.0,
+      "event_rates": {
+        "human_edit_rate": 0.1,
+        "human_reject_rate": 0.05,
+        "auto_accept_rate": 0.85
+      },
+      "failures": [],
+      "events": {
+        "generated": 10000,
+        "accepted": 8500,
+        "rejected": 500,
+        "edited": 1000
+      },
+      "performance": {
+        "compile_time_ms": 100.3186000000369,
+        "memory_usage_mb": 24.796875,
+        "events_processed_per_second": 99682.41183585419,
+        "compression_factor": 10000.0,
+        "compression_ratio": 0.0001
+      },
+      "complexity": {
+        "reducer_metrics": {
+          "task_events": 5000,
+          "decision_events": 2500,
+          "question_events": 1500,
+          "project_events": 1000
+        },
+        "state_metrics": {
+          "active_tasks": 3,
+          "active_decisions": 1,
+          "active_questions": 1
+        }
+      }
+    },
+    {
+      "benchmark_id": "f1a_scale_50000",
+      "benchmark_type": "synthetic",
+      "final_metrics": {
+        "goal_recall": 1.0,
+        "task_recall": 1.0,
+        "decision_recall": 1.0,
+        "question_recall": 1.0,
+        "blocker_recall": 1.0,
+        "next_action_accuracy": 1.0,
+        "rationale_recall": 1.0,
+        "decision_contradiction_rate": 0.0,
+        "overall_decision_integrity": 1.0,
+        "weighted_decision_integrity": 1.0,
+        "weighted_contradiction_rate": 0.0,
+        "decision_drift": 0.0,
+        "goal_drift": 0.0,
+        "next_action_drift": 0.0,
+        "overall_continuity": 1.0,
+        "overall_fidelity": 1.0,
+        "decision_states": [
+          {
+            "expected": "Decision 1",
+            "severity": "medium",
+            "identity_status": "PRESERVED",
+            "semantic_status": "CONSISTENT",
+            "integrity_state": "HEALTHY",
+            "observed": "Decision 1"
+          }
+        ],
+        "agent_breakout": {
+          "agent": {
+            "goal_recall": 1.0,
+            "task_recall": 1.0,
+            "decision_recall": 1.0,
+            "question_recall": 1.0,
+            "blocker_recall": 1.0,
+            "next_action_accuracy": 1.0,
+            "rationale_recall": 1.0,
+            "decision_contradiction_rate": 0.0,
+            "overall_decision_integrity": 1.0,
+            "weighted_decision_integrity": 1.0,
+            "weighted_contradiction_rate": 0.0,
+            "decision_drift": 0.0,
+            "goal_drift": 0.0,
+            "next_action_drift": 0.0,
+            "overall_continuity": 1.0,
+            "overall_fidelity": 1.0,
+            "decision_states": [],
+            "agent_breakout": {}
+          }
+        }
+      },
+      "degradation_rate": 0.0,
+      "event_rates": {
+        "human_edit_rate": 0.1,
+        "human_reject_rate": 0.05,
+        "auto_accept_rate": 0.85
+      },
+      "failures": [],
+      "events": {
+        "generated": 50000,
+        "accepted": 42500,
+        "rejected": 2500,
+        "edited": 5000
+      },
+      "performance": {
+        "compile_time_ms": 200.75939999992443,
+        "memory_usage_mb": 24.80078125,
+        "events_processed_per_second": 249054.34066857552,
+        "compression_factor": 50000.0,
+        "compression_ratio": 2e-05
+      },
+      "complexity": {
+        "reducer_metrics": {
+          "task_events": 25000,
+          "decision_events": 12500,
+          "question_events": 7500,
+          "project_events": 5000
+        },
+        "state_metrics": {
+          "active_tasks": 3,
+          "active_decisions": 1,
+          "active_questions": 1
+        }
+      }
+    },
+    {
+      "benchmark_id": "f1b_multihop_10",
+      "benchmark_type": "synthetic",
+      "final_metrics": {
+        "goal_recall": 1.0,
+        "task_recall": 1.0,
+        "decision_recall": 0.0,
+        "question_recall": 0.0,
+        "blocker_recall": 1.0,
+        "next_action_accuracy": 1.0,
+        "rationale_recall": 1.0,
+        "decision_contradiction_rate": 0.0,
+        "overall_decision_integrity": 0.5,
+        "weighted_decision_integrity": 0.5,
+        "weighted_contradiction_rate": 0.0,
+        "decision_drift": 1.0,
+        "goal_drift": 0.0,
+        "next_action_drift": 0.0,
+        "overall_continuity": 0.7,
+        "overall_fidelity": 0.6666666666666667,
+        "decision_states": [
+          {
+            "expected": "Decision 1",
+            "severity": "medium",
+            "identity_status": "ALIASED",
+            "semantic_status": "DRIFTED",
+            "integrity_state": "MUTATED",
+            "observed": "Decision 1 - mutated by agent - mutated by agent - mutated by agent"
+          }
+        ],
+        "agent_breakout": {
+          "claude": {
+            "goal_recall": 1.0,
+            "task_recall": 1.0,
+            "decision_recall": 0.0,
+            "question_recall": 0.0,
+            "blocker_recall": 1.0,
+            "next_action_accuracy": 1.0,
+            "rationale_recall": 1.0,
+            "decision_contradiction_rate": 0.0,
+            "overall_decision_integrity": 1.0,
+            "weighted_decision_integrity": 1.0,
+            "weighted_contradiction_rate": 0.0,
+            "decision_drift": 1.0,
+            "goal_drift": 0.0,
+            "next_action_drift": 0.0,
+            "overall_continuity": 0.7,
+            "overall_fidelity": 0.6666666666666667,
+            "decision_states": [],
+            "agent_breakout": {}
+          },
+          "opencode": {
+            "goal_recall": 1.0,
+            "task_recall": 1.0,
+            "decision_recall": 0.0,
+            "question_recall": 0.0,
+            "blocker_recall": 1.0,
+            "next_action_accuracy": 1.0,
+            "rationale_recall": 1.0,
+            "decision_contradiction_rate": 0.0,
+            "overall_decision_integrity": 1.0,
+            "weighted_decision_integrity": 1.0,
+            "weighted_contradiction_rate": 0.0,
+            "decision_drift": 1.0,
+            "goal_drift": 0.0,
+            "next_action_drift": 0.0,
+            "overall_continuity": 0.7,
+            "overall_fidelity": 0.6666666666666667,
+            "decision_states": [],
+            "agent_breakout": {}
+          },
+          "chatgpt": {
+            "goal_recall": 1.0,
+            "task_recall": 1.0,
+            "decision_recall": 0.0,
+            "question_recall": 0.0,
+            "blocker_recall": 1.0,
+            "next_action_accuracy": 1.0,
+            "rationale_recall": 1.0,
+            "decision_contradiction_rate": 0.0,
+            "overall_decision_integrity": 1.0,
+            "weighted_decision_integrity": 1.0,
+            "weighted_contradiction_rate": 0.0,
+            "decision_drift": 1.0,
+            "goal_drift": 0.0,
+            "next_action_drift": 0.0,
+            "overall_continuity": 0.7,
+            "overall_fidelity": 0.6666666666666667,
+            "decision_states": [],
+            "agent_breakout": {}
+          },
+          "cursor": {
+            "goal_recall": 1.0,
+            "task_recall": 1.0,
+            "decision_recall": 0.0,
+            "question_recall": 0.0,
+            "blocker_recall": 1.0,
+            "next_action_accuracy": 1.0,
+            "rationale_recall": 1.0,
+            "decision_contradiction_rate": 0.0,
+            "overall_decision_integrity": 1.0,
+            "weighted_decision_integrity": 1.0,
+            "weighted_contradiction_rate": 0.0,
+            "decision_drift": 1.0,
+            "goal_drift": 0.0,
+            "next_action_drift": 0.0,
+            "overall_continuity": 0.7,
+            "overall_fidelity": 0.6666666666666667,
+            "decision_states": [],
+            "agent_breakout": {}
+          }
+        }
+      },
+      "degradation_rate": 0.030000000000000006,
+      "event_rates": {
+        "human_edit_rate": 0.1,
+        "human_reject_rate": 0.05,
+        "auto_accept_rate": 0.85
+      },
+      "failures": [
+        {
+          "failure_type": "CONTEXT_DRIFT",
+          "source_agent": "claude",
+          "target_agent": "opencode",
+          "item_id": "Decision 1",
+          "expected": "Decision 1",
+          "observed": "Decision 1 - mutated by agent"
+        },
+        {
+          "failure_type": "QUESTION_LOSS",
+          "source_agent": "chatgpt",
+          "target_agent": "cursor",
+          "item_id": "Question 1",
+          "expected": "Question 1",
+          "observed": "Missing"
+        },
+        {
+          "failure_type": "CONTEXT_DRIFT",
+          "source_agent": "claude",
+          "target_agent": "opencode",
+          "item_id": "Decision 1 - mutated by agent",
+          "expected": "Decision 1 - mutated by agent",
+          "observed": "Decision 1 - mutated by agent - mutated by agent"
+        },
+        {
+          "failure_type": "CONTEXT_DRIFT",
+          "source_agent": "claude",
+          "target_agent": "opencode",
+          "item_id": "Decision 1 - mutated by agent - mutated by agent",
+          "expected": "Decision 1 - mutated by agent - mutated by agent",
+          "observed": "Decision 1 - mutated by agent - mutated by agent - mutated by agent"
+        }
+      ],
+      "events": {
+        "generated": 100,
+        "accepted": 85,
+        "rejected": 5,
+        "edited": 10
+      },
+      "performance": {
+        "compile_time_ms": 0.00020000015865662135,
+        "memory_usage_mb": 24.8046875,
+        "events_processed_per_second": 499999603.35876125,
+        "compression_factor": 125.0,
+        "compression_ratio": 0.008
+      },
+      "complexity": {
+        "reducer_metrics": {
+          "task_events": 50,
+          "decision_events": 25,
+          "question_events": 15,
+          "project_events": 10
+        },
+        "state_metrics": {
+          "active_tasks": 2,
+          "active_decisions": 1,
+          "active_questions": 0
+        }
+      }
+    },
+    {
+      "benchmark_id": "f1b_multihop_20",
+      "benchmark_type": "synthetic",
+      "final_metrics": {
+        "goal_recall": 1.0,
+        "task_recall": 1.0,
+        "decision_recall": 0.0,
+        "question_recall": 0.0,
+        "blocker_recall": 1.0,
+        "next_action_accuracy": 1.0,
+        "rationale_recall": 1.0,
+        "decision_contradiction_rate": 0.0,
+        "overall_decision_integrity": 0.5,
+        "weighted_decision_integrity": 0.5,
+        "weighted_contradiction_rate": 0.0,
+        "decision_drift": 1.0,
+        "goal_drift": 0.0,
+        "next_action_drift": 0.0,
+        "overall_continuity": 0.7,
+        "overall_fidelity": 0.6666666666666667,
+        "decision_states": [
+          {
+            "expected": "Decision 1",
+            "severity": "medium",
+            "identity_status": "ALIASED",
+            "semantic_status": "DRIFTED",
+            "integrity_state": "MUTATED",
+            "observed": "Decision 1 - mutated by agent - mutated by agent - mutated by agent - mutated by agent - mutated by agent - mutated by agent"
+          }
+        ],
+        "agent_breakout": {
+          "claude": {
+            "goal_recall": 1.0,
+            "task_recall": 1.0,
+            "decision_recall": 0.0,
+            "question_recall": 0.0,
+            "blocker_recall": 1.0,
+            "next_action_accuracy": 1.0,
+            "rationale_recall": 1.0,
+            "decision_contradiction_rate": 0.0,
+            "overall_decision_integrity": 1.0,
+            "weighted_decision_integrity": 1.0,
+            "weighted_contradiction_rate": 0.0,
+            "decision_drift": 1.0,
+            "goal_drift": 0.0,
+            "next_action_drift": 0.0,
+            "overall_continuity": 0.7,
+            "overall_fidelity": 0.6666666666666667,
+            "decision_states": [],
+            "agent_breakout": {}
+          },
+          "opencode": {
+            "goal_recall": 1.0,
+            "task_recall": 1.0,
+            "decision_recall": 0.0,
+            "question_recall": 0.0,
+            "blocker_recall": 1.0,
+            "next_action_accuracy": 1.0,
+            "rationale_recall": 1.0,
+            "decision_contradiction_rate": 0.0,
+            "overall_decision_integrity": 1.0,
+            "weighted_decision_integrity": 1.0,
+            "weighted_contradiction_rate": 0.0,
+            "decision_drift": 1.0,
+            "goal_drift": 0.0,
+            "next_action_drift": 0.0,
+            "overall_continuity": 0.7,
+            "overall_fidelity": 0.6666666666666667,
+            "decision_states": [],
+            "agent_breakout": {}
+          },
+          "chatgpt": {
+            "goal_recall": 1.0,
+            "task_recall": 1.0,
+            "decision_recall": 0.0,
+            "question_recall": 0.0,
+            "blocker_recall": 1.0,
+            "next_action_accuracy": 1.0,
+            "rationale_recall": 1.0,
+            "decision_contradiction_rate": 0.0,
+            "overall_decision_integrity": 1.0,
+            "weighted_decision_integrity": 1.0,
+            "weighted_contradiction_rate": 0.0,
+            "decision_drift": 1.0,
+            "goal_drift": 0.0,
+            "next_action_drift": 0.0,
+            "overall_continuity": 0.7,
+            "overall_fidelity": 0.6666666666666667,
+            "decision_states": [],
+            "agent_breakout": {}
+          },
+          "cursor": {
+            "goal_recall": 1.0,
+            "task_recall": 1.0,
+            "decision_recall": 0.0,
+            "question_recall": 0.0,
+            "blocker_recall": 1.0,
+            "next_action_accuracy": 1.0,
+            "rationale_recall": 1.0,
+            "decision_contradiction_rate": 0.0,
+            "overall_decision_integrity": 1.0,
+            "weighted_decision_integrity": 1.0,
+            "weighted_contradiction_rate": 0.0,
+            "decision_drift": 1.0,
+            "goal_drift": 0.0,
+            "next_action_drift": 0.0,
+            "overall_continuity": 0.7,
+            "overall_fidelity": 0.6666666666666667,
+            "decision_states": [],
+            "agent_breakout": {}
+          }
+        }
+      },
+      "degradation_rate": 0.015000000000000003,
+      "event_rates": {
+        "human_edit_rate": 0.1,
+        "human_reject_rate": 0.05,
+        "auto_accept_rate": 0.85
+      },
+      "failures": [
+        {
+          "failure_type": "CONTEXT_DRIFT",
+          "source_agent": "claude",
+          "target_agent": "opencode",
+          "item_id": "Decision 1",
+          "expected": "Decision 1",
+          "observed": "Decision 1 - mutated by agent"
+        },
+        {
+          "failure_type": "QUESTION_LOSS",
+          "source_agent": "chatgpt",
+          "target_agent": "cursor",
+          "item_id": "Question 1",
+          "expected": "Question 1",
+          "observed": "Missing"
+        },
+        {
+          "failure_type": "CONTEXT_DRIFT",
+          "source_agent": "claude",
+          "target_agent": "opencode",
+          "item_id": "Decision 1 - mutated by agent",
+          "expected": "Decision 1 - mutated by agent",
+          "observed": "Decision 1 - mutated by agent - mutated by agent"
+        },
+        {
+          "failure_type": "CONTEXT_DRIFT",
+          "source_agent": "claude",
+          "target_agent": "opencode",
+          "item_id": "Decision 1 - mutated by agent - mutated by agent",
+          "expected": "Decision 1 - mutated by agent - mutated by agent",
+          "observed": "Decision 1 - mutated by agent - mutated by agent - mutated by agent"
+        },
+        {
+          "failure_type": "CONTEXT_DRIFT",
+          "source_agent": "claude",
+          "target_agent": "opencode",
+          "item_id": "Decision 1 - mutated by agent - mutated by agent - mutated by agent",
+          "expected": "Decision 1 - mutated by agent - mutated by agent - mutated by agent",
+          "observed": "Decision 1 - mutated by agent - mutated by agent - mutated by agent - mutated by agent"
+        },
+        {
+          "failure_type": "CONTEXT_DRIFT",
+          "source_agent": "claude",
+          "target_agent": "opencode",
+          "item_id": "Decision 1 - mutated by agent - mutated by agent - mutated by agent - mutated by agent",
+          "expected": "Decision 1 - mutated by agent - mutated by agent - mutated by agent - mutated by agent",
+          "observed": "Decision 1 - mutated by agent - mutated by agent - mutated by agent - mutated by agent - mutated by agent"
+        },
+        {
+          "failure_type": "CONTEXT_DRIFT",
+          "source_agent": "claude",
+          "target_agent": "opencode",
+          "item_id": "Decision 1 - mutated by agent - mutated by agent - mutated by agent - mutated by agent - mutated by agent",
+          "expected": "Decision 1 - mutated by agent - mutated by agent - mutated by agent - mutated by agent - mutated by agent",
+          "observed": "Decision 1 - mutated by agent - mutated by agent - mutated by agent - mutated by agent - mutated by agent - mutated by agent"
+        }
+      ],
+      "events": {
+        "generated": 200,
+        "accepted": 170,
+        "rejected": 10,
+        "edited": 20
+      },
+      "performance": {
+        "compile_time_ms": 2.5390999999217456,
+        "memory_usage_mb": 24.80859375,
+        "events_processed_per_second": 78768.06742789333,
+        "compression_factor": 250.0,
+        "compression_ratio": 0.004
+      },
+      "complexity": {
+        "reducer_metrics": {
+          "task_events": 100,
+          "decision_events": 50,
+          "question_events": 30,
+          "project_events": 20
+        },
+        "state_metrics": {
+          "active_tasks": 2,
+          "active_decisions": 1,
+          "active_questions": 0
+        }
+      }
+    },
+    {
+      "benchmark_id": "f1b_multihop_50",
+      "benchmark_type": "synthetic",
+      "final_metrics": {
+        "goal_recall": 1.0,
+        "task_recall": 1.0,
+        "decision_recall": 0.0,
+        "question_recall": 0.0,
+        "blocker_recall": 1.0,
+        "next_action_accuracy": 1.0,
+        "rationale_recall": 1.0,
+        "decision_contradiction_rate": 0.0,
+        "overall_decision_integrity": 0.5,
+        "weighted_decision_integrity": 0.5,
+        "weighted_contradiction_rate": 0.0,
+        "decision_drift": 1.0,
+        "goal_drift": 0.0,
+        "next_action_drift": 0.0,
+        "overall_continuity": 0.7,
+        "overall_fidelity": 0.6666666666666667,
+        "decision_states": [
+          {
+            "expected": "Decision 1",
+            "severity": "medium",
+            "identity_status": "ALIASED",
+            "semantic_status": "DRIFTED",
+            "integrity_state": "MUTATED",
+            "observed": "Decision 1 - mutated by agent - mutated by agent - mutated by agent - mutated by agent - mutated by agent - mutated by agent - mutated by agent - mutated by agent - mutated by agent - mutated by agent - mutated by agent - mutated by agent - mutated by agent - mutated by agent - mutated by agent"
+          }
+        ],
+        "agent_breakout": {
+          "claude": {
+            "goal_recall": 1.0,
+            "task_recall": 1.0,
+            "decision_recall": 0.0,
+            "question_recall": 0.0,
+            "blocker_recall": 1.0,
+            "next_action_accuracy": 1.0,
+            "rationale_recall": 1.0,
+            "decision_contradiction_rate": 0.0,
+            "overall_decision_integrity": 1.0,
+            "weighted_decision_integrity": 1.0,
+            "weighted_contradiction_rate": 0.0,
+            "decision_drift": 1.0,
+            "goal_drift": 0.0,
+            "next_action_drift": 0.0,
+            "overall_continuity": 0.7,
+            "overall_fidelity": 0.6666666666666667,
+            "decision_states": [],
+            "agent_breakout": {}
+          },
+          "opencode": {
+            "goal_recall": 1.0,
+            "task_recall": 1.0,
+            "decision_recall": 0.0,
+            "question_recall": 0.0,
+            "blocker_recall": 1.0,
+            "next_action_accuracy": 1.0,
+            "rationale_recall": 1.0,
+            "decision_contradiction_rate": 0.0,
+            "overall_decision_integrity": 1.0,
+            "weighted_decision_integrity": 1.0,
+            "weighted_contradiction_rate": 0.0,
+            "decision_drift": 1.0,
+            "goal_drift": 0.0,
+            "next_action_drift": 0.0,
+            "overall_continuity": 0.7,
+            "overall_fidelity": 0.6666666666666667,
+            "decision_states": [],
+            "agent_breakout": {}
+          },
+          "chatgpt": {
+            "goal_recall": 1.0,
+            "task_recall": 1.0,
+            "decision_recall": 0.0,
+            "question_recall": 0.0,
+            "blocker_recall": 1.0,
+            "next_action_accuracy": 1.0,
+            "rationale_recall": 1.0,
+            "decision_contradiction_rate": 0.0,
+            "overall_decision_integrity": 1.0,
+            "weighted_decision_integrity": 1.0,
+            "weighted_contradiction_rate": 0.0,
+            "decision_drift": 1.0,
+            "goal_drift": 0.0,
+            "next_action_drift": 0.0,
+            "overall_continuity": 0.7,
+            "overall_fidelity": 0.6666666666666667,
+            "decision_states": [],
+            "agent_breakout": {}
+          },
+          "cursor": {
+            "goal_recall": 1.0,
+            "task_recall": 1.0,
+            "decision_recall": 0.0,
+            "question_recall": 0.0,
+            "blocker_recall": 1.0,
+            "next_action_accuracy": 1.0,
+            "rationale_recall": 1.0,
+            "decision_contradiction_rate": 0.0,
+            "overall_decision_integrity": 1.0,
+            "weighted_decision_integrity": 1.0,
+            "weighted_contradiction_rate": 0.0,
+            "decision_drift": 1.0,
+            "goal_drift": 0.0,
+            "next_action_drift": 0.0,
+            "overall_continuity": 0.7,
+            "overall_fidelity": 0.6666666666666667,
+            "decision_states": [],
+            "agent_breakout": {}
+          }
+        }
+      },
+      "degradation_rate": 0.006000000000000001,
+      "event_rates": {
+        "human_edit_rate": 0.1,
+        "human_reject_rate": 0.05,
+        "auto_accept_rate": 0.85
+      },
+      "failures": [
+        {
+          "failure_type": "CONTEXT_DRIFT",
+          "source_agent": "claude",
+          "target_agent": "opencode",
+          "item_id": "Decision 1",
+          "expected": "Decision 1",
+          "observed": "Decision 1 - mutated by agent"
+        },
+        {
+          "failure_type": "QUESTION_LOSS",
+          "source_agent": "chatgpt",
+          "target_agent": "cursor",
+          "item_id": "Question 1",
+          "expected": "Question 1",
+          "observed": "Missing"
+        },
+        {
+          "failure_type": "CONTEXT_DRIFT",
+          "source_agent": "claude",
+          "target_agent": "opencode",
+          "item_id": "Decision 1 - mutated by agent",
+          "expected": "Decision 1 - mutated by agent",
+          "observed": "Decision 1 - mutated by agent - mutated by agent"
+        },
+        {
+          "failure_type": "CONTEXT_DRIFT",
+          "source_agent": "claude",
+          "target_agent": "opencode",
+          "item_id": "Decision 1 - mutated by agent - mutated by agent",
+          "expected": "Decision 1 - mutated by agent - mutated by agent",
+          "observed": "Decision 1 - mutated by agent - mutated by agent - mutated by agent"
+        },
+        {
+          "failure_type": "CONTEXT_DRIFT",
+          "source_agent": "claude",
+          "target_agent": "opencode",
+          "item_id": "Decision 1 - mutated by agent - mutated by agent - mutated by agent",
+          "expected": "Decision 1 - mutated by agent - mutated by agent - mutated by agent",
+          "observed": "Decision 1 - mutated by agent - mutated by agent - mutated by agent - mutated by agent"
+        },
+        {
+          "failure_type": "CONTEXT_DRIFT",
+          "source_agent": "claude",
+          "target_agent": "opencode",
+          "item_id": "Decision 1 - mutated by agent - mutated by agent - mutated by agent - mutated by agent",
+          "expected": "Decision 1 - mutated by agent - mutated by agent - mutated by agent - mutated by agent",
+          "observed": "Decision 1 - mutated by agent - mutated by agent - mutated by agent - mutated by agent - mutated by agent"
+        },
+        {
+          "failure_type": "CONTEXT_DRIFT",
+          "source_agent": "claude",
+          "target_agent": "opencode",
+          "item_id": "Decision 1 - mutated by agent - mutated by agent - mutated by agent - mutated by agent - mutated by agent",
+          "expected": "Decision 1 - mutated by agent - mutated by agent - mutated by agent - mutated by agent - mutated by agent",
+          "observed": "Decision 1 - mutated by agent - mutated by agent - mutated by agent - mutated by agent - mutated by agent - mutated by agent"
+        },
+        {
+          "failure_type": "CONTEXT_DRIFT",
+          "source_agent": "claude",
+          "target_agent": "opencode",
+          "item_id": "Decision 1 - mutated by agent - mutated by agent - mutated by agent - mutated by agent - mutated by agent - mutated by agent",
+          "expected": "Decision 1 - mutated by agent - mutated by agent - mutated by agent - mutated by agent - mutated by agent - mutated by agent",
+          "observed": "Decision 1 - mutated by agent - mutated by agent - mutated by agent - mutated by agent - mutated by agent - mutated by agent - mutated by agent"
+        },
+        {
+          "failure_type": "CONTEXT_DRIFT",
+          "source_agent": "claude",
+          "target_agent": "opencode",
+          "item_id": "Decision 1 - mutated by agent - mutated by agent - mutated by agent - mutated by agent - mutated by agent - mutated by agent - mutated by agent",
+          "expected": "Decision 1 - mutated by agent - mutated by agent - mutated by agent - mutated by agent - mutated by agent - mutated by agent - mutated by agent",
+          "observed": "Decision 1 - mutated by agent - mutated by agent - mutated by agent - mutated by agent - mutated by agent - mutated by agent - mutated by agent - mutated by agent"
+        },
+        {
+          "failure_type": "CONTEXT_DRIFT",
+          "source_agent": "claude",
+          "target_agent": "opencode",
+          "item_id": "Decision 1 - mutated by agent - mutated by agent - mutated by agent - mutated by agent - mutated by agent - mutated by agent - mutated by agent - mutated by agent",
+          "expected": "Decision 1 - mutated by agent - mutated by agent - mutated by agent - mutated by agent - mutated by agent - mutated by agent - mutated by agent - mutated by agent",
+          "observed": "Decision 1 - mutated by agent - mutated by agent - mutated by agent - mutated by agent - mutated by agent - mutated by agent - mutated by agent - mutated by agent - mutated by agent"
+        },
+        {
+          "failure_type": "CONTEXT_DRIFT",
+          "source_agent": "claude",
+          "target_agent": "opencode",
+          "item_id": "Decision 1 - mutated by agent - mutated by agent - mutated by agent - mutated by agent - mutated by agent - mutated by agent - mutated by agent - mutated by agent - mutated by agent",
+          "expected": "Decision 1 - mutated by agent - mutated by agent - mutated by agent - mutated by agent - mutated by agent - mutated by agent - mutated by agent - mutated by agent - mutated by agent",
+          "observed": "Decision 1 - mutated by agent - mutated by agent - mutated by agent - mutated by agent - mutated by agent - mutated by agent - mutated by agent - mutated by agent - mutated by agent - mutated by agent"
+        },
+        {
+          "failure_type": "CONTEXT_DRIFT",
+          "source_agent": "claude",
+          "target_agent": "opencode",
+          "item_id": "Decision 1 - mutated by agent - mutated by agent - mutated by agent - mutated by agent - mutated by agent - mutated by agent - mutated by agent - mutated by agent - mutated by agent - mutated by agent",
+          "expected": "Decision 1 - mutated by agent - mutated by agent - mutated by agent - mutated by agent - mutated by agent - mutated by agent - mutated by agent - mutated by agent - mutated by agent - mutated by agent",
+          "observed": "Decision 1 - mutated by agent - mutated by agent - mutated by agent - mutated by agent - mutated by agent - mutated by agent - mutated by agent - mutated by agent - mutated by agent - mutated by agent - mutated by agent"
+        },
+        {
+          "failure_type": "CONTEXT_DRIFT",
+          "source_agent": "claude",
+          "target_agent": "opencode",
+          "item_id": "Decision 1 - mutated by agent - mutated by agent - mutated by agent - mutated by agent - mutated by agent - mutated by agent - mutated by agent - mutated by agent - mutated by agent - mutated by agent - mutated by agent",
+          "expected": "Decision 1 - mutated by agent - mutated by agent - mutated by agent - mutated by agent - mutated by agent - mutated by agent - mutated by agent - mutated by agent - mutated by agent - mutated by agent - mutated by agent",
+          "observed": "Decision 1 - mutated by agent - mutated by agent - mutated by agent - mutated by agent - mutated by agent - mutated by agent - mutated by agent - mutated by agent - mutated by agent - mutated by agent - mutated by agent - mutated by agent"
+        },
+        {
+          "failure_type": "CONTEXT_DRIFT",
+          "source_agent": "claude",
+          "target_agent": "opencode",
+          "item_id": "Decision 1 - mutated by agent - mutated by agent - mutated by agent - mutated by agent - mutated by agent - mutated by agent - mutated by agent - mutated by agent - mutated by agent - mutated by agent - mutated by agent - mutated by agent",
+          "expected": "Decision 1 - mutated by agent - mutated by agent - mutated by agent - mutated by agent - mutated by agent - mutated by agent - mutated by agent - mutated by agent - mutated by agent - mutated by agent - mutated by agent - mutated by agent",
+          "observed": "Decision 1 - mutated by agent - mutated by agent - mutated by agent - mutated by agent - mutated by agent - mutated by agent - mutated by agent - mutated by agent - mutated by agent - mutated by agent - mutated by agent - mutated by agent - mutated by agent"
+        },
+        {
+          "failure_type": "CONTEXT_DRIFT",
+          "source_agent": "claude",
+          "target_agent": "opencode",
+          "item_id": "Decision 1 - mutated by agent - mutated by agent - mutated by agent - mutated by agent - mutated by agent - mutated by agent - mutated by agent - mutated by agent - mutated by agent - mutated by agent - mutated by agent - mutated by agent - mutated by agent",
+          "expected": "Decision 1 - mutated by agent - mutated by agent - mutated by agent - mutated by agent - mutated by agent - mutated by agent - mutated by agent - mutated by agent - mutated by agent - mutated by agent - mutated by agent - mutated by agent - mutated by agent",
+          "observed": "Decision 1 - mutated by agent - mutated by agent - mutated by agent - mutated by agent - mutated by agent - mutated by agent - mutated by agent - mutated by agent - mutated by agent - mutated by agent - mutated by agent - mutated by agent - mutated by agent - mutated by agent"
+        },
+        {
+          "failure_type": "CONTEXT_DRIFT",
+          "source_agent": "claude",
+          "target_agent": "opencode",
+          "item_id": "Decision 1 - mutated by agent - mutated by agent - mutated by agent - mutated by agent - mutated by agent - mutated by agent - mutated by agent - mutated by agent - mutated by agent - mutated by agent - mutated by agent - mutated by agent - mutated by agent - mutated by agent",
+          "expected": "Decision 1 - mutated by agent - mutated by agent - mutated by agent - mutated by agent - mutated by agent - mutated by agent - mutated by agent - mutated by agent - mutated by agent - mutated by agent - mutated by agent - mutated by agent - mutated by agent - mutated by agent",
+          "observed": "Decision 1 - mutated by agent - mutated by agent - mutated by agent - mutated by agent - mutated by agent - mutated by agent - mutated by agent - mutated by agent - mutated by agent - mutated by agent - mutated by agent - mutated by agent - mutated by agent - mutated by agent - mutated by agent"
+        }
+      ],
+      "events": {
+        "generated": 500,
+        "accepted": 425,
+        "rejected": 25,
+        "edited": 50
+      },
+      "performance": {
+        "compile_time_ms": 5.401800000072399,
+        "memory_usage_mb": 24.8203125,
+        "events_processed_per_second": 92561.73867845879,
+        "compression_factor": 625.0,
+        "compression_ratio": 0.0016
+      },
+      "complexity": {
+        "reducer_metrics": {
+          "task_events": 250,
+          "decision_events": 125,
+          "question_events": 75,
+          "project_events": 50
+        },
+        "state_metrics": {
+          "active_tasks": 2,
+          "active_decisions": 1,
+          "active_questions": 0
+        }
+      }
+    },
+    {
+      "benchmark_id": "synthetic_large",
+      "benchmark_type": "synthetic",
+      "final_metrics": {
+        "goal_recall": 1.0,
+        "task_recall": 1.0,
+        "decision_recall": 0.95,
+        "question_recall": 0.9333333333333333,
+        "blocker_recall": 0.0,
+        "next_action_accuracy": 1.0,
+        "rationale_recall": 1.0,
+        "decision_contradiction_rate": 0.0,
+        "overall_decision_integrity": 0.975,
+        "weighted_decision_integrity": 0.975,
+        "weighted_contradiction_rate": 0.0,
+        "decision_drift": 0.05,
+        "goal_drift": 0.0,
+        "next_action_drift": 0.0,
+        "overall_continuity": 0.9816666666666667,
+        "overall_fidelity": 0.9833333333333333,
+        "decision_states": [
+          {
+            "expected": "Decision 1",
+            "severity": "medium",
+            "identity_status": "ALIASED",
+            "semantic_status": "DRIFTED",
+            "integrity_state": "MUTATED",
+            "observed": "Decision 1 - mutated by agent"
+          },
+          {
+            "expected": "Decision 2",
+            "severity": "medium",
+            "identity_status": "PRESERVED",
+            "semantic_status": "CONSISTENT",
+            "integrity_state": "HEALTHY",
+            "observed": "Decision 2"
+          },
+          {
+            "expected": "Decision 3",
+            "severity": "medium",
+            "identity_status": "PRESERVED",
+            "semantic_status": "CONSISTENT",
+            "integrity_state": "HEALTHY",
+            "observed": "Decision 3"
+          },
+          {
+            "expected": "Decision 4",
+            "severity": "medium",
+            "identity_status": "PRESERVED",
+            "semantic_status": "CONSISTENT",
+            "integrity_state": "HEALTHY",
+            "observed": "Decision 4"
+          },
+          {
+            "expected": "Decision 5",
+            "severity": "medium",
+            "identity_status": "PRESERVED",
+            "semantic_status": "CONSISTENT",
+            "integrity_state": "HEALTHY",
+            "observed": "Decision 5"
+          },
+          {
+            "expected": "Decision 6",
+            "severity": "medium",
+            "identity_status": "PRESERVED",
+            "semantic_status": "CONSISTENT",
+            "integrity_state": "HEALTHY",
+            "observed": "Decision 6"
+          },
+          {
+            "expected": "Decision 7",
+            "severity": "medium",
+            "identity_status": "PRESERVED",
+            "semantic_status": "CONSISTENT",
+            "integrity_state": "HEALTHY",
+            "observed": "Decision 7"
+          },
+          {
+            "expected": "Decision 8",
+            "severity": "medium",
+            "identity_status": "PRESERVED",
+            "semantic_status": "CONSISTENT",
+            "integrity_state": "HEALTHY",
+            "observed": "Decision 8"
+          },
+          {
+            "expected": "Decision 9",
+            "severity": "medium",
+            "identity_status": "PRESERVED",
+            "semantic_status": "CONSISTENT",
+            "integrity_state": "HEALTHY",
+            "observed": "Decision 9"
+          },
+          {
+            "expected": "Decision 10",
+            "severity": "medium",
+            "identity_status": "PRESERVED",
+            "semantic_status": "CONSISTENT",
+            "integrity_state": "HEALTHY",
+            "observed": "Decision 10"
+          },
+          {
+            "expected": "Decision 11",
+            "severity": "medium",
+            "identity_status": "PRESERVED",
+            "semantic_status": "CONSISTENT",
+            "integrity_state": "HEALTHY",
+            "observed": "Decision 11"
+          },
+          {
+            "expected": "Decision 12",
+            "severity": "medium",
+            "identity_status": "PRESERVED",
+            "semantic_status": "CONSISTENT",
+            "integrity_state": "HEALTHY",
+            "observed": "Decision 12"
+          },
+          {
+            "expected": "Decision 13",
+            "severity": "medium",
+            "identity_status": "PRESERVED",
+            "semantic_status": "CONSISTENT",
+            "integrity_state": "HEALTHY",
+            "observed": "Decision 13"
+          },
+          {
+            "expected": "Decision 14",
+            "severity": "medium",
+            "identity_status": "PRESERVED",
+            "semantic_status": "CONSISTENT",
+            "integrity_state": "HEALTHY",
+            "observed": "Decision 14"
+          },
+          {
+            "expected": "Decision 15",
+            "severity": "medium",
+            "identity_status": "PRESERVED",
+            "semantic_status": "CONSISTENT",
+            "integrity_state": "HEALTHY",
+            "observed": "Decision 15"
+          },
+          {
+            "expected": "Decision 16",
+            "severity": "medium",
+            "identity_status": "PRESERVED",
+            "semantic_status": "CONSISTENT",
+            "integrity_state": "HEALTHY",
+            "observed": "Decision 16"
+          },
+          {
+            "expected": "Decision 17",
+            "severity": "medium",
+            "identity_status": "PRESERVED",
+            "semantic_status": "CONSISTENT",
+            "integrity_state": "HEALTHY",
+            "observed": "Decision 17"
+          },
+          {
+            "expected": "Decision 18",
+            "severity": "medium",
+            "identity_status": "PRESERVED",
+            "semantic_status": "CONSISTENT",
+            "integrity_state": "HEALTHY",
+            "observed": "Decision 18"
+          },
+          {
+            "expected": "Decision 19",
+            "severity": "medium",
+            "identity_status": "PRESERVED",
+            "semantic_status": "CONSISTENT",
+            "integrity_state": "HEALTHY",
+            "observed": "Decision 19"
+          },
+          {
+            "expected": "Decision 20",
+            "severity": "medium",
+            "identity_status": "PRESERVED",
+            "semantic_status": "CONSISTENT",
+            "integrity_state": "HEALTHY",
+            "observed": "Decision 20"
+          }
+        ],
+        "agent_breakout": {
+          "antigravity": {
+            "goal_recall": 1.0,
+            "task_recall": 1.0,
+            "decision_recall": 0.95,
+            "question_recall": 0.9333333333333333,
+            "blocker_recall": 0.0,
+            "next_action_accuracy": 1.0,
+            "rationale_recall": 1.0,
+            "decision_contradiction_rate": 0.0,
+            "overall_decision_integrity": 1.0,
+            "weighted_decision_integrity": 1.0,
+            "weighted_contradiction_rate": 0.0,
+            "decision_drift": 0.05,
+            "goal_drift": 0.0,
+            "next_action_drift": 0.0,
+            "overall_continuity": 0.9816666666666667,
+            "overall_fidelity": 0.9833333333333333,
+            "decision_states": [],
+            "agent_breakout": {}
+          },
+          "opencode": {
+            "goal_recall": 1.0,
+            "task_recall": 1.0,
+            "decision_recall": 0.95,
+            "question_recall": 0.9333333333333333,
+            "blocker_recall": 0.0,
+            "next_action_accuracy": 1.0,
+            "rationale_recall": 1.0,
+            "decision_contradiction_rate": 0.0,
+            "overall_decision_integrity": 1.0,
+            "weighted_decision_integrity": 1.0,
+            "weighted_contradiction_rate": 0.0,
+            "decision_drift": 0.05,
+            "goal_drift": 0.0,
+            "next_action_drift": 0.0,
+            "overall_continuity": 0.9816666666666667,
+            "overall_fidelity": 0.9833333333333333,
+            "decision_states": [],
+            "agent_breakout": {}
+          },
+          "claude": {
+            "goal_recall": 1.0,
+            "task_recall": 1.0,
+            "decision_recall": 0.95,
+            "question_recall": 0.9333333333333333,
+            "blocker_recall": 0.0,
+            "next_action_accuracy": 1.0,
+            "rationale_recall": 1.0,
+            "decision_contradiction_rate": 0.0,
+            "overall_decision_integrity": 1.0,
+            "weighted_decision_integrity": 1.0,
+            "weighted_contradiction_rate": 0.0,
+            "decision_drift": 0.05,
+            "goal_drift": 0.0,
+            "next_action_drift": 0.0,
+            "overall_continuity": 0.9816666666666667,
+            "overall_fidelity": 0.9833333333333333,
+            "decision_states": [],
+            "agent_breakout": {}
+          },
+          "cursor": {
+            "goal_recall": 1.0,
+            "task_recall": 1.0,
+            "decision_recall": 0.95,
+            "question_recall": 0.9333333333333333,
+            "blocker_recall": 0.0,
+            "next_action_accuracy": 1.0,
+            "rationale_recall": 1.0,
+            "decision_contradiction_rate": 0.0,
+            "overall_decision_integrity": 1.0,
+            "weighted_decision_integrity": 1.0,
+            "weighted_contradiction_rate": 0.0,
+            "decision_drift": 0.05,
+            "goal_drift": 0.0,
+            "next_action_drift": 0.0,
+            "overall_continuity": 0.9816666666666667,
+            "overall_fidelity": 0.9833333333333333,
+            "decision_states": [],
+            "agent_breakout": {}
+          },
+          "chatgpt": {
+            "goal_recall": 1.0,
+            "task_recall": 1.0,
+            "decision_recall": 0.95,
+            "question_recall": 0.9333333333333333,
+            "blocker_recall": 0.0,
+            "next_action_accuracy": 1.0,
+            "rationale_recall": 1.0,
+            "decision_contradiction_rate": 0.0,
+            "overall_decision_integrity": 1.0,
+            "weighted_decision_integrity": 1.0,
+            "weighted_contradiction_rate": 0.0,
+            "decision_drift": 0.05,
+            "goal_drift": 0.0,
+            "next_action_drift": 0.0,
+            "overall_continuity": 0.9816666666666667,
+            "overall_fidelity": 0.9833333333333333,
+            "decision_states": [],
+            "agent_breakout": {}
+          }
+        }
+      },
+      "degradation_rate": 0.0036666666666666627,
+      "event_rates": {
+        "human_edit_rate": 0.1,
+        "human_reject_rate": 0.04,
+        "auto_accept_rate": 0.86
+      },
+      "failures": [
+        {
+          "failure_type": "CONTEXT_DRIFT",
+          "source_agent": "antigravity",
+          "target_agent": "opencode",
+          "item_id": "Decision 1",
+          "expected": "Decision 1",
+          "observed": "Decision 1 - mutated by agent"
+        },
+        {
+          "failure_type": "BLOCKER_BYPASS",
+          "source_agent": "opencode",
+          "target_agent": "claude",
+          "item_id": "Task 1 blocks Task 50",
+          "expected": "Task 1 blocks Task 50",
+          "observed": "Bypassed / Ignored"
+        },
+        {
+          "failure_type": "QUESTION_LOSS",
+          "source_agent": "claude",
+          "target_agent": "cursor",
+          "item_id": "Question 1",
+          "expected": "Question 1",
+          "observed": "Missing"
+        }
+      ],
+      "events": {
+        "generated": 50,
+        "accepted": 43,
+        "rejected": 2,
+        "edited": 5
+      },
+      "performance": {
+        "compile_time_ms": 0.00020000015865662135,
+        "memory_usage_mb": 24.8359375,
+        "events_processed_per_second": 249999801.67938063,
+        "compression_factor": 2.9411764705882355,
+        "compression_ratio": 0.34
+      },
+      "complexity": {
+        "reducer_metrics": {
+          "task_events": 25,
+          "decision_events": 12,
+          "question_events": 7,
+          "project_events": 6
+        },
+        "state_metrics": {
+          "active_tasks": 50,
+          "active_decisions": 20,
+          "active_questions": 14
+        }
+      }
+    },
+    {
+      "benchmark_id": "synthetic_medium",
+      "benchmark_type": "synthetic",
+      "final_metrics": {
+        "goal_recall": 1.0,
+        "task_recall": 1.0,
+        "decision_recall": 0.9,
+        "question_recall": 0.8,
+        "blocker_recall": 0.5,
+        "next_action_accuracy": 1.0,
+        "rationale_recall": 1.0,
+        "decision_contradiction_rate": 0.0,
+        "overall_decision_integrity": 0.95,
+        "weighted_decision_integrity": 0.95,
+        "weighted_contradiction_rate": 0.0,
+        "decision_drift": 0.1,
+        "goal_drift": 0.0,
+        "next_action_drift": 0.0,
+        "overall_continuity": 0.95,
+        "overall_fidelity": 0.9666666666666667,
+        "decision_states": [
+          {
+            "expected": "Decision 1: Use JWT for authentication",
+            "severity": "medium",
+            "identity_status": "ALIASED",
+            "semantic_status": "DRIFTED",
+            "integrity_state": "MUTATED",
+            "observed": "Decision 1: Use JWT for authentication - mutated by agent"
+          },
+          {
+            "expected": "Decision 2: Use bcrypt for password hashing",
+            "severity": "medium",
+            "identity_status": "PRESERVED",
+            "semantic_status": "CONSISTENT",
+            "integrity_state": "HEALTHY",
+            "observed": "Decision 2: Use bcrypt for password hashing"
+          },
+          {
+            "expected": "Decision 3: Use PostgreSQL for production storage",
+            "severity": "medium",
+            "identity_status": "PRESERVED",
+            "semantic_status": "CONSISTENT",
+            "integrity_state": "HEALTHY",
+            "observed": "Decision 3: Use PostgreSQL for production storage"
+          },
+          {
+            "expected": "Decision 4: Use Alembic for migrations",
+            "severity": "medium",
+            "identity_status": "PRESERVED",
+            "semantic_status": "CONSISTENT",
+            "integrity_state": "HEALTHY",
+            "observed": "Decision 4: Use Alembic for migrations"
+          },
+          {
+            "expected": "Decision 5: Use Docker Compose for local services",
+            "severity": "medium",
+            "identity_status": "PRESERVED",
+            "semantic_status": "CONSISTENT",
+            "integrity_state": "HEALTHY",
+            "observed": "Decision 5: Use Docker Compose for local services"
+          },
+          {
+            "expected": "Decision 6: Use pytest for test suite",
+            "severity": "medium",
+            "identity_status": "PRESERVED",
+            "semantic_status": "CONSISTENT",
+            "integrity_state": "HEALTHY",
+            "observed": "Decision 6: Use pytest for test suite"
+          },
+          {
+            "expected": "Decision 7: Use black for formatting",
+            "severity": "medium",
+            "identity_status": "PRESERVED",
+            "semantic_status": "CONSISTENT",
+            "integrity_state": "HEALTHY",
+            "observed": "Decision 7: Use black for formatting"
+          },
+          {
+            "expected": "Decision 8: Use flake8 for linting",
+            "severity": "medium",
+            "identity_status": "PRESERVED",
+            "semantic_status": "CONSISTENT",
+            "integrity_state": "HEALTHY",
+            "observed": "Decision 8: Use flake8 for linting"
+          },
+          {
+            "expected": "Decision 9: Use poetry for dependency management",
+            "severity": "medium",
+            "identity_status": "PRESERVED",
+            "semantic_status": "CONSISTENT",
+            "integrity_state": "HEALTHY",
+            "observed": "Decision 9: Use poetry for dependency management"
+          },
+          {
+            "expected": "Decision 10: Use FastAPI instead of Flask",
+            "severity": "medium",
+            "identity_status": "PRESERVED",
+            "semantic_status": "CONSISTENT",
+            "integrity_state": "HEALTHY",
+            "observed": "Decision 10: Use FastAPI instead of Flask"
+          }
+        ],
+        "agent_breakout": {
+          "antigravity": {
+            "goal_recall": 1.0,
+            "task_recall": 1.0,
+            "decision_recall": 0.9,
+            "question_recall": 0.8,
+            "blocker_recall": 0.5,
+            "next_action_accuracy": 1.0,
+            "rationale_recall": 1.0,
+            "decision_contradiction_rate": 0.0,
+            "overall_decision_integrity": 1.0,
+            "weighted_decision_integrity": 1.0,
+            "weighted_contradiction_rate": 0.0,
+            "decision_drift": 0.1,
+            "goal_drift": 0.0,
+            "next_action_drift": 0.0,
+            "overall_continuity": 0.95,
+            "overall_fidelity": 0.9666666666666667,
+            "decision_states": [],
+            "agent_breakout": {}
+          },
+          "opencode": {
+            "goal_recall": 1.0,
+            "task_recall": 1.0,
+            "decision_recall": 0.9,
+            "question_recall": 0.8,
+            "blocker_recall": 0.5,
+            "next_action_accuracy": 1.0,
+            "rationale_recall": 1.0,
+            "decision_contradiction_rate": 0.0,
+            "overall_decision_integrity": 1.0,
+            "weighted_decision_integrity": 1.0,
+            "weighted_contradiction_rate": 0.0,
+            "decision_drift": 0.1,
+            "goal_drift": 0.0,
+            "next_action_drift": 0.0,
+            "overall_continuity": 0.95,
+            "overall_fidelity": 0.9666666666666667,
+            "decision_states": [],
+            "agent_breakout": {}
+          },
+          "claude": {
+            "goal_recall": 1.0,
+            "task_recall": 1.0,
+            "decision_recall": 0.9,
+            "question_recall": 0.8,
+            "blocker_recall": 0.5,
+            "next_action_accuracy": 1.0,
+            "rationale_recall": 1.0,
+            "decision_contradiction_rate": 0.0,
+            "overall_decision_integrity": 1.0,
+            "weighted_decision_integrity": 1.0,
+            "weighted_contradiction_rate": 0.0,
+            "decision_drift": 0.1,
+            "goal_drift": 0.0,
+            "next_action_drift": 0.0,
+            "overall_continuity": 0.95,
+            "overall_fidelity": 0.9666666666666667,
+            "decision_states": [],
+            "agent_breakout": {}
+          },
+          "cursor": {
+            "goal_recall": 1.0,
+            "task_recall": 1.0,
+            "decision_recall": 0.9,
+            "question_recall": 0.8,
+            "blocker_recall": 0.5,
+            "next_action_accuracy": 1.0,
+            "rationale_recall": 1.0,
+            "decision_contradiction_rate": 0.0,
+            "overall_decision_integrity": 1.0,
+            "weighted_decision_integrity": 1.0,
+            "weighted_contradiction_rate": 0.0,
+            "decision_drift": 0.1,
+            "goal_drift": 0.0,
+            "next_action_drift": 0.0,
+            "overall_continuity": 0.95,
+            "overall_fidelity": 0.9666666666666667,
+            "decision_states": [],
+            "agent_breakout": {}
+          }
+        }
+      },
+      "degradation_rate": 0.012500000000000011,
+      "event_rates": {
+        "human_edit_rate": 0.1,
+        "human_reject_rate": 0.05,
+        "auto_accept_rate": 0.85
+      },
+      "failures": [
+        {
+          "failure_type": "CONTEXT_DRIFT",
+          "source_agent": "antigravity",
+          "target_agent": "opencode",
+          "item_id": "Decision 1: Use JWT for authentication",
+          "expected": "Decision 1: Use JWT for authentication",
+          "observed": "Decision 1: Use JWT for authentication - mutated by agent"
+        },
+        {
+          "failure_type": "BLOCKER_BYPASS",
+          "source_agent": "opencode",
+          "target_agent": "claude",
+          "item_id": "Task 2 blocks Task 3",
+          "expected": "Task 2 blocks Task 3",
+          "observed": "Bypassed / Ignored"
+        },
+        {
+          "failure_type": "QUESTION_LOSS",
+          "source_agent": "claude",
+          "target_agent": "cursor",
+          "item_id": "Question 1: Support social auth login?",
+          "expected": "Question 1: Support social auth login?",
+          "observed": "Missing"
+        }
+      ],
+      "events": {
+        "generated": 40,
+        "accepted": 34,
+        "rejected": 2,
+        "edited": 4
+      },
+      "performance": {
+        "compile_time_ms": 0.00010000007932831068,
+        "memory_usage_mb": 24.8359375,
+        "events_processed_per_second": 399999682.68700904,
+        "compression_factor": 5.714285714285714,
+        "compression_ratio": 0.175
+      },
+      "complexity": {
+        "reducer_metrics": {
+          "task_events": 20,
+          "decision_events": 10,
+          "question_events": 6,
+          "project_events": 4
+        },
+        "state_metrics": {
+          "active_tasks": 20,
+          "active_decisions": 10,
+          "active_questions": 4
+        }
+      }
+    },
+    {
+      "benchmark_id": "synthetic_small",
+      "benchmark_type": "synthetic",
+      "final_metrics": {
+        "goal_recall": 1.0,
+        "task_recall": 1.0,
+        "decision_recall": 0.5,
+        "question_recall": 1.0,
+        "blocker_recall": 0.0,
+        "next_action_accuracy": 1.0,
+        "rationale_recall": 1.0,
+        "decision_contradiction_rate": 0.0,
+        "overall_decision_integrity": 0.75,
+        "weighted_decision_integrity": 0.75,
+        "weighted_contradiction_rate": 0.0,
+        "decision_drift": 0.5,
+        "goal_drift": 0.0,
+        "next_action_drift": 0.0,
+        "overall_continuity": 0.95,
+        "overall_fidelity": 0.8333333333333334,
+        "decision_states": [
+          {
+            "expected": "Decision 1: Use FastAPI",
+            "severity": "medium",
+            "identity_status": "ALIASED",
+            "semantic_status": "DRIFTED",
+            "integrity_state": "MUTATED",
+            "observed": "Decision 1: Use FastAPI - mutated by agent"
+          },
+          {
+            "expected": "Decision 2: Use SQLite",
+            "severity": "medium",
+            "identity_status": "PRESERVED",
+            "semantic_status": "CONSISTENT",
+            "integrity_state": "HEALTHY",
+            "observed": "Decision 2: Use SQLite"
+          }
+        ],
+        "agent_breakout": {
+          "antigravity": {
+            "goal_recall": 1.0,
+            "task_recall": 1.0,
+            "decision_recall": 0.5,
+            "question_recall": 1.0,
+            "blocker_recall": 0.0,
+            "next_action_accuracy": 1.0,
+            "rationale_recall": 1.0,
+            "decision_contradiction_rate": 0.0,
+            "overall_decision_integrity": 1.0,
+            "weighted_decision_integrity": 1.0,
+            "weighted_contradiction_rate": 0.0,
+            "decision_drift": 0.5,
+            "goal_drift": 0.0,
+            "next_action_drift": 0.0,
+            "overall_continuity": 0.95,
+            "overall_fidelity": 0.8333333333333334,
+            "decision_states": [],
+            "agent_breakout": {}
+          },
+          "opencode": {
+            "goal_recall": 1.0,
+            "task_recall": 1.0,
+            "decision_recall": 0.5,
+            "question_recall": 1.0,
+            "blocker_recall": 0.0,
+            "next_action_accuracy": 1.0,
+            "rationale_recall": 1.0,
+            "decision_contradiction_rate": 0.0,
+            "overall_decision_integrity": 1.0,
+            "weighted_decision_integrity": 1.0,
+            "weighted_contradiction_rate": 0.0,
+            "decision_drift": 0.5,
+            "goal_drift": 0.0,
+            "next_action_drift": 0.0,
+            "overall_continuity": 0.95,
+            "overall_fidelity": 0.8333333333333334,
+            "decision_states": [],
+            "agent_breakout": {}
+          },
+          "claude": {
+            "goal_recall": 1.0,
+            "task_recall": 1.0,
+            "decision_recall": 0.5,
+            "question_recall": 1.0,
+            "blocker_recall": 0.0,
+            "next_action_accuracy": 1.0,
+            "rationale_recall": 1.0,
+            "decision_contradiction_rate": 0.0,
+            "overall_decision_integrity": 1.0,
+            "weighted_decision_integrity": 1.0,
+            "weighted_contradiction_rate": 0.0,
+            "decision_drift": 0.5,
+            "goal_drift": 0.0,
+            "next_action_drift": 0.0,
+            "overall_continuity": 0.95,
+            "overall_fidelity": 0.8333333333333334,
+            "decision_states": [],
+            "agent_breakout": {}
+          }
+        }
+      },
+      "degradation_rate": 0.01666666666666668,
+      "event_rates": {
+        "human_edit_rate": 0.1,
+        "human_reject_rate": 0.03333333333333333,
+        "auto_accept_rate": 0.8666666666666667
+      },
+      "failures": [
+        {
+          "failure_type": "CONTEXT_DRIFT",
+          "source_agent": "antigravity",
+          "target_agent": "opencode",
+          "item_id": "Decision 1: Use FastAPI",
+          "expected": "Decision 1: Use FastAPI",
+          "observed": "Decision 1: Use FastAPI - mutated by agent"
+        },
+        {
+          "failure_type": "BLOCKER_BYPASS",
+          "source_agent": "opencode",
+          "target_agent": "claude",
+          "item_id": "Task 1 blocks Task 2",
+          "expected": "Task 1 blocks Task 2",
+          "observed": "Bypassed / Ignored"
+        }
+      ],
+      "events": {
+        "generated": 30,
+        "accepted": 26,
+        "rejected": 1,
+        "edited": 3
+      },
+      "performance": {
+        "compile_time_ms": 0.00010000007932831068,
+        "memory_usage_mb": 24.84375,
+        "events_processed_per_second": 299999762.01525676,
+        "compression_factor": 16.666666666666668,
+        "compression_ratio": 0.06
+      },
+      "complexity": {
+        "reducer_metrics": {
+          "task_events": 15,
+          "decision_events": 7,
+          "question_events": 4,
+          "project_events": 4
+        },
+        "state_metrics": {
+          "active_tasks": 5,
+          "active_decisions": 2,
+          "active_questions": 2
+        }
+      }
+    },
+    {
+      "benchmark_id": "real_session_001",
+      "benchmark_type": "real_world",
+      "final_metrics": {
+        "goal_recall": 1.0,
+        "task_recall": 1.0,
+        "decision_recall": 0.0,
+        "question_recall": 1.0,
+        "blocker_recall": 1.0,
+        "next_action_accuracy": 1.0,
+        "rationale_recall": 0.0,
+        "decision_contradiction_rate": 0.0,
+        "overall_decision_integrity": 0.5,
+        "weighted_decision_integrity": 0.5,
+        "weighted_contradiction_rate": 0.0,
+        "decision_drift": 1.0,
+        "goal_drift": 0.0,
+        "next_action_drift": 0.0,
+        "overall_continuity": 0.7,
+        "overall_fidelity": 0.6666666666666667,
+        "decision_states": [
+          {
+            "expected": "Decision: Use SQLite as default backend",
+            "severity": "medium",
+            "identity_status": "ALIASED",
+            "semantic_status": "DRIFTED",
+            "integrity_state": "MUTATED",
+            "observed": "Decision: Use SQLite as default backend - mutated by agent"
+          }
+        ],
+        "agent_breakout": {
+          "claude": {
+            "goal_recall": 1.0,
+            "task_recall": 1.0,
+            "decision_recall": 0.0,
+            "question_recall": 1.0,
+            "blocker_recall": 1.0,
+            "next_action_accuracy": 1.0,
+            "rationale_recall": 0.0,
+            "decision_contradiction_rate": 0.0,
+            "overall_decision_integrity": 1.0,
+            "weighted_decision_integrity": 1.0,
+            "weighted_contradiction_rate": 0.0,
+            "decision_drift": 1.0,
+            "goal_drift": 0.0,
+            "next_action_drift": 0.0,
+            "overall_continuity": 0.7,
+            "overall_fidelity": 0.6666666666666667,
+            "decision_states": [],
+            "agent_breakout": {}
+          },
+          "opencode": {
+            "goal_recall": 1.0,
+            "task_recall": 1.0,
+            "decision_recall": 0.0,
+            "question_recall": 1.0,
+            "blocker_recall": 1.0,
+            "next_action_accuracy": 1.0,
+            "rationale_recall": 0.0,
+            "decision_contradiction_rate": 0.0,
+            "overall_decision_integrity": 1.0,
+            "weighted_decision_integrity": 1.0,
+            "weighted_contradiction_rate": 0.0,
+            "decision_drift": 1.0,
+            "goal_drift": 0.0,
+            "next_action_drift": 0.0,
+            "overall_continuity": 0.7,
+            "overall_fidelity": 0.6666666666666667,
+            "decision_states": [],
+            "agent_breakout": {}
+          }
+        }
+      },
+      "degradation_rate": 0.15000000000000002,
+      "event_rates": {
+        "human_edit_rate": 0.1,
+        "human_reject_rate": 0.05,
+        "auto_accept_rate": 0.85
+      },
+      "failures": [
+        {
+          "failure_type": "CONTEXT_COMPRESSION_FAILURE",
+          "source_agent": "initial_state",
+          "target_agent": "claude",
+          "item_id": "Avoid Docker setup complexity for local developer flow.",
+          "expected": "Avoid Docker setup complexity for local developer flow.",
+          "observed": "Missing Rationale"
+        },
+        {
+          "failure_type": "CONTEXT_DRIFT",
+          "source_agent": "claude",
+          "target_agent": "opencode",
+          "item_id": "Decision: Use SQLite as default backend",
+          "expected": "Decision: Use SQLite as default backend",
+          "observed": "Decision: Use SQLite as default backend - mutated by agent"
+        }
+      ],
+      "events": {
+        "generated": 20,
+        "accepted": 17,
+        "rejected": 1,
+        "edited": 2
+      },
+      "performance": {
+        "compile_time_ms": 0.00010000007932831068,
+        "memory_usage_mb": 24.84765625,
+        "events_processed_per_second": 199999841.34350452,
+        "compression_factor": 33.333333333333336,
+        "compression_ratio": 0.03
+      },
+      "complexity": {
+        "reducer_metrics": {
+          "task_events": 10,
+          "decision_events": 5,
+          "question_events": 3,
+          "project_events": 2
+        },
+        "state_metrics": {
+          "active_tasks": 2,
+          "active_decisions": 1,
+          "active_questions": 0
+        }
+      }
+    },
+    {
+      "benchmark_id": "real_session_002",
+      "benchmark_type": "real_world",
+      "final_metrics": {
+        "goal_recall": 1.0,
+        "task_recall": 1.0,
+        "decision_recall": 0.0,
+        "question_recall": 1.0,
+        "blocker_recall": 1.0,
+        "next_action_accuracy": 1.0,
+        "rationale_recall": 1.0,
+        "decision_contradiction_rate": 0.0,
+        "overall_decision_integrity": 0.5,
+        "weighted_decision_integrity": 0.5,
+        "weighted_contradiction_rate": 0.0,
+        "decision_drift": 1.0,
+        "goal_drift": 0.0,
+        "next_action_drift": 0.0,
+        "overall_continuity": 0.9,
+        "overall_fidelity": 0.6666666666666667,
+        "decision_states": [
+          {
+            "expected": "Decision: Capture decision rationales",
+            "severity": "medium",
+            "identity_status": "ALIASED",
+            "semantic_status": "DRIFTED",
+            "integrity_state": "MUTATED",
+            "observed": "Decision: Capture decision rationales - mutated by agent"
+          }
+        ],
+        "agent_breakout": {
+          "opencode": {
+            "goal_recall": 1.0,
+            "task_recall": 1.0,
+            "decision_recall": 0.0,
+            "question_recall": 1.0,
+            "blocker_recall": 1.0,
+            "next_action_accuracy": 1.0,
+            "rationale_recall": 1.0,
+            "decision_contradiction_rate": 0.0,
+            "overall_decision_integrity": 1.0,
+            "weighted_decision_integrity": 1.0,
+            "weighted_contradiction_rate": 0.0,
+            "decision_drift": 1.0,
+            "goal_drift": 0.0,
+            "next_action_drift": 0.0,
+            "overall_continuity": 0.9,
+            "overall_fidelity": 0.6666666666666667,
+            "decision_states": [],
+            "agent_breakout": {}
+          },
+          "cursor": {
+            "goal_recall": 1.0,
+            "task_recall": 1.0,
+            "decision_recall": 0.0,
+            "question_recall": 1.0,
+            "blocker_recall": 1.0,
+            "next_action_accuracy": 1.0,
+            "rationale_recall": 1.0,
+            "decision_contradiction_rate": 0.0,
+            "overall_decision_integrity": 1.0,
+            "weighted_decision_integrity": 1.0,
+            "weighted_contradiction_rate": 0.0,
+            "decision_drift": 1.0,
+            "goal_drift": 0.0,
+            "next_action_drift": 0.0,
+            "overall_continuity": 0.9,
+            "overall_fidelity": 0.6666666666666667,
+            "decision_states": [],
+            "agent_breakout": {}
+          }
+        }
+      },
+      "degradation_rate": 0.04999999999999999,
+      "event_rates": {
+        "human_edit_rate": 0.1,
+        "human_reject_rate": 0.05,
+        "auto_accept_rate": 0.85
+      },
+      "failures": [
+        {
+          "failure_type": "CONTEXT_DRIFT",
+          "source_agent": "initial_state",
+          "target_agent": "opencode",
+          "item_id": "Decision: Capture decision rationales",
+          "expected": "Decision: Capture decision rationales",
+          "observed": "Decision: Capture decision rationales - mutated by agent"
+        }
+      ],
+      "events": {
+        "generated": 20,
+        "accepted": 17,
+        "rejected": 1,
+        "edited": 2
+      },
+      "performance": {
+        "compile_time_ms": 0.00010000007932831068,
+        "memory_usage_mb": 24.84765625,
+        "events_processed_per_second": 199999841.34350452,
+        "compression_factor": 33.333333333333336,
+        "compression_ratio": 0.03
+      },
+      "complexity": {
+        "reducer_metrics": {
+          "task_events": 10,
+          "decision_events": 5,
+          "question_events": 3,
+          "project_events": 2
+        },
+        "state_metrics": {
+          "active_tasks": 2,
+          "active_decisions": 1,
+          "active_questions": 0
+        }
+      }
+    }
+  ]
+}

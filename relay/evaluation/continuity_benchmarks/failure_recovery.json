@@ -1,0 +1,68 @@
+{
+  "benchmark_id": "failure_recovery",
+  "benchmark_version": 1,
+  "scenario_name": "Failure Pattern and Lesson Retention",
+  "description": "Agent A encounters failures and records lessons. Agent B must recover failure patterns and lessons to avoid repeating them.",
+  "query": "What failures occurred and what lessons were learned?",
+  "expected_goals": [
+    {
+      "artifact_type": "goal",
+      "canonical_value": "Ship the API release",
+      "aliases": ["API release", "Release the API", "Ship API"],
+      "severity": "high"
+    }
+  ],
+  "expected_decisions": [
+    {
+      "artifact_type": "decision",
+      "canonical_value": "Add retry logic for database connections",
+      "aliases": ["Retry logic", "Database retry", "Connection retry"],
+      "severity": "high",
+      "rationale": "Connection pool exhaustion caused cascading failures in production"
+    }
+  ],
+  "expected_rationales": [
+    {
+      "artifact_type": "rationale",
+      "canonical_value": "Connection pool exhaustion",
+      "aliases": ["Pool exhaustion", "Connection pool failure"],
+      "severity": "high"
+    }
+  ],
+  "expected_tasks": [
+    {
+      "artifact_type": "task",
+      "canonical_value": "Implement connection pool monitoring",
+      "aliases": ["Pool monitoring", "Monitor connection pools"],
+      "severity": "critical"
+    },
+    {
+      "artifact_type": "task",
+      "canonical_value": "Add circuit breaker for external API calls",
+      "aliases": ["Circuit breaker", "External API resilience"],
+      "severity": "high"
+    }
+  ],
+  "expected_knowledge": [
+    {
+      "artifact_type": "knowledge",
+      "canonical_value": "Connection pool limits must be tuned per deployment",
+      "aliases": ["Pool tuning", "Connection pool configuration"],
+      "severity": "high"
+    },
+    {
+      "artifact_type": "knowledge",
+      "canonical_value": "Cascading failures occur when pool exhaustion is not detected early",
+      "aliases": ["Cascading failure pattern", "Pool exhaustion cascading"],
+      "severity": "critical"
+    }
+  ],
+  "expected_questions": [],
+  "min_goal_recall": 1.0,
+  "min_decision_recall": 1.0,
+  "min_rationale_recall": 0.95,
+  "min_task_recall": 0.95,
+  "min_knowledge_recall": 0.80,
+  "min_overall_continuity": 0.90,
+  "min_context_gain": 0.10
+}

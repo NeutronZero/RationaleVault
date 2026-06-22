@@ -1,0 +1,26 @@
+{
+  "benchmark_id": "real_session_002",
+  "benchmark_type": "real_world",
+  "benchmark_version": 1,
+  "expected_goal": "Build evaluation framework",
+  "expected_tasks": [
+    "Task A: Design metrics",
+    "Task B: Create test runner"
+  ],
+  "expected_decisions": [
+    "Decision: Capture decision rationales"
+  ],
+  "expected_questions": [],
+  "expected_blockers": [],
+  "expected_next_action": "Task A: Design metrics",
+  "handoff_chain": [
+    "opencode",
+    "cursor"
+  ],
+  "metadata": {
+    "session_id": "session_002",
+    "expected_rationales": [
+      "Prevent context compression failures during long-timeline handoffs."
+    ]
+  }
+}

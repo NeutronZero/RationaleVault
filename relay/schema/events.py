@@ -67,6 +67,28 @@ class EventType(str, Enum):
     # ── Reflection (R8 — recorded now, generated in a future phase) ────────
     REFLECTION_GENERATED = "REFLECTION_GENERATED"
 
+    # ── Memory Integration (Sprint I1) ─────────────────────────────────────
+    MEMORY_RECORDED = "MEMORY_RECORDED"
+    MEMORY_CONSOLIDATED = "MEMORY_CONSOLIDATED"
+    MEMORY_REFERENCED = "MEMORY_REFERENCED"
+    MEMORY_SUPERSEDED = "MEMORY_SUPERSEDED"
+    MEMORY_ARCHIVED = "MEMORY_ARCHIVED"
+    MEMORY_RANKED = "MEMORY_RANKED"
+    CONSOLIDATION_CANDIDATE = "CONSOLIDATION_CANDIDATE"
+    RETRIEVAL_AUDITED = "RETRIEVAL_AUDITED"
+    RETRIEVAL_EXECUTED = "RETRIEVAL_EXECUTED"
+
+    # ── Failure Events ─────────────────────────────────────────────────────
+    QUESTION_LOSS = "QUESTION_LOSS"
+    CONTEXT_DRIFT = "CONTEXT_DRIFT"
+    DECISION_MUTATION = "DECISION_MUTATION"
+    DECISION_CONTRADICTION = "DECISION_CONTRADICTION"
+
+    # ── Knowledge Synthesis (Sprint I4) ───────────────────────────────────
+    KNOWLEDGE_SYNTHESIZED = "KNOWLEDGE_SYNTHESIZED"
+    KNOWLEDGE_SUPERSEDED = "KNOWLEDGE_SUPERSEDED"
+    KNOWLEDGE_CONTRADICTION = "KNOWLEDGE_CONTRADICTION"
+
 
 @dataclass
 class EventMetadata:

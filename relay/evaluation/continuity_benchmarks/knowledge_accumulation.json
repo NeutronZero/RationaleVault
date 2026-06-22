@@ -1,0 +1,61 @@
+{
+  "benchmark_id": "knowledge_accumulation",
+  "benchmark_version": 1,
+  "scenario_name": "Architecture Principle Retention",
+  "description": "Agent A accumulates architecture principles and project invariants. Agent B must recover these to maintain consistency.",
+  "query": "What are the architecture principles and project invariants?",
+  "expected_goals": [
+    {
+      "artifact_type": "goal",
+      "canonical_value": "Maintain a clean layered architecture",
+      "aliases": ["Layered architecture", "Clean architecture", "Architecture layers"],
+      "severity": "high"
+    }
+  ],
+  "expected_decisions": [
+    {
+      "artifact_type": "decision",
+      "canonical_value": "Enforce strict dependency direction",
+      "aliases": ["Dependency direction", "One-way dependencies", "No circular deps"],
+      "severity": "critical",
+      "rationale": "Circular dependencies make the system untestable and fragile"
+    }
+  ],
+  "expected_rationales": [
+    {
+      "artifact_type": "rationale",
+      "canonical_value": "Circular dependencies make the system untestable",
+      "aliases": ["Untestable with circular deps", "Testability requires clean deps"],
+      "severity": "critical"
+    }
+  ],
+  "expected_tasks": [],
+  "expected_knowledge": [
+    {
+      "artifact_type": "knowledge",
+      "canonical_value": "Domain layer must not depend on infrastructure",
+      "aliases": ["Domain independence", "Domain layer isolation", "No infra in domain"],
+      "severity": "critical"
+    },
+    {
+      "artifact_type": "knowledge",
+      "canonical_value": "All external integrations go through port adapters",
+      "aliases": ["Port adapter pattern", "Hexagonal architecture", "Adapter pattern"],
+      "severity": "high"
+    },
+    {
+      "artifact_type": "knowledge",
+      "canonical_value": "No business logic in controllers or handlers",
+      "aliases": ["Thin controllers", "Controller logic separation", "Fat models thin controllers"],
+      "severity": "high"
+    }
+  ],
+  "expected_questions": [],
+  "min_goal_recall": 1.0,
+  "min_decision_recall": 1.0,
+  "min_rationale_recall": 0.95,
+  "min_task_recall": 0.95,
+  "min_knowledge_recall": 0.80,
+  "min_overall_continuity": 0.90,
+  "min_context_gain": 0.10
+}

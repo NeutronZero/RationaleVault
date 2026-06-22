@@ -1,147 +1,93 @@
-# Relay
+# Relay (v1.0.0rc2)
 
-**Event-sourced memory layer for multi-agent AI workflows.**
+**Event-sourced cognitive continuity and memory layer for multi-agent AI workflows.**
 
-Relay allows any AI agent — Claude, ChatGPT, Hermes, Cursor, OpenCode — to resume work on a project with full context continuity, within 30 seconds, without manual summarization.
+Relay enables any AI agent — Claude, OpenCode, ChatGPT, Cursor, Copilot — to resume work on a project with full context continuity, within 30 seconds, without manual summarization.
 
 ---
 
-## Core Principle
+## Why Relay Exists
 
-> Every fact, decision, task, and relationship is derived from an immutable event ledger.
-> State is never stored directly — always compiled from events.
+LLM agents lose context. As projects evolve over weeks or months, they accumulate decisions, lessons, failures, architectural constraints, and rationale. Standard RAG tools and vector databases fail to preserve these because they lack structural temporal order, resulting in context drift, memory duplication, and decision degradation.
 
-```
-Claude starts work
-       ↓
-    Relay
-  (ledger grows)
-       ↓
-Claude exhausted
-       ↓
-  compile_cognitive_head()
-       ↓
-  ClaudeCompiler → Context Block
-       ↓
-ChatGPT resumes (no context lost)
-       ↓
-    Relay
-       ↓
-   Hermes resumes
+Relay provides an event-sourced cognitive continuity layer. By treating events as the immutable source of truth and compiling memory, knowledge, and graphs as deterministic projections, Relay ensures agents can reconstruct state and continue work with zero cognitive loss.
+
+## What Relay Is Not
+
+To understand Relay, it is helpful to clarify what it is not:
+- **Not a vector database**: Relay uses structured keyword, domain, and profile-based slot allocation for deterministic context compilation.
+- **Not a graph database**: The knowledge graph in Relay is a derived view (a projection), not a storage database.
+- **Not a workflow engine**: Relay does not execute agent loops or handle tasks; it provides cognitive memory infrastructure.
+- **Not an agent framework**: Relay is agent-agnostic and interfaces via standardized compiler adapters.
+- **Not a memory database**: Relay is event-sourced; the immutable event ledger is the sole source of truth.
+
+---
+
+## Architecture Flow
+
+Every layer of Relay has an implementation, evaluation metrics, and validation exit gates.
+
+```text
+Events (Ledger)
+      ↓
+Memory Extraction (Provenance / Deduplication)
+      ↓
+Memory Intelligence (Reference Counts / Recency)
+      ↓
+Retrieval Intelligence (Ranking & Keywords)
+      ↓
+Knowledge Synthesis (Synthesized Facts & Contradictions)
+      ↓
+Knowledge Evaluation (Density & Precision Gates)
+      ↓
+Knowledge Graph Projection (Nodes & Edge Integrity)
+      ↓
+Context Construction (Profile Slot Allocation Blending)
+      ↓
+Context Evaluation (Completeness & Traceability)
+      ↓
+Agent Compilers (Prompt Serialization / Adapters)
+      ↓
+Continuity Validation (Handoff Integrity Verification)
 ```
 
 ---
 
 ## Quick Start
 
-### 1. Start PostgreSQL
+### 1. Install Relay
 
-```bash
-docker-compose -f docker/postgres/docker-compose.yml up -d
-```
-
-### 2. Install dependencies
-
+Install Relay in editable developer mode:
 ```bash
 pip install -e ".[dev]"
 ```
 
-### 3. Configure environment
+### 2. Verify Installation
 
+Run the system diagnostics tool to verify that the environment, active databases, registry, and projection chains are fully functional:
 ```bash
-cp .env.example .env
-# Edit .env if needed (defaults match docker-compose)
+relay doctor
 ```
 
-### 4. Initialize the database
+### 3. Run the Unified Evaluation Suite
 
+Execute the full evaluation pipeline, checking all exit gates (Memory, Knowledge, Context, Compilers, Continuity, Graph, and Examples):
 ```bash
-python scripts/init_db.py
+relay evaluate
 ```
 
-### 5. Seed a demo project
+This generates a PEP 440-compliant release manifest at `.relay/reports/release_manifest.json` and a markdown summary at `.relay/reports/report.md`.
 
+### 4. Run tests
 ```bash
-python scripts/seed_demo.py
+pytest
 ```
-
-This creates 20+ realistic events and prints a **Relay Context Block** you can paste directly into Claude to begin Sprint C.
-
-### 6. Run tests
-
-```bash
-# Pure unit tests (no database required)
-pytest tests/unit/ -v
-
-# Database tests (requires RELAY_DB_TEST_ENABLED=1 in .env)
-set RELAY_DB_TEST_ENABLED=1
-pytest tests/unit/ -v
-```
+All 283 tests will run (269 pass; 14 are skipped as they require a live PostgreSQL database connection).
 
 ---
 
-## Architecture
-
-```
-relay/
-├── schema/events.py          # Canonical event types + metadata envelope
-├── db/
-│   ├── connection.py         # psycopg3 connection management
-│   └── event_store.py        # Immutable append-only ledger
-├── cognitive_head/
-│   ├── reducers.py           # Pure state reducers (no I/O)
-│   ├── snapshot.py           # SnapshotStore interface (placeholder)
-│   └── compiler.py           # compile_cognitive_head()
-└── compilers/
-    ├── base.py               # AgentCompiler ABC
-    └── claude.py             # ClaudeCompiler
-```
-
-### Event Ordering Guarantee
-
-`event_sequence` (BIGSERIAL) is the **only** authoritative replay order.
-
-All reducers use `ORDER BY event_sequence ASC`. The `version` field exists only for optimistic concurrency control.
-
-### Project Bootstrap Requirement
-
-Every project stream **must** begin with:
-```
-PROJECT_CREATED → PROJECT_GOAL_SET → PROJECT_FOCUS_CHANGED
-```
-
-`compile_cognitive_head()` raises `MissingProjectBootstrapError` if these events are absent.
-
----
-
-## Sprint Plan
-
-| Sprint | Goal | Status |
-|--------|------|--------|
-| A | Reliable Event Ledger | ✅ Built |
-| B | Cognitive Head + Claude Compiler | ✅ Built |
-| C | Real multi-agent handoff experiment | 🔲 Run |
-| D | Based on Sprint C failures only | 🔲 TBD |
-
----
-
-## First Experiment (Sprint C)
-
-See [`examples/first_experiment.md`](examples/first_experiment.md) for the step-by-step guide to running the Claude → Relay → ChatGPT → Relay → Hermes handoff experiment.
-
-Measure continuity with:
-```bash
-python scripts/handoff_metrics.py --project-id <UUID>
-```
-
----
-
-## Design Decisions
-
-| Decision | Rationale |
-|----------|-----------|
-| psycopg3 (sync) | Low-volume local workload; async complexity not justified in V1 |
-| No ORM | Event ledger must be fully auditable; every query explicit |
-| No Alembic | Plain SQL migrations are sufficient and simpler for V1 |
-| event_sequence for ordering | Prevents subtle ordering bugs in concurrent multi-agent writes |
-| SnapshotStore placeholder | Interface defined now; implemented when ledger reaches scale |
+## Design Principles
+- **Ledger Invariance**: `event_sequence` is the only authoritative ordering key.
+- **Determinism**: Same events always project to the identical memory, knowledge, and graph states.
+- **Provenance Traceability**: Every context citation must trace back to original event ledger records.
+- **Zero-Dependency Core**: Standard configuration runs local-first on SQLite with zero external database setup.

@@ -1,0 +1,75 @@
+{
+  "benchmark_id": "architecture_decisions",
+  "benchmark_version": 1,
+  "scenario_name": "Architecture Decision Retention",
+  "description": "Agent A makes architectural decisions with rationale. Agent B must recover both the decisions and why they were made.",
+  "query": "What architectural decisions were made and why?",
+  "expected_goals": [
+    {
+      "artifact_type": "goal",
+      "canonical_value": "Build a scalable web application",
+      "aliases": ["Scalable web app", "Web application scalability"],
+      "severity": "high"
+    }
+  ],
+  "expected_decisions": [
+    {
+      "artifact_type": "decision",
+      "canonical_value": "Use PostgreSQL for primary database",
+      "aliases": ["PostgreSQL database", "Postgres for storage", "Use Postgres"],
+      "severity": "critical",
+      "rationale": "PostgreSQL provides ACID compliance andJSON support needed for the domain model"
+    },
+    {
+      "artifact_type": "decision",
+      "canonical_value": "Use Redis for session caching",
+      "aliases": ["Redis for caching", "Redis session store", "Use Redis"],
+      "severity": "high",
+      "rationale": "Redis sub-millisecond latency is required for session lookups at scale"
+    }
+  ],
+  "expected_rationales": [
+    {
+      "artifact_type": "rationale",
+      "canonical_value": "ACID compliance",
+      "aliases": ["ACID", "transactional integrity"],
+      "severity": "critical"
+    },
+    {
+      "artifact_type": "rationale",
+      "canonical_value": "sub-millisecond latency",
+      "aliases": ["low latency", "fast lookups", "latency requirement"],
+      "severity": "high"
+    }
+  ],
+  "expected_tasks": [
+    {
+      "artifact_type": "task",
+      "canonical_value": "Design database schema",
+      "aliases": ["Database schema design", "Schema design"],
+      "severity": "high"
+    },
+    {
+      "artifact_type": "task",
+      "canonical_value": "Implement session management",
+      "aliases": ["Session management", "Session layer"],
+      "severity": "medium"
+    }
+  ],
+  "expected_knowledge": [
+    {
+      "artifact_type": "knowledge",
+      "canonical_value": "PostgreSQL chosen over MySQL for JSON support",
+      "aliases": ["PostgreSQL JSON", "JSON support decision"],
+      "severity": "high"
+    }
+  ],
+  "expected_questions": [],
+  "min_goal_recall": 1.0,
+  "min_decision_recall": 1.0,
+  "min_rationale_recall": 0.95,
+  "min_task_recall": 0.95,
+  "min_knowledge_recall": 0.80,
+  "min_overall_continuity": 0.90,
+  "min_context_gain": 0.10
+}

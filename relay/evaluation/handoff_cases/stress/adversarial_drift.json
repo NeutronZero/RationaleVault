@@ -1,0 +1,12 @@
+{
+  "benchmark_id": "adversarial_drift",
+  "benchmark_type": "synthetic",
+  "expected_goal": "Stress test adversarial drift tracking",
+  "expected_tasks": ["Task A", "Task B"],
+  "expected_decisions": ["Use SQLite"],
+  "expected_questions": ["Question 1", "Question 2"],
+  "expected_blockers": ["Question 1 blocks Task A"],
+  "expected_next_action": "Question 1",
+  "handoff_chain": ["claude", "opencode", "cursor"],
+  "metadata": {}
+}

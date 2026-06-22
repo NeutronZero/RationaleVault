@@ -1,0 +1,18 @@
+{
+  "benchmark_id": "f1b_multihop_50",
+  "benchmark_type": "synthetic",
+  "expected_goal": "Stress test 50-hop context handoff",
+  "expected_tasks": ["Task 1", "Task 2"],
+  "expected_decisions": ["Decision 1"],
+  "expected_questions": ["Question 1"],
+  "expected_blockers": [],
+  "expected_next_action": "Task 1",
+  "handoff_chain": [
+    "claude", "opencode", "chatgpt", "cursor", "claude", "opencode", "chatgpt", "cursor", "claude", "opencode",
+    "claude", "opencode", "chatgpt", "cursor", "claude", "opencode", "chatgpt", "cursor", "claude", "opencode",
+    "claude", "opencode", "chatgpt", "cursor", "claude", "opencode", "chatgpt", "cursor", "claude", "opencode",
+    "claude", "opencode", "chatgpt", "cursor", "claude", "opencode", "chatgpt", "cursor", "claude", "opencode",
+    "claude", "opencode", "chatgpt", "cursor", "claude", "opencode", "chatgpt", "cursor", "claude", "opencode"
+  ],
+  "metadata": {}
+}

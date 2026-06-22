@@ -1,0 +1,28 @@
+{
+  "corpus_version": 1,
+  "generated_at": "Sun Jun 21 20:17:29 2026",
+  "sessions_count": 2,
+  "total_handoffs": 2,
+  "agent_pair_counts": {
+    "claude->opencode": 1,
+    "opencode->cursor": 1
+  },
+  "sessions": [
+    {
+      "session_id": "session_001",
+      "handoffs": 1,
+      "agents": [
+        "claude",
+        "opencode"
+      ]
+    },
+    {
+      "session_id": "session_002",
+      "handoffs": 1,
+      "agents": [
+        "opencode",
+        "cursor"
+      ]
+    }
+  ]
+}

@@ -35,7 +35,7 @@ def get_dsn() -> str:
     dbname = os.environ.get("RELAY_DB_NAME", "relay")
     user = os.environ.get("RELAY_DB_USER", "relay")
     password = os.environ.get("RELAY_DB_PASSWORD", "relay")
-    return f"host={host} port={port} dbname={dbname} user={user} password={password}"
+    return f"host={host} port={port} dbname={dbname} user={user} password={password} connect_timeout=3"
 
 
 @contextmanager

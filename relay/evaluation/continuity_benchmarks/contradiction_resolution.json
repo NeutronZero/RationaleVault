@@ -1,0 +1,63 @@
+{
+  "benchmark_id": "contradiction_resolution",
+  "benchmark_version": 1,
+  "scenario_name": "Decision Supersession Tracking",
+  "description": "Agent A supersedes earlier decisions. Agent B must recover the current decision state and understand what changed.",
+  "query": "What are the current decisions and which ones were superseded?",
+  "expected_goals": [
+    {
+      "artifact_type": "goal",
+      "canonical_value": "Optimize for developer experience",
+      "aliases": ["Developer experience", "DX optimization", "Developer productivity"],
+      "severity": "high"
+    }
+  ],
+  "expected_decisions": [
+    {
+      "artifact_type": "decision",
+      "canonical_value": "Use MongoDB for document storage",
+      "aliases": ["MongoDB", "Mongo for documents", "Document storage with MongoDB"],
+      "severity": "high",
+      "rationale": "Flexible schema is needed for evolving document types"
+    },
+    {
+      "artifact_type": "decision",
+      "canonical_value": "Adopt TypeScript for all new services",
+      "aliases": ["TypeScript adoption", "All TypeScript", "TypeScript standard"],
+      "severity": "medium",
+      "rationale": "Type safety reduces runtime errors in microservices"
+    }
+  ],
+  "expected_rationales": [
+    {
+      "artifact_type": "rationale",
+      "canonical_value": "Flexible schema is needed for evolving document types",
+      "aliases": ["Schema flexibility", "Evolving document types", "Flexible schema"],
+      "severity": "high"
+    }
+  ],
+  "expected_tasks": [
+    {
+      "artifact_type": "task",
+      "canonical_value": "Migrate remaining services to TypeScript",
+      "aliases": ["TypeScript migration", "Migrate to TS", "Complete TS adoption"],
+      "severity": "medium"
+    }
+  ],
+  "expected_knowledge": [
+    {
+      "artifact_type": "knowledge",
+      "canonical_value": "Superseded decision: Use MySQL for document storage",
+      "aliases": ["MySQL was superseded", "Old decision MySQL", "MySQL replaced by MongoDB"],
+      "severity": "medium"
+    }
+  ],
+  "expected_questions": [],
+  "min_goal_recall": 1.0,
+  "min_decision_recall": 1.0,
+  "min_rationale_recall": 0.95,
+  "min_task_recall": 0.95,
+  "min_knowledge_recall": 0.80,
+  "min_overall_continuity": 0.90,
+  "min_context_gain": 0.10
+}

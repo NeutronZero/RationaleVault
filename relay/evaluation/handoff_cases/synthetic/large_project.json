@@ -1,0 +1,26 @@
+{
+  "benchmark_id": "synthetic_large",
+  "benchmark_type": "synthetic",
+  "expected_goal": "Validate large enterprise-scale project continuity",
+  "expected_tasks": [
+    "Task 1", "Task 2", "Task 3", "Task 4", "Task 5", "Task 6", "Task 7", "Task 8", "Task 9", "Task 10",
+    "Task 11", "Task 12", "Task 13", "Task 14", "Task 15", "Task 16", "Task 17", "Task 18", "Task 19", "Task 20",
+    "Task 21", "Task 22", "Task 23", "Task 24", "Task 25", "Task 26", "Task 27", "Task 28", "Task 29", "Task 30",
+    "Task 31", "Task 32", "Task 33", "Task 34", "Task 35", "Task 36", "Task 37", "Task 38", "Task 39", "Task 40",
+    "Task 41", "Task 42", "Task 43", "Task 44", "Task 45", "Task 46", "Task 47", "Task 48", "Task 49", "Task 50"
+  ],
+  "expected_decisions": [
+    "Decision 1", "Decision 2", "Decision 3", "Decision 4", "Decision 5", "Decision 6", "Decision 7", "Decision 8", "Decision 9", "Decision 10",
+    "Decision 11", "Decision 12", "Decision 13", "Decision 14", "Decision 15", "Decision 16", "Decision 17", "Decision 18", "Decision 19", "Decision 20"
+  ],
+  "expected_questions": [
+    "Question 1", "Question 2", "Question 3", "Question 4", "Question 5", "Question 6", "Question 7", "Question 8", "Question 9", "Question 10",
+    "Question 11", "Question 12", "Question 13", "Question 14", "Question 15"
+  ],
+  "expected_blockers": [
+    "Task 1 blocks Task 50"
+  ],
+  "expected_next_action": "Task 1",
+  "handoff_chain": ["antigravity", "opencode", "claude", "cursor", "chatgpt"],
+  "metadata": {}
+}

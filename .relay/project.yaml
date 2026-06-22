@@ -1,2 +1,5 @@
-project_id: c62f9915-f8f5-4c70-a625-5d803a11038f
+project_id: b8282e11-e261-4138-961d-27cfd72dacc8
 protocol_version: 1
+storage:
+  backend: sqlite
+  database: .relay/relay.db

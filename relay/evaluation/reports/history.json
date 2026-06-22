@@ -1,0 +1,58 @@
+[
+  {
+    "run_id": "1782052472",
+    "date": "Sun Jun 21 20:04:32 2026",
+    "goal_recall": 1.0,
+    "decision_recall": 1.0,
+    "question_recall": 1.0,
+    "degradation_rate": 0.0
+  },
+  {
+    "run_id": "1782052472",
+    "date": "Sun Jun 21 20:04:32 2026",
+    "goal_recall": 1.0,
+    "decision_recall": 0.8033333333333333,
+    "question_recall": 0.7466666666666667,
+    "degradation_rate": 0.03633690476190476
+  },
+  {
+    "run_id": "1782052486",
+    "date": "Sun Jun 21 20:04:46 2026",
+    "goal_recall": 1.0,
+    "decision_recall": 1.0,
+    "question_recall": 1.0,
+    "degradation_rate": 0.0
+  },
+  {
+    "run_id": "1782052486",
+    "date": "Sun Jun 21 20:04:46 2026",
+    "goal_recall": 1.0,
+    "decision_recall": 0.8033333333333333,
+    "question_recall": 0.7466666666666667,
+    "degradation_rate": 0.03633690476190476
+  },
+  {
+    "run_id": "1782052491",
+    "date": "Sun Jun 21 20:04:51 2026",
+    "goal_recall": 1.0,
+    "decision_recall": 1.0,
+    "question_recall": 1.0,
+    "degradation_rate": 0.0
+  },
+  {
+    "run_id": "1782052491",
+    "date": "Sun Jun 21 20:04:51 2026",
+    "goal_recall": 1.0,
+    "decision_recall": 0.8033333333333333,
+    "question_recall": 0.7466666666666667,
+    "degradation_rate": 0.03633690476190476
+  },
+  {
+    "run_id": "1782052503",
+    "date": "Sun Jun 21 20:05:03 2026",
+    "goal_recall": 1.0,
+    "decision_recall": 1.0,
+    "question_recall": 1.0,
+    "degradation_rate": 0.0
+  }
+]

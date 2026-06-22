@@ -1,0 +1,53 @@
+{
+  "benchmark_id": "synthetic_medium",
+  "benchmark_type": "synthetic",
+  "expected_goal": "Validate medium project continuity",
+  "expected_tasks": [
+    "Task 1: Init project",
+    "Task 2: Define auth schema",
+    "Task 3: Implement auth endpoints",
+    "Task 4: Add JWT handling",
+    "Task 5: Secure routes",
+    "Task 6: Create user model",
+    "Task 7: Setup migrations",
+    "Task 8: Add database seeders",
+    "Task 9: Implement CORS middleware",
+    "Task 10: Configure environment variables",
+    "Task 11: Write unit tests for auth",
+    "Task 12: Write integration tests for endpoints",
+    "Task 13: Add load testing",
+    "Task 14: Setup CI pipeline",
+    "Task 15: Configure linting",
+    "Task 16: Setup pre-commit hooks",
+    "Task 17: Containerize with Docker",
+    "Task 18: Document API endpoints",
+    "Task 19: Write deployment guide",
+    "Task 20: Conduct security review"
+  ],
+  "expected_decisions": [
+    "Decision 1: Use JWT for authentication",
+    "Decision 2: Use bcrypt for password hashing",
+    "Decision 3: Use PostgreSQL for production storage",
+    "Decision 4: Use Alembic for migrations",
+    "Decision 5: Use Docker Compose for local services",
+    "Decision 6: Use pytest for test suite",
+    "Decision 7: Use black for formatting",
+    "Decision 8: Use flake8 for linting",
+    "Decision 9: Use poetry for dependency management",
+    "Decision 10: Use FastAPI instead of Flask"
+  ],
+  "expected_questions": [
+    "Question 1: Support social auth login?",
+    "Question 2: Enable database connection pooling?",
+    "Question 3: Use Redis for caching session keys?",
+    "Question 4: Enforce HTTPS redirection in dev?",
+    "Question 5: Add rate limiting on auth endpoints?"
+  ],
+  "expected_blockers": [
+    "Task 2 blocks Task 3",
+    "Task 7 blocks Task 8"
+  ],
+  "expected_next_action": "Task 2: Define auth schema",
+  "handoff_chain": ["antigravity", "opencode", "claude", "cursor"],
+  "metadata": {}
+}
