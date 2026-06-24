@@ -1,8 +1,8 @@
-# RationaleVault (v1.1.0)
+# RationaleVault (v1.1.0) — Event-Sourced Cognitive Memory & Context Optimization Layer for AI Agents
 
-**Event-sourced cognitive continuity and memory layer for multi-agent AI workflows.**
+**Event-sourced cognitive continuity, multi-agent context compression, and shared memory infrastructure for AI workflows.**
 
-RationaleVault enables any AI agent — Claude, OpenCode, ChatGPT, Cursor, Copilot — to resume work on a project with full context continuity, within 30 seconds, without manual summarization.
+RationaleVault enables autonomous LLM agents — Claude, ChatGPT, Cursor, Copilot, and custom Model Context Protocol (MCP) clients — to resume work on complex codebases with full context continuity, within seconds, eliminating manual summarization and context drift.
 
 ---
 
