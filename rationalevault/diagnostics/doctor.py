@@ -9,6 +9,7 @@ from pathlib import Path
 from typing import Any
 
 from rationalevault.evaluation.thresholds import EvaluationThresholds
+from rationalevault.knowledge.relation_types import RelationType
 from rationalevault import __version__ as VERSION
 
 
@@ -137,6 +138,7 @@ def run_diagnostics() -> HealthReport:
             source_event_ids=["synth_ev_123"],
             source_type="synthetic",
             confidence=1.0,
+            project_id="diagnostic",
         )
 
         # Step B: KnowledgeObject
@@ -161,11 +163,12 @@ def run_diagnostics() -> HealthReport:
             importance="critical",
             provenance=prov,
             tags=["synthetic"],
+            project_id="diagnostic",
         )
 
         # Step C: Graph Build
         from rationalevault.knowledge.graph import GraphProjection
-        rel = KnowledgeRelation(source_id="synth_k_123", target_id="synth_k_123", relation_type="RELATED_TO", confidence=1.0)
+        rel = KnowledgeRelation(source_id="synth_k_123", target_id="synth_k_123", relation_type=RelationType.RELATED_TO, confidence=1.0)
         GraphProjection.build([ko], [rel])
 
         # Step D: Context compilation

@@ -23,12 +23,17 @@ class QueryIntent:
     intent: str
 
 
+import re
+
+TOKEN_RE = re.compile(r"\w+")
+
+
 def analyze_query(query: str) -> QueryIntent:
     """
     Analyzes raw queries to detect intent, targeted RetrievalProfile, and filters.
     """
     q_clean = query.lower().strip()
-    words = [w.strip("?,.:;\"'()[]{}") for w in q_clean.split()]
+    words = TOKEN_RE.findall(q_clean)
     stopwords = {"what", "is", "a", "the", "of", "and", "in", "to", "exist", "are", "about", "for", "with", "on", "exist", "exists"}
     keywords = [w for w in words if w and w not in stopwords]
 

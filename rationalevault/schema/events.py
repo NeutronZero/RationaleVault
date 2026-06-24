@@ -89,6 +89,11 @@ class EventType(str, Enum):
     KNOWLEDGE_SUPERSEDED = "KNOWLEDGE_SUPERSEDED"
     KNOWLEDGE_CONTRADICTION = "KNOWLEDGE_CONTRADICTION"
 
+    # ── Work-in-progress tracking ────────────────────────────────────────────────
+    TASK_PROGRESS_NOTED        = "TASK_PROGRESS_NOTED"
+    CONTEXT_SNAPSHOT_RECORDED  = "CONTEXT_SNAPSHOT_RECORDED"
+
+
 
 @dataclass
 class EventMetadata:

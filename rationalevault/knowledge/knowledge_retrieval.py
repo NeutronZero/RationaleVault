@@ -96,10 +96,22 @@ def retrieve_ranked_knowledge_citations(
     query: str,
     limit: int = 10,
     intent: QueryIntent | None = None,
+    include_stale: bool = False,
+    project_id: str | None = None,
+    transferable_only: bool = False,
 ) -> tuple[list[KnowledgeCitation], dict[str, Any]]:
-    """Full knowledge retrieval pipeline: search → rank → cite.
+    """Full knowledge retrieval pipeline: search -> rank -> cite.
 
     Mirrors retrieve_ranked_citations from rationalevault/memory/retrieval.py.
+
+    Args:
+        query: Search query.
+        limit: Max citations to return.
+        intent: Optional pre-computed query intent.
+        include_stale: If False (default), only ACTIVE knowledge is returned.
+        project_id: If provided, only return knowledge belonging to this project
+                    (plus transferable knowledge from other projects).
+        transferable_only: If True, only return REUSABLE/ORGANIZATIONAL knowledge.
     """
     t_start = time.perf_counter()
     retrieval_path = ["knowledge_query_analyzer", "knowledge_retrieval_planner"]
@@ -110,7 +122,34 @@ def retrieve_ranked_knowledge_citations(
     t_analysis_end = time.perf_counter()
 
     provider = get_knowledge_provider()
-    all_knowledge = provider.get_all_knowledge()
+    if project_id:
+        if transferable_only:
+            # Only return transferable knowledge (reusable or organizational)
+            all_knowledge = provider.get_all_knowledge(transferable_only=True)
+            all_knowledge = [
+                k for k in all_knowledge
+                if k.project_id == project_id or k.transferability in ("REUSABLE", "ORGANIZATIONAL")
+            ]
+        else:
+            # Blend local knowledge and transferable knowledge from other projects
+            project_knowledge = provider.get_all_knowledge(project_id=project_id)
+            transferable_knowledge = provider.get_all_knowledge(transferable_only=True)
+            seen = set()
+            all_knowledge = []
+            for k in project_knowledge + transferable_knowledge:
+                if k.id not in seen:
+                    seen.add(k.id)
+                    all_knowledge.append(k)
+    else:
+        all_knowledge = provider.get_all_knowledge(transferable_only=transferable_only)
+
+    # Lifecycle filtering: default to ACTIVE only
+    if not include_stale:
+        from rationalevault.knowledge.models import KnowledgeLifecycle
+        all_knowledge = [
+            k for k in all_knowledge
+            if k.lifecycle_status == KnowledgeLifecycle.ACTIVE.value
+        ]
 
     t_search_start = time.perf_counter()
     retrieval_path.append("search_knowledge_rrf")

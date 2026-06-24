@@ -274,6 +274,40 @@ def test_claude_compiler_profile_adaptation() -> None:
     assert len(out_knowledge.rendered_content) > 0
 
 
+def test_claude_compiler_organization_continuation_section() -> None:
+    """ClaudeContextCompiler must render Where the Organization Left Off when state present."""
+    from rationalevault.organization.continuation import (
+        OrganizationContinuationHealth,
+        OrganizationContinuationState,
+    )
+
+    cont_state = OrganizationContinuationState(
+        compiled_at="2024-01-01T00:00:00",
+        projects_needing_attention=["project-alpha", "project-beta"],
+        organizational_next_actions=[
+            "Resolve 2 contradiction(s) involving project 'project-alpha'",
+            "Review inactive project 'project-gamma'",
+        ],
+        continuation_summary=["3 of 5 projects active", "2 project(s) need attention"],
+        health=OrganizationContinuationHealth(
+            activity_coverage=0.6,
+            continuity=0.6,
+            attention_accuracy=1.0,
+            overall=0.711,
+        ),
+    )
+    package = _make_package(citations=[])
+    package.organization_continuation_state = cont_state
+    compiler = ClaudeContextCompiler()
+    output = compiler.compile(package)
+
+    assert "Where the Organization Left Off" in output.rendered_content
+    assert "project-alpha" in output.rendered_content
+    assert "project-beta" in output.rendered_content
+    assert "Review inactive project" in output.rendered_content
+    assert "3 of 5 projects active" in output.rendered_content
+
+
 # ── OpenCodeContextCompiler Tests ──────────────────────────────────────────
 
 

@@ -29,6 +29,11 @@ def perform_rrf_blending(
     return [all_records[rid] for rid in sorted_ids]
 
 
+import re
+
+TOKEN_RE = re.compile(r"\w+")
+
+
 def search_memories_rrf(
     query: str,
     all_records: list[MemoryRecord],
@@ -42,7 +47,7 @@ def search_memories_rrf(
 
     # Split query into tokens and filter stopwords
     q_clean = query.lower().strip()
-    words = [w.strip("?,.:;\"'()[]{}") for w in q_clean.split()]
+    words = TOKEN_RE.findall(q_clean)
     stopwords = {"what", "is", "a", "the", "of", "and", "in", "to", "exist", "are", "about", "for", "with", "on", "exist", "exists", "did", "occur", "why"}
     keywords = [w for w in words if w and w not in stopwords]
 

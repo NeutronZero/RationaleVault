@@ -5,6 +5,7 @@ import hashlib
 import json
 import xml.etree.ElementTree as ET
 
+from rationalevault.knowledge.relation_types import RelationType
 from rationalevault.knowledge.models import (
     KnowledgeObject,
     KnowledgeType,
@@ -55,6 +56,7 @@ def _create_mock_knowledge(
         supporting_memory_ids=["mem1", "mem2"],
         created_at="2026-06-22T00:00:00",
         updated_at="2026-06-22T00:00:00",
+        project_id="test",
     )
 
 
@@ -70,10 +72,10 @@ def test_graph_projection_build() -> None:
         "k3_id", "Title Three", "Content Three", KnowledgeType.LESSON, version=1
     )
 
-    r1 = KnowledgeRelation(source_id="k1_id", target_id="k2_id", relation_type="SUPPORTS", confidence=0.8)
-    r2 = KnowledgeRelation(source_id="k2_id", target_id="k3_id", relation_type="CONTRADICTS", confidence=0.9)
+    r1 = KnowledgeRelation(source_id="k1_id", target_id="k2_id", relation_type=RelationType.SUPPORTS, confidence=0.8)
+    r2 = KnowledgeRelation(source_id="k2_id", target_id="k3_id", relation_type=RelationType.CONTRADICTS, confidence=0.9)
     # Relation with missing endpoint (should be skipped deterministically)
-    r_missing = KnowledgeRelation(source_id="k1_id", target_id="nonexistent", relation_type="RELATED_TO", confidence=0.5)
+    r_missing = KnowledgeRelation(source_id="k1_id", target_id="nonexistent", relation_type=RelationType.RELATED_TO, confidence=0.5)
 
     knowledge_list = [k1, k2, k3]
     relations_list = [r1, r2, r_missing]
@@ -107,7 +109,7 @@ def test_graph_projection_build() -> None:
     assert n1.metadata["version"] == 1
 
     # Check edge mappings (sources and targets must match the new node IDs)
-    e1 = next(e for e in projection.edges if e.relation_type == "SUPPORTS")
+    e1 = next(e for e in projection.edges if e.relation_type == RelationType.SUPPORTS)
     assert e1.source == expected_n1_id
     assert e1.target == expected_n2_id
     assert e1.confidence == 0.8
@@ -116,7 +118,7 @@ def test_graph_projection_build() -> None:
 def test_graph_determinism() -> None:
     k1 = _create_mock_knowledge("k1_id", "Title One", "Content One", KnowledgeType.ARCHITECTURE_PRINCIPLE)
     k2 = _create_mock_knowledge("k2_id", "Title Two", "Content Two", KnowledgeType.PROJECT_INVARIANT)
-    r1 = KnowledgeRelation(source_id="k1_id", target_id="k2_id", relation_type="SUPPORTS", confidence=0.8)
+    r1 = KnowledgeRelation(source_id="k1_id", target_id="k2_id", relation_type=RelationType.SUPPORTS, confidence=0.8)
 
     # Build graph multiple times
     proj1 = GraphProjection.build([k1, k2], [r1])
@@ -140,9 +142,9 @@ def test_graph_queries() -> None:
     k4 = _create_mock_knowledge("k4", "N4", "C4", KnowledgeType.FAILURE_PATTERN)
 
     # Chain: N1 -> N2 -> N3 -> N4
-    r1 = KnowledgeRelation(source_id="k1", target_id="k2", relation_type="SUPPORTS", confidence=0.8)
-    r2 = KnowledgeRelation(source_id="k2", target_id="k3", relation_type="SUPPORTS", confidence=0.8)
-    r3 = KnowledgeRelation(source_id="k3", target_id="k4", relation_type="SUPPORTS", confidence=0.8)
+    r1 = KnowledgeRelation(source_id="k1", target_id="k2", relation_type=RelationType.SUPPORTS, confidence=0.8)
+    r2 = KnowledgeRelation(source_id="k2", target_id="k3", relation_type=RelationType.SUPPORTS, confidence=0.8)
+    r3 = KnowledgeRelation(source_id="k3", target_id="k4", relation_type=RelationType.SUPPORTS, confidence=0.8)
 
     projection = GraphProjection.build([k1, k2, k3, k4], [r1, r2, r3])
 
@@ -181,8 +183,8 @@ def test_graph_statistics() -> None:
     k3 = _create_mock_knowledge("k3", "N3", "C3", KnowledgeType.LESSON)
     k_orphan = _create_mock_knowledge("k_orphan", "Orphan", "C_orphan", KnowledgeType.LESSON)
 
-    r1 = KnowledgeRelation(source_id="k1", target_id="k2", relation_type="SUPPORTS", confidence=0.8)
-    r2 = KnowledgeRelation(source_id="k2", target_id="k3", relation_type="SUPPORTS", confidence=0.8)
+    r1 = KnowledgeRelation(source_id="k1", target_id="k2", relation_type=RelationType.SUPPORTS, confidence=0.8)
+    r2 = KnowledgeRelation(source_id="k2", target_id="k3", relation_type=RelationType.SUPPORTS, confidence=0.8)
 
     projection = GraphProjection.build([k1, k2, k3, k_orphan], [r1, r2])
     stats = projection.stats()
@@ -198,7 +200,7 @@ def test_graph_statistics() -> None:
 def test_graph_exports() -> None:
     k1 = _create_mock_knowledge("k1", "N1", "C1", KnowledgeType.ARCHITECTURE_PRINCIPLE)
     k2 = _create_mock_knowledge("k2", "N2", "C2", KnowledgeType.PROJECT_INVARIANT)
-    r1 = KnowledgeRelation(source_id="k1", target_id="k2", relation_type="SUPPORTS", confidence=0.8)
+    r1 = KnowledgeRelation(source_id="k1", target_id="k2", relation_type=RelationType.SUPPORTS, confidence=0.8)
 
     projection = GraphProjection.build([k1, k2], [r1])
 
@@ -223,13 +225,13 @@ def test_graph_exports() -> None:
     nx = projection.export_networkx()
     assert nx["directed"] is True
     assert len(nx["nodes"]) == 2
-    assert nx["links"][0]["relation_type"] == "SUPPORTS"
+    assert nx["links"][0]["relation_type"] == RelationType.SUPPORTS.value
 
 
 def test_graph_evaluation_and_gates() -> None:
     k1 = _create_mock_knowledge("k1", "N1", "C1", KnowledgeType.ARCHITECTURE_PRINCIPLE)
     k2 = _create_mock_knowledge("k2", "N2", "C2", KnowledgeType.PROJECT_INVARIANT)
-    r1 = KnowledgeRelation(source_id="k1", target_id="k2", relation_type="SUPPORTS", confidence=0.8)
+    r1 = KnowledgeRelation(source_id="k1", target_id="k2", relation_type=RelationType.SUPPORTS, confidence=0.8)
 
     projection = GraphProjection.build([k1, k2], [r1])
     projection2 = GraphProjection.build([k1, k2], [r1])

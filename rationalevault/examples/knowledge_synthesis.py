@@ -45,6 +45,7 @@ def main() -> None:
         confidence=conf,
         importance="critical",
         provenance=prov,
+        project_id="example",
     )
 
     k2 = KnowledgeObject(
@@ -57,6 +58,7 @@ def main() -> None:
         confidence=conf,
         importance="critical",
         provenance=prov,
+        project_id="example",
     )
 
     k_prov.add_knowledge(k1)

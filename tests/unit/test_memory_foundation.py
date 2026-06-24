@@ -27,6 +27,7 @@ def test_memory_record_id_and_priority() -> None:
         lifecycle_status="active",
         source_event_ids=["evt-123"],
         source_type="decision",
+        project_id="test",
     )
     
     assert rec.id == m_id
@@ -55,6 +56,7 @@ def test_markdown_provider_crud(tmp_path: Path) -> None:
         lifecycle_status="active",
         source_event_ids=["e1"],
         source_type="test",
+        project_id="test",
     )
     
     provider.add_record(rec1)
@@ -75,6 +77,7 @@ def test_markdown_provider_crud(tmp_path: Path) -> None:
         lifecycle_status="active",
         source_event_ids=["e1"],
         source_type="test",
+        project_id="test",
     )
     provider.add_record(rec1_updated)
     
@@ -97,6 +100,7 @@ def test_sqlite_provider_crud(tmp_path: Path) -> None:
         lifecycle_status="active",
         source_event_ids=["e2"],
         source_type="test",
+        project_id="test",
     )
     
     provider.add_record(rec1)
@@ -151,6 +155,7 @@ def test_compile_memory_context(tmp_path: Path, monkeypatch) -> None:
         lifecycle_status="active",
         source_event_ids=["e1"],
         source_type="project",
+        project_id="test",
     )
     provider.add_record(rec)
     

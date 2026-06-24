@@ -13,6 +13,7 @@ from typing import Any, Optional, cast
 import xml.etree.ElementTree as ET
 
 from rationalevault.knowledge.models import KnowledgeObject, KnowledgeRelation
+from rationalevault.knowledge.relation_types import RelationType
 
 
 @dataclass
@@ -64,25 +65,34 @@ class KnowledgeEdge:
     """A projected edge representing a KnowledgeRelation in the graph."""
     source: str
     target: str
-    relation_type: str
+    relation_type: RelationType
     confidence: float
     metadata: dict[str, Any] = field(default_factory=dict)
+
+    def __post_init__(self) -> None:
+        if not isinstance(self.relation_type, RelationType):
+            raise TypeError(
+                f"relation_type must be a RelationType, got {type(self.relation_type).__name__}"
+            )
 
     def to_dict(self) -> dict[str, Any]:
         return {
             "source": self.source,
             "target": self.target,
-            "relation_type": self.relation_type,
+            "relation_type": self.relation_type.value,
             "confidence": self.confidence,
             "metadata": self.metadata,
         }
 
     @classmethod
     def from_dict(cls, d: dict[str, Any]) -> KnowledgeEdge:
+        rt = d["relation_type"]
+        if isinstance(rt, str):
+            rt = RelationType.from_str(rt)
         return cls(
             source=d["source"],
             target=d["target"],
-            relation_type=d["relation_type"],
+            relation_type=rt,
             confidence=d["confidence"],
             metadata=d.get("metadata", {}),
         )
@@ -402,7 +412,7 @@ class GraphProjection:
                 "target": e.target
             })
             d_rel = ET.SubElement(edge_el, "data", {"key": "relation_type"})
-            d_rel.text = e.relation_type
+            d_rel.text = e.relation_type.value
             d_conf = ET.SubElement(edge_el, "data", {"key": "edge_confidence"})
             d_conf.text = str(e.confidence)
 
@@ -420,7 +430,7 @@ class GraphProjection:
             lines.append(f'    {n.id}["[{n.type}] {safe_title}"]')
         # Declare connections
         for e in self.edges:
-            lines.append(f'    {e.source} -->|{e.relation_type}| {e.target}')
+            lines.append(f'    {e.source} -->|{e.relation_type.value}| {e.target}')
         return "\n".join(lines)
 
     def export_networkx(self) -> dict[str, Any]:
@@ -434,7 +444,7 @@ class GraphProjection:
                 {
                     "source": e.source,
                     "target": e.target,
-                    "relation_type": e.relation_type,
+                    "relation_type": e.relation_type.value,
                     "confidence": e.confidence,
                     "metadata": e.metadata,
                 } for e in self.edges

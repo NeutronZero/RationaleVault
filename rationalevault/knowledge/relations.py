@@ -6,6 +6,7 @@ between knowledge objects.
 from __future__ import annotations
 
 from rationalevault.knowledge.models import KnowledgeObject, KnowledgeRelation
+from rationalevault.knowledge.relation_types import RelationType
 from rationalevault.memory.consolidation import jaccard_similarity
 
 
@@ -33,7 +34,7 @@ def detect_relations(knowledge: list[KnowledgeObject]) -> list[KnowledgeRelation
                 relations.append(KnowledgeRelation(
                     source_id=k1.id,
                     target_id=k2.id,
-                    relation_type="CONTRADICTS",
+                    relation_type=RelationType.CONTRADICTS,
                     confidence=0.9,
                 ))
             # Check for support (high similarity, same type)
@@ -43,7 +44,7 @@ def detect_relations(knowledge: list[KnowledgeObject]) -> list[KnowledgeRelation
                     relations.append(KnowledgeRelation(
                         source_id=k1.id,
                         target_id=k2.id,
-                        relation_type="SUPPORTS",
+                        relation_type=RelationType.SUPPORTS,
                         confidence=sim,
                     ))
             # Check for topic overlap
@@ -51,7 +52,7 @@ def detect_relations(knowledge: list[KnowledgeObject]) -> list[KnowledgeRelation
                 relations.append(KnowledgeRelation(
                     source_id=k1.id,
                     target_id=k2.id,
-                    relation_type="RELATED_TO",
+                    relation_type=RelationType.RELATED_TO,
                     confidence=0.6,
                 ))
 

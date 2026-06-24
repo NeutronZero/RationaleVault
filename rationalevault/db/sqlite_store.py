@@ -194,6 +194,46 @@ class SQLiteEventStore(BaseEventStore):
             cur = conn.execute(sql, (str(project_id),))
             return cur.fetchone()["cnt"]
 
+    def get_session_events(self, project_id: UUID, session_id: str) -> list[EventRecord]:
+        sql = """
+            SELECT event_sequence, id, project_id, stream_id, version,
+                   event_type, metadata, payload, parent_id, recorded_at
+            FROM rationalevault_events
+            WHERE project_id = ?
+              AND json_extract(metadata, '$.session_id') = ?
+            ORDER BY event_sequence ASC
+        """
+        with self._get_conn() as conn:
+            cur = conn.execute(sql, (str(project_id), session_id))
+            return [self._row_to_record(row) for row in cur.fetchall()]
+
+    def get_last_session_id(self, project_id: UUID) -> Optional[str]:
+        sql = """
+            SELECT json_extract(metadata, '$.session_id') AS session_id
+            FROM rationalevault_events
+            WHERE project_id = ?
+            ORDER BY event_sequence DESC
+            LIMIT 1
+        """
+        with self._get_conn() as conn:
+            cur = conn.execute(sql, (str(project_id),))
+            row = cur.fetchone()
+            return row["session_id"] if row else None
+
+    def get_recent_events(self, project_id: UUID, limit: int = 20) -> list[EventRecord]:
+        sql = """
+            SELECT event_sequence, id, project_id, stream_id, version,
+                   event_type, metadata, payload, parent_id, recorded_at
+            FROM rationalevault_events
+            WHERE project_id = ?
+            ORDER BY event_sequence DESC
+            LIMIT ?
+        """
+        with self._get_conn() as conn:
+            cur = conn.execute(sql, (str(project_id), limit))
+            return [self._row_to_record(row) for row in cur.fetchall()]
+
+
     # ── Internal ───────────────────────────────────────────────────────────
 
     @staticmethod

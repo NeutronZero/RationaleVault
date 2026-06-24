@@ -28,7 +28,7 @@ rationalevault doctor
 Expected output:
 ```text
 === RationaleVault Doctor ===
-RationaleVault version: 1.0.0rc2
+RationaleVault version: 1.1.0
 Generated at:  ...
 
   Event Store            [PASS]   : Connected to SQLiteEventStore

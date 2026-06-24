@@ -57,6 +57,11 @@ class TaskState:
     updated_at: Optional[str] = None
     completed_at: Optional[str] = None
     created_by: str = ""
+    progress_notes: list[dict] = field(default_factory=list)
+# Each entry: {"note": str, "timestamp": str, "actor": str, "source_event_seq": int}
+    related_knowledge_ids: list[str] = field(default_factory=list)
+    # Future-ready: links task to knowledge nodes for dependency context
+
 
 
 @dataclass
@@ -200,6 +205,17 @@ class TaskReducer:
                     event.recorded_at.isoformat()
                     if event.recorded_at else None
                 )
+
+            elif et == EventType.TASK_PROGRESS_NOTED:
+                if not task_id or task_id not in tasks:
+                    continue
+                tasks[task_id].progress_notes.append({
+                    "note": p.get("note", ""),
+                    "timestamp": event.recorded_at.isoformat() if event.recorded_at else None,
+                    "actor": event.metadata.actor,
+                    "source_event_seq": event.event_sequence,
+                })
+
 
         return tasks
 

@@ -23,6 +23,7 @@ class EvaluationResult:
     compiler_passed: bool
     continuity_passed: bool
     graph_passed: bool
+    graph_projection_passed: bool
     examples_passed: bool
     overall_passed: bool
     report_path: str
@@ -61,6 +62,7 @@ def run_full_evaluation() -> EvaluationResult:
         source_event_ids=["eval_temp_ev_1"],
         source_type="event",
         confidence=1.0,
+        project_id="test",
     )
     mock_m2 = MemoryRecord(
         id="eval_temp_mem_2",
@@ -73,6 +75,7 @@ def run_full_evaluation() -> EvaluationResult:
         source_event_ids=["eval_temp_ev_2"],
         source_type="event",
         confidence=1.0,
+        project_id="test",
     )
 
     # Create mock knowledge
@@ -96,6 +99,7 @@ def run_full_evaluation() -> EvaluationResult:
         importance="critical",
         provenance=prov1,
         tags=["test"],
+        project_id="test",
     )
     prov2 = ProvenanceChain(
         knowledge_id="eval_temp_k_2",
@@ -116,6 +120,7 @@ def run_full_evaluation() -> EvaluationResult:
         importance="critical",
         provenance=prov2,
         tags=["test"],
+        project_id="test",
     )
 
     # State variables for evaluation
@@ -125,11 +130,19 @@ def run_full_evaluation() -> EvaluationResult:
     compiler_passed = True
     continuity_passed = True
     graph_passed = True
+    graph_projection_passed = True
     examples_passed = True
 
     try:
         # Seeding
-        metadata = EventMetadata(actor="evaluator", source="evaluator")
+        metadata = EventMetadata(actor="evaluator", source="evaluator", session_id="eval-session-1")
+        event_store.append_event(
+            project_id=project_uuid,
+            stream_id="main",
+            event_type=EventType.PROJECT_CREATED,
+            payload={"name": "Test Project"},
+            metadata=metadata,
+        )
         event_store.append_event(
             project_id=project_uuid,
             stream_id="main",
@@ -140,8 +153,54 @@ def run_full_evaluation() -> EvaluationResult:
         event_store.append_event(
             project_id=project_uuid,
             stream_id="main",
+            event_type=EventType.PROJECT_FOCUS_CHANGED,
+            payload={"focus": "Test focus"},
+            metadata=metadata,
+        )
+        event_store.append_event(
+            project_id=project_uuid,
+            stream_id="main",
             event_type=EventType.DECISION_ACCEPTED,
-            payload={"decision": "Test query decision accepted"},
+            payload={"decision_id": "d1", "title": "Test query decision accepted", "rationale": "Test rationale"},
+            metadata=metadata,
+        )
+        event_store.append_event(
+            project_id=project_uuid,
+            stream_id="tasks",
+            event_type=EventType.TASK_CREATED,
+            payload={"task_id": "t1", "title": "Test task", "priority": "high"},
+            metadata=metadata,
+        )
+        event_store.append_event(
+            project_id=project_uuid,
+            stream_id="tasks",
+            event_type=EventType.TASK_MUTATED,
+            payload={"task_id": "t1", "status": "in_progress"},
+            metadata=metadata,
+        )
+        event_store.append_event(
+            project_id=project_uuid,
+            stream_id="tasks",
+            event_type=EventType.TASK_PROGRESS_NOTED,
+            payload={"task_id": "t1", "note": "Progress note"},
+            metadata=metadata,
+        )
+        event_store.append_event(
+            project_id=project_uuid,
+            stream_id="questions",
+            event_type=EventType.OPEN_QUESTION_RAISED,
+            payload={"question_id": "q1", "title": "Open question", "priority": "normal"},
+            metadata=metadata,
+        )
+        event_store.append_event(
+            project_id=project_uuid,
+            stream_id="main",
+            event_type=EventType.CONTEXT_SNAPSHOT_RECORDED,
+            payload={
+                "summary": "Test query goal set summary",
+                "blocked_on": "something block",
+                "next_action": "Do next things"
+            },
             metadata=metadata,
         )
 
@@ -199,11 +258,24 @@ def run_full_evaluation() -> EvaluationResult:
         }
 
         # 4. Continuity Validation
-        metrics["continuity"] = {
-            "goal_recall": 1.0,
-            "decision_recall": 1.0,
-            "task_recall": 1.0,
-        }
+        from rationalevault.knowledge.context_compiler import compile_context, ContextMode
+        from rationalevault.compilers.claude_context import ClaudeContextCompiler
+        from rationalevault.evaluation.continuation_evaluator import ContinuationEvaluator
+
+        cont_package = compile_context("continue", project_uuid, mode=ContextMode.CONTINUATION)
+        compiler = ClaudeContextCompiler()
+        cont_output = compiler.compile(cont_package)
+        
+        if cont_package.continuation_state:
+            cont_evaluator = ContinuationEvaluator()
+            cont_result = cont_evaluator.evaluate(cont_package.continuation_state, cont_output.rendered_content)
+            gate_passed, failures = cont_result.passes_exit_gate()
+            continuity_passed = gate_passed
+            metrics["continuity"] = cont_result.to_dict()
+        else:
+            continuity_passed = False
+            metrics["continuity"] = {"error": "No continuation state compiled"}
+
 
         # 5. Graph Evaluation
         from rationalevault.knowledge.relations import detect_relations
@@ -221,6 +293,29 @@ def run_full_evaluation() -> EvaluationResult:
         if not passed:
             graph_passed = False
 
+        # 5b. Graph Projection Evaluation (new GraphState evaluator)
+        from rationalevault.projections.knowledge import KnowledgeProjection as NewKnowledgeProjection
+        from rationalevault.projections.graph import GraphProjection as NewGraphProjection
+        from rationalevault.evaluation.graph_projection_evaluator import (
+            GraphProjectionEvaluator,
+            check_graph_projection_gates,
+        )
+
+        try:
+            ks = NewKnowledgeProjection.project(str(project_uuid))
+            gs = NewGraphProjection.project(ks)
+            gs2 = NewGraphProjection.project(ks)
+
+            gp_evaluator = GraphProjectionEvaluator()
+            gp_result = gp_evaluator.evaluate(gs, previous_state=gs2)
+            gp_passed, gp_failures = check_graph_projection_gates(gp_result)
+            metrics["graph_projection"] = gp_result.to_dict()
+            if not gp_passed:
+                graph_projection_passed = False
+        except Exception:
+            graph_projection_passed = False
+            metrics["graph_projection"] = {"error": "Graph projection evaluation failed"}
+
     except Exception as e:
         # Any exception in pipeline means failure
         memory_passed = False
@@ -228,6 +323,7 @@ def run_full_evaluation() -> EvaluationResult:
         context_passed = False
         compiler_passed = False
         graph_passed = False
+        graph_projection_passed = False
         metrics["error"] = str(e)
     finally:
         # Clean up mock database records
@@ -312,8 +408,42 @@ def run_full_evaluation() -> EvaluationResult:
         compiler_passed,
         continuity_passed,
         graph_passed,
+        graph_projection_passed,
         examples_passed,
     ])
+
+    # Cognitive Continuity Score (CCS)
+    from rationalevault.evaluation.thresholds import CCS_WEIGHTS
+
+    continuation_rate = metrics.get("continuity", {}).get("continuation_success_rate", 0.0)
+    knowledge_rate = metrics.get("knowledge", {}).get("knowledge_projection_success_rate", 0.0)
+    gp_rate = metrics.get("graph_projection", {}).get("graph_projection_success_rate", 0.0)
+
+    ccs = (
+        CCS_WEIGHTS["continuation"] * continuation_rate
+        + CCS_WEIGHTS["knowledge"] * knowledge_rate
+        + CCS_WEIGHTS["graph"] * gp_rate
+    )
+
+    if ccs >= 0.95:
+        ccs_grade = "EXCELLENT"
+    elif ccs >= 0.85:
+        ccs_grade = "GOOD"
+    elif ccs >= 0.70:
+        ccs_grade = "FAIR"
+    else:
+        ccs_grade = "POOR"
+
+    metrics["ccs"] = {
+        "score": round(ccs, 4),
+        "grade": ccs_grade,
+        "weights": CCS_WEIGHTS,
+        "components": {
+            "continuation": continuation_rate,
+            "knowledge": knowledge_rate,
+            "graph": gp_rate,
+        },
+    }
 
     # Output Reports Directory (use .rationalevault/ to match renamed package)
     reports_dir = Path.cwd() / ".rationalevault" / "reports"
@@ -332,7 +462,9 @@ def run_full_evaluation() -> EvaluationResult:
             "compiler": "PASS" if compiler_passed else "FAIL",
             "continuity": "PASS" if continuity_passed else "FAIL",
             "graph": "PASS" if graph_passed else "FAIL",
+            "graph_projection": "PASS" if graph_projection_passed else "FAIL",
         },
+        "ccs": metrics.get("ccs", {}),
         "examples": examples_status,
         "metrics": metrics,
     }
@@ -353,7 +485,15 @@ def run_full_evaluation() -> EvaluationResult:
         f.write(f"- **Compiler**: {'PASS' if compiler_passed else 'FAIL'}\n")
         f.write(f"- **Continuity**: {'PASS' if continuity_passed else 'FAIL'}\n")
         f.write(f"- **Graph Projection**: {'PASS' if graph_passed else 'FAIL'}\n")
+        f.write(f"- **Graph Projection (new)**: {'PASS' if graph_projection_passed else 'FAIL'}\n")
         f.write(f"- **Examples execution**: {'PASS' if examples_passed else 'FAIL'}\n\n")
+        f.write(f"## Cognitive Continuity Score\n\n")
+        ccs_data = metrics.get("ccs", {})
+        f.write(f"- **Score:** {ccs_data.get('score', 'N/A')}\n")
+        f.write(f"- **Grade:** {ccs_data.get('grade', 'N/A')}\n")
+        f.write(f"- **Components:** continuation={ccs_data.get('components', {}).get('continuation', 0):.2f}, "
+                f"knowledge={ccs_data.get('components', {}).get('knowledge', 0):.2f}, "
+                f"graph={ccs_data.get('components', {}).get('graph', 0):.2f}\n\n")
         f.write("## Example Runs Status\n\n")
         for ex_name, ex_verdict in examples_status.items():
             f.write(f"- `{ex_name}`: {ex_verdict}\n")
@@ -367,6 +507,7 @@ def run_full_evaluation() -> EvaluationResult:
         compiler_passed=compiler_passed,
         continuity_passed=continuity_passed,
         graph_passed=graph_passed,
+        graph_projection_passed=graph_projection_passed,
         examples_passed=examples_passed,
         overall_passed=overall_passed,
         report_path=str(manifest_path),

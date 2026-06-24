@@ -11,6 +11,13 @@ This roadmap outlines current architectural freeze zones and plans for upcoming 
 - **Context Compilation**: Slot-blended context packages based on query profiles.
 - **Unified Evaluation**: Authorities system checks and diagnostics via CLI (`rationalevault doctor`, `rationalevault evaluate`).
 
+## v1.1.0 (Organizational Release)
+- **Cross-Project Sharing**: Allow agents to reference patterns, architecture rules, and lessons learned across separate repository ledgers using the new `OrganizationState` projection.
+- **Organization Graph**: Derived cross-project relations (IN_CLUSTER and TRANSFERRED_TO) mapped topolocigally.
+- **Recommendation Engine**: Proactive recommendation generation checking conflicts, duplicates, and project drift.
+- **MCP Server Support**: Standardized tool interface via Model Context Protocol.
+- **Hardening & Determinism**: Standardized `reference_time` run environment, optimized Jaccard Union complexity, and iterative DFS graph safety.
+
 ---
 
 ## v1.x (Stability & Presentation Track)
@@ -22,6 +29,5 @@ This roadmap outlines current architectural freeze zones and plans for upcoming 
 
 ## v2.0.0 (Research Track)
 - **Graph-RAG Integration**: Project hybrid semantic indices that combine vector searches with topological navigation.
-- **Cross-Project Memory sharing**: Allow agents to reference patterns, architecture rules, and lessons learned across separate repository ledgers.
 - **User-owned Memory Profiles**: Support personalized memory scopes (e.g. tracking specific engineer workflows vs agent loops).
 - **Semantic Reasoners**: Advanced contradiction resolver rules.

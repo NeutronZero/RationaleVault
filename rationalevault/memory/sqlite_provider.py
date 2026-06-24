@@ -34,12 +34,13 @@ class SQLiteMemoryProvider(BaseMemoryProvider):
                 retrieval_priority REAL,
                 reference_count INTEGER DEFAULT 0,
                 last_referenced_at TEXT,
-                created_at TEXT
+                created_at TEXT,
+                project_id TEXT DEFAULT ''
             )
             """
         )
         conn.commit()
-        # Migration guard
+        # Migration guards
         try:
             conn.execute("ALTER TABLE rationalevault_memories ADD COLUMN reference_count INTEGER DEFAULT 0")
             conn.commit()
@@ -47,6 +48,11 @@ class SQLiteMemoryProvider(BaseMemoryProvider):
             pass
         try:
             conn.execute("ALTER TABLE rationalevault_memories ADD COLUMN last_referenced_at TEXT")
+            conn.commit()
+        except Exception:
+            pass
+        try:
+            conn.execute("ALTER TABLE rationalevault_memories ADD COLUMN project_id TEXT DEFAULT ''")
             conn.commit()
         except Exception:
             pass
@@ -61,7 +67,7 @@ class SQLiteMemoryProvider(BaseMemoryProvider):
                 """
                 SELECT id, version, title, content, memory_type, importance, lifecycle_status,
                        source_event_ids, source_type, tags, confidence, retrieval_priority,
-                       reference_count, last_referenced_at, created_at
+                       reference_count, last_referenced_at, created_at, project_id
                 FROM rationalevault_memories
                 """
             )
@@ -84,6 +90,7 @@ class SQLiteMemoryProvider(BaseMemoryProvider):
                         reference_count=row[12] if row[12] is not None else 0,
                         last_referenced_at=row[13],
                         created_at=row[14],
+                        project_id=row[15] if len(row) > 15 and row[15] else "",
                     )
                 )
         finally:
@@ -107,8 +114,8 @@ class SQLiteMemoryProvider(BaseMemoryProvider):
                 INSERT OR REPLACE INTO rationalevault_memories (
                     id, version, title, content, memory_type, importance, lifecycle_status,
                     source_event_ids, source_type, tags, confidence, retrieval_priority,
-                    reference_count, last_referenced_at, created_at
-                ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+                    reference_count, last_referenced_at, created_at, project_id
+                ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
                 """,
                 (
                     record.id,
@@ -126,6 +133,7 @@ class SQLiteMemoryProvider(BaseMemoryProvider):
                     record.reference_count,
                     record.last_referenced_at,
                     record.created_at,
+                    record.project_id,
                 ),
             )
             conn.commit()
@@ -142,7 +150,7 @@ class SQLiteMemoryProvider(BaseMemoryProvider):
                 """
                 SELECT id, version, title, content, memory_type, importance, lifecycle_status,
                        source_event_ids, source_type, tags, confidence, retrieval_priority,
-                       reference_count, last_referenced_at, created_at
+                       reference_count, last_referenced_at, created_at, project_id
                 FROM rationalevault_memories 
                 WHERE title LIKE ? OR content LIKE ? OR tags LIKE ? 
                 ORDER BY retrieval_priority DESC LIMIT ?
@@ -168,6 +176,7 @@ class SQLiteMemoryProvider(BaseMemoryProvider):
                         reference_count=row[12] if row[12] is not None else 0,
                         last_referenced_at=row[13],
                         created_at=row[14],
+                        project_id=row[15] if len(row) > 15 and row[15] else "",
                     )
                 )
         finally:

@@ -22,12 +22,15 @@ Design constraints:
 """
 from __future__ import annotations
 
+from enum import Enum
 import hashlib
 import time
 import uuid
+import warnings
+import traceback
 from dataclasses import dataclass, field
 from datetime import datetime
-from typing import Any
+from typing import Any, Optional
 
 from rationalevault.knowledge.context_types import (
     ContextCitation,
@@ -40,6 +43,22 @@ from rationalevault.knowledge.knowledge_retrieval import (
 )
 from rationalevault.memory.query_analyzer import QueryIntent, RetrievalProfile, analyze_query
 from rationalevault.memory.retrieval import retrieve_ranked_citations
+
+class ContextMode(str, Enum):
+    """
+    Controls HOW context is assembled — independent of WHAT information is needed.
+
+    STANDARD:     Normal profile-driven retrieval blend.
+    CONTINUATION: Optimized for agent resumption. Elevates recent events.
+                  Populates ContextPackage.continuation_state.
+    """
+    STANDARD     = "standard"
+    CONTINUATION = "continuation"
+
+_CONTINUATION_SOURCE_WEIGHTS: dict[str, float] = {
+    "event": 0.40, "memory": 0.35, "knowledge": 0.25
+}
+
 
 
 # ── Profile Source Weight Matrix ────────────────────────────────────────────
@@ -84,6 +103,15 @@ class ContextPackage:
     inclusion_reasons: list[str] = field(default_factory=list)
     source_counts: dict[str, int] = field(default_factory=dict)
     timing: dict[str, float] = field(default_factory=dict)
+    mode: str = "standard"
+    continuation_state: Optional[Any] = None
+    knowledge_state: Optional[Any] = None
+    graph_state: Optional[Any] = None
+    cross_project_state: Optional[Any] = None
+    organization_state: Optional[Any] = None
+    organization_continuation_state: Optional[Any] = None
+    retrieval_plan: Optional[Any] = None
+    recommendations: Optional[Any] = None
 
     def to_dict(self) -> dict[str, Any]:
         return {
@@ -95,6 +123,14 @@ class ContextPackage:
             "inclusion_reasons": self.inclusion_reasons,
             "source_counts": self.source_counts,
             "timing": self.timing,
+            "mode": self.mode,
+            "continuation_state": self.continuation_state.to_dict() if self.continuation_state else None,
+            "graph_state": self.graph_state.to_dict() if self.graph_state else None,
+            "cross_project_state": self.cross_project_state.to_dict() if self.cross_project_state else None,
+            "organization_state": self.organization_state.to_dict() if self.organization_state else None,
+            "organization_continuation_state": self.organization_continuation_state.to_dict() if self.organization_continuation_state else None,
+            "retrieval_plan": self.retrieval_plan.to_dict() if self.retrieval_plan else None,
+            "recommendations": self.recommendations.to_dict() if self.recommendations else None,
         }
 
 
@@ -103,13 +139,18 @@ class ContextPackage:
 def _get_slot_allocation(
     profile: RetrievalProfile,
     total_limit: int,
+    mode: ContextMode = ContextMode.STANDARD,
 ) -> dict[str, int]:
     """Convert profile weights to integer slot counts."""
-    weights = PROFILE_SOURCE_WEIGHTS.get(
-        profile, PROFILE_SOURCE_WEIGHTS[RetrievalProfile.GENERAL_SEARCH]
-    )
+    if mode == ContextMode.CONTINUATION:
+        weights = _CONTINUATION_SOURCE_WEIGHTS
+    else:
+        weights = PROFILE_SOURCE_WEIGHTS.get(
+            profile, PROFILE_SOURCE_WEIGHTS[RetrievalProfile.GENERAL_SEARCH]
+        )
     slots = {}
     for source, ratio in weights.items():
+
         slots[source] = max(0, round(total_limit * ratio))
 
     total = sum(slots.values())
@@ -138,6 +179,8 @@ def _summarize_event_payload(event_type: str, payload: dict[str, Any]) -> str:
         "KNOWLEDGE_SYNTHESIZED": lambda p: f"Knowledge synthesized: {p.get('title', 'untitled')}",
         "KNOWLEDGE_CONTRADICTION": lambda p: "Knowledge contradiction detected",
         "MEMORY_RECORDED": lambda p: f"Memory recorded: {p.get('title', 'untitled')}",
+        "TASK_PROGRESS_NOTED":       lambda p: f"Progress on {p.get('task_id','?')}: {p.get('note','')}",
+        "CONTEXT_SNAPSHOT_RECORDED": lambda p: f"Snapshot: {p.get('summary','')} | Next: {p.get('next_action','')}",
     }
     formatter = summaries.get(event_type)
     if formatter:
@@ -264,9 +307,10 @@ def _blend_citations(
     event_contexts: list[EventContext],
     profile: RetrievalProfile,
     total_limit: int,
+    mode: ContextMode = ContextMode.STANDARD,
 ) -> list[ContextCitation]:
     """Blend all sources into a single ranked list using profile-based slot allocation."""
-    slots = _get_slot_allocation(profile, total_limit)
+    slots = _get_slot_allocation(profile, total_limit, mode)
 
     citations: list[ContextCitation] = []
 
@@ -304,10 +348,12 @@ def compile_context(
     query: str,
     project_id: uuid.UUID | None = None,
     profile: RetrievalProfile | None = None,
+    mode: ContextMode = ContextMode.STANDARD,
     memory_limit: int = 10,
     knowledge_limit: int = 10,
     event_limit: int = 20,
     total_slices: int = 30,
+    plan: Optional[Any] = None,
 ) -> ContextPackage:
     """Compile a unified context package from events, memories, and knowledge.
 
@@ -316,15 +362,158 @@ def compile_context(
         project_id: Optional project UUID for event retrieval.
                      If None, event retrieval is skipped.
         profile: Optional profile override. If None, auto-detected from query.
+        mode: The context compilation mode (STANDARD or CONTINUATION).
         memory_limit: Max memory citations to retrieve.
         knowledge_limit: Max knowledge citations to retrieve.
         event_limit: Max recent events to include.
         total_slices: Max total citations in the blended output.
+        plan: Optional RetrievalPlan from orchestrator. When provided,
+              context_weights from the plan override profile weights.
+              Backward-compatible: legacy callers unaffected.
 
     Returns:
         ContextPackage with blended, ranked context from all three sources.
     """
     t_start = time.perf_counter()
+
+    continuation_state = None
+    knowledge_state = None
+    graph_state = None
+    cross_project_state = None
+    organization_state = None
+    if mode == ContextMode.CONTINUATION:
+        event_limit = max(event_limit, 30)
+        if project_id is not None:
+            from rationalevault.projections.continuation import ContinuationProjection
+            continuation_state = ContinuationProjection.project(project_id)
+
+    # Build knowledge projection when project_id is available
+    if project_id is not None:
+        try:
+            from rationalevault.projections.knowledge import KnowledgeProjection
+            knowledge_state = KnowledgeProjection.project(str(project_id))
+        except Exception as exc:
+            warnings.warn(
+                f"Knowledge projection failed: {exc}\n"
+                f"{traceback.format_exc()}"
+            )
+            knowledge_state = None
+
+    # Build graph projection lazily — only when it will be used
+    if (
+        knowledge_state
+        and knowledge_state.active_knowledge
+        and mode == ContextMode.CONTINUATION
+    ):
+        try:
+            from rationalevault.projections.graph import GraphProjection
+            graph_state = GraphProjection.project(knowledge_state)
+        except Exception as exc:
+            warnings.warn(
+                f"Graph projection failed: {exc}\n"
+                f"{traceback.format_exc()}"
+            )
+            graph_state = None
+
+    # Build cross-project state when knowledge_state is available
+    target_knowledge: dict[str, list[Any]] = {}
+    if knowledge_state and project_id is not None:
+        try:
+            from rationalevault.knowledge.project_registry import ProjectRegistry
+            from rationalevault.knowledge.factory import get_knowledge_provider
+            from rationalevault.projections.cross_project import CrossProjectProjection
+
+            registry = ProjectRegistry.load()
+            provider = get_knowledge_provider()
+
+            # Load knowledge from registered projects, excluding current project
+            for entry in registry.list_projects():
+                if entry.id != str(project_id):
+                    try:
+                        target_knowledge[entry.id] = provider.get_all_knowledge(project_id=entry.id)
+                    except Exception as e:
+                        warnings.warn(
+                            f"Failed to fetch knowledge for project {entry.id}: {e}\n"
+                            f"{traceback.format_exc()}"
+                        )
+
+            cross_project_state = CrossProjectProjection.project(
+                current_project_id=str(project_id),
+                current_knowledge=knowledge_state.active_knowledge,
+                target_knowledge=target_knowledge,
+                query=query,
+            )
+        except Exception as exc:
+            warnings.warn(
+                f"Cross-project projection failed: {exc}\n"
+                f"{traceback.format_exc()}"
+            )
+            cross_project_state = None
+
+    # Build organization state when cross_project_state is available
+    if cross_project_state is not None:
+        try:
+            from rationalevault.organization.projection import OrganizationProjection
+            from rationalevault.knowledge.project_registry import ProjectRegistry
+
+            registry = ProjectRegistry.load()
+            all_knowledge_by_project: dict[str, list[Any]] = {}
+            if knowledge_state:
+                all_knowledge_by_project[str(project_id)] = list(knowledge_state.active_knowledge)
+            
+            # Populate other projects' knowledge in all_knowledge_by_project
+            for pid, klist in target_knowledge.items():
+                all_knowledge_by_project[pid] = klist
+
+            organization_state = OrganizationProjection.project(
+                registry=registry,
+                cross_project_states={str(project_id): cross_project_state},
+                knowledge_by_project=all_knowledge_by_project,
+            )
+        except Exception as exc:
+            warnings.warn(
+                f"Organization projection failed: {exc}\n"
+                f"{traceback.format_exc()}"
+            )
+            organization_state = None
+
+    # Build organization continuation when org state is available in continuation mode
+    organization_continuation_state = None
+    if organization_state is not None and mode == ContextMode.CONTINUATION:
+        try:
+            from rationalevault.organization.activity import OrganizationActivityProjection
+            from rationalevault.organization.continuation import (
+                OrganizationContinuationProjection,
+            )
+            from rationalevault.organization.graph import OrganizationGraphProjection
+            from rationalevault.knowledge.factory import get_knowledge_provider
+
+            provider = get_knowledge_provider()
+            all_knowledge = provider.get_all_knowledge()
+            recent_knowledge_by_project: dict[str, list[Any]] = {}
+            for pid in organization_state.project_ids:
+                pid_knowledge = [
+                    k for k in all_knowledge
+                    if getattr(k, "project_id", "") == pid
+                ]
+                recent_knowledge_by_project[pid] = pid_knowledge[:10]
+
+            activity = OrganizationActivityProjection.project(
+                project_ids=organization_state.project_ids,
+                recent_events_by_project={},
+                recent_knowledge_by_project=recent_knowledge_by_project,
+                recent_memories_by_project={},
+                org_state=organization_state,
+                activity_window_hours=72,
+            )
+            org_graph_state = OrganizationGraphProjection.project(organization_state)
+            organization_continuation_state = OrganizationContinuationProjection.project(
+                org_state=organization_state,
+                graph_state=org_graph_state,
+                activity_state=activity,
+            )
+        except Exception:
+            organization_continuation_state = None
 
     # 1. Analyze query
     t_analysis_start = time.perf_counter()
@@ -351,7 +540,8 @@ def compile_context(
     knowledge_citations: list[Any] = []
     try:
         knowledge_citations, _ = retrieve_ranked_knowledge_citations(
-            query, limit=knowledge_limit, intent=intent
+            query, limit=knowledge_limit, intent=intent,
+            project_id=str(project_id) if project_id else None,
         )
     except Exception:
         knowledge_citations = []
@@ -374,6 +564,7 @@ def compile_context(
         event_contexts=event_contexts,
         profile=intent.profile,
         total_limit=total_slices,
+        mode=mode,
     )
     t_blend_end = time.perf_counter()
 
@@ -410,4 +601,13 @@ def compile_context(
         inclusion_reasons=inclusion_reasons,
         source_counts=source_counts,
         timing=timing,
+        mode=mode.value,
+        continuation_state=continuation_state,
+        knowledge_state=knowledge_state,
+        graph_state=graph_state,
+        cross_project_state=cross_project_state,
+        organization_state=organization_state,
+        organization_continuation_state=organization_continuation_state,
+        retrieval_plan=plan,
     )
+

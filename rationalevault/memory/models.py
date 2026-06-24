@@ -42,6 +42,7 @@ class MemoryRecord:
     reference_count: int = 0
     last_referenced_at: str | None = None
     created_at: str = field(default_factory=lambda: datetime.now().isoformat())
+    project_id: str = ""
 
     def __post_init__(self) -> None:
         weights = {"low": 1.0, "medium": 2.0, "high": 3.0, "critical": 5.0}
@@ -65,6 +66,7 @@ class MemoryRecord:
             reference_count=d.get("reference_count", 0),
             last_referenced_at=d.get("last_referenced_at"),
             created_at=d.get("created_at") or datetime.now().isoformat(),
+            project_id=d.get("project_id", ""),
         )
 
     def to_dict(self) -> dict[str, Any]:
@@ -84,4 +86,5 @@ class MemoryRecord:
             "reference_count": self.reference_count,
             "last_referenced_at": self.last_referenced_at,
             "created_at": self.created_at,
+            "project_id": self.project_id,
         }

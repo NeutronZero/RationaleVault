@@ -1,12 +1,12 @@
 # RationaleVault Release Validation Checklist
 
-Before releasing a new version of RationaleVault (e.g. `v1.0.0`), the following checks must be executed and validated.
+Before releasing a new version of RationaleVault (e.g. `v1.1.0`), the following checks must be executed and validated.
 
 ---
 
 ## 1. Automated Tests & Diagnostics
 
-- [ ] **Run Unit Tests**: All 283 tests must be collected. 269 pass; 14 are expected skips (require live PostgreSQL connection, marked with `@pytest.mark.db`).
+- [ ] **Run Unit Tests**: All 876 tests must be collected. 862 pass; 14 are expected skips (require live PostgreSQL connection, marked with `@pytest.mark.db`).
   ```bash
   pytest
   ```
@@ -43,7 +43,7 @@ Before releasing a new version of RationaleVault (e.g. `v1.0.0`), the following 
 - [ ] **Release Manifest Verification**: Confirms that `.rationalevault/reports/release_manifest.json` contains:
   ```json
   {
-    "rationalevault_version": "1.0.0rc2",
+    "rationalevault_version": "1.1.0",
     "schema_version": "1.0"
   }
   ```

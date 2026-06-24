@@ -117,6 +117,7 @@ class CognitiveHead:
                     "tags": t.tags,
                     "blocked_by": t.blocked_by,
                     "created_by": t.created_by,
+                    "progress_notes": t.progress_notes,
                 }
                 for t in self.active_tasks
             ],

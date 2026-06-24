@@ -24,8 +24,12 @@ class BaseKnowledgeProvider(ABC):
         pass
 
     @abstractmethod
-    def get_all_knowledge(self) -> list[KnowledgeObject]:
-        """Return all knowledge objects stored."""
+    def get_all_knowledge(
+        self,
+        project_id: Optional[str] = None,
+        transferable_only: bool = False,
+    ) -> list[KnowledgeObject]:
+        """Return knowledge objects, optionally filtered by project and transferability."""
         pass
 
     @abstractmethod
@@ -34,8 +38,14 @@ class BaseKnowledgeProvider(ABC):
         pass
 
     @abstractmethod
-    def search_knowledge(self, query: str, limit: int = 5) -> list[KnowledgeObject]:
-        """Search knowledge objects by query string."""
+    def search_knowledge(
+        self,
+        query: str,
+        limit: int = 5,
+        project_id: Optional[str] = None,
+        transferable_only: bool = False,
+    ) -> list[KnowledgeObject]:
+        """Search knowledge objects by query string, optionally filtered."""
         pass
 
     @abstractmethod
@@ -74,11 +84,24 @@ class SQLiteKnowledgeProvider(BaseKnowledgeProvider):
                 contradicting_memory_ids TEXT,
                 superseded_by TEXT,
                 created_at TEXT,
-                updated_at TEXT
+                updated_at TEXT,
+                project_id TEXT DEFAULT '',
+                transferability TEXT DEFAULT 'LOCAL_ONLY'
             )
             """
         )
         conn.commit()
+        # Migration guards
+        try:
+            conn.execute("ALTER TABLE rationalevault_knowledge ADD COLUMN project_id TEXT DEFAULT ''")
+            conn.commit()
+        except Exception:
+            pass
+        try:
+            conn.execute("ALTER TABLE rationalevault_knowledge ADD COLUMN transferability TEXT DEFAULT 'LOCAL_ONLY'")
+            conn.commit()
+        except Exception:
+            pass
         return conn
 
     def add_knowledge(self, knowledge: KnowledgeObject) -> None:
@@ -101,8 +124,8 @@ class SQLiteKnowledgeProvider(BaseKnowledgeProvider):
                     id, version, title, content, knowledge_type, knowledge_domain,
                     importance, lifecycle_status, tags, confidence, provenance,
                     supporting_memory_ids, contradicting_memory_ids, superseded_by,
-                    created_at, updated_at
-                ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+                    created_at, updated_at, project_id, transferability
+                ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
                 """,
                 (
                     knowledge.id,
@@ -121,25 +144,41 @@ class SQLiteKnowledgeProvider(BaseKnowledgeProvider):
                     knowledge.superseded_by,
                     knowledge.created_at,
                     knowledge.updated_at,
+                    knowledge.project_id,
+                    knowledge.transferability,
                 ),
             )
             conn.commit()
         finally:
             conn.close()
 
-    def get_all_knowledge(self) -> list[KnowledgeObject]:
+    def get_all_knowledge(
+        self,
+        project_id: Optional[str] = None,
+        transferable_only: bool = False,
+    ) -> list[KnowledgeObject]:
         records = []
         conn = self._get_conn()
         try:
             cursor = conn.cursor()
+            conditions = []
+            params: list = []
+            if project_id:
+                conditions.append("project_id = ?")
+                params.append(project_id)
+            if transferable_only:
+                conditions.append("transferability IN ('REUSABLE', 'ORGANIZATIONAL')")
+            where = f"WHERE {' AND '.join(conditions)}" if conditions else ""
             cursor.execute(
-                """
+                f"""
                 SELECT id, version, title, content, knowledge_type, knowledge_domain,
                        importance, lifecycle_status, tags, confidence, provenance,
                        supporting_memory_ids, contradicting_memory_ids, superseded_by,
-                       created_at, updated_at
+                       created_at, updated_at, project_id, transferability
                 FROM rationalevault_knowledge
-                """
+                {where}
+                """,
+                params,
             )
             for row in cursor.fetchall():
                 records.append(self._row_to_knowledge(row))
@@ -156,7 +195,7 @@ class SQLiteKnowledgeProvider(BaseKnowledgeProvider):
                 SELECT id, version, title, content, knowledge_type, knowledge_domain,
                        importance, lifecycle_status, tags, confidence, provenance,
                        supporting_memory_ids, contradicting_memory_ids, superseded_by,
-                       created_at, updated_at
+                       created_at, updated_at, project_id, transferability
                 FROM rationalevault_knowledge WHERE id = ?
                 """,
                 (knowledge_id,),
@@ -168,23 +207,37 @@ class SQLiteKnowledgeProvider(BaseKnowledgeProvider):
             conn.close()
         return None
 
-    def search_knowledge(self, query: str, limit: int = 5) -> list[KnowledgeObject]:
+    def search_knowledge(
+        self,
+        query: str,
+        limit: int = 5,
+        project_id: Optional[str] = None,
+        transferable_only: bool = False,
+    ) -> list[KnowledgeObject]:
         records = []
         conn = self._get_conn()
         try:
             cursor = conn.cursor()
             q = f"%{query}%"
+            conditions = ["(title LIKE ? OR content LIKE ? OR tags LIKE ?)"]
+            params: list = [q, q, q]
+            if project_id:
+                conditions.append("project_id = ?")
+                params.append(project_id)
+            if transferable_only:
+                conditions.append("transferability IN ('REUSABLE', 'ORGANIZATIONAL')")
+            params.append(limit)
             cursor.execute(
-                """
+                f"""
                 SELECT id, version, title, content, knowledge_type, knowledge_domain,
                        importance, lifecycle_status, tags, confidence, provenance,
                        supporting_memory_ids, contradicting_memory_ids, superseded_by,
-                       created_at, updated_at
+                       created_at, updated_at, project_id, transferability
                 FROM rationalevault_knowledge
-                WHERE title LIKE ? OR content LIKE ? OR tags LIKE ?
+                WHERE {' AND '.join(conditions)}
                 ORDER BY created_at DESC LIMIT ?
                 """,
-                (q, q, q, limit),
+                params,
             )
             for row in cursor.fetchall():
                 records.append(self._row_to_knowledge(row))
@@ -222,6 +275,8 @@ class SQLiteKnowledgeProvider(BaseKnowledgeProvider):
             "superseded_by": row[13],
             "created_at": row[14],
             "updated_at": row[15],
+            "project_id": row[16] if len(row) > 16 and row[16] else "",
+            "transferability": row[17] if len(row) > 17 and row[17] else "LOCAL_ONLY",
         }
         return KnowledgeObject.from_dict(d)
 
@@ -257,7 +312,11 @@ class MarkdownKnowledgeProvider(BaseKnowledgeProvider):
 
         self._write_records(records)
 
-    def get_all_knowledge(self) -> list[KnowledgeObject]:
+    def get_all_knowledge(
+        self,
+        project_id: Optional[str] = None,
+        transferable_only: bool = False,
+    ) -> list[KnowledgeObject]:
         self._ensure_file()
         records = []
         try:
@@ -275,6 +334,14 @@ class MarkdownKnowledgeProvider(BaseKnowledgeProvider):
                     pass
         except Exception:
             pass
+
+        if project_id:
+            records = [r for r in records if r.project_id == project_id]
+        if transferable_only:
+            records = [
+                r for r in records
+                if r.transferability in ("REUSABLE", "ORGANIZATIONAL")
+            ]
         return records
 
     def get_knowledge_by_id(self, knowledge_id: str) -> Optional[KnowledgeObject]:
@@ -284,8 +351,16 @@ class MarkdownKnowledgeProvider(BaseKnowledgeProvider):
                 return r
         return None
 
-    def search_knowledge(self, query: str, limit: int = 5) -> list[KnowledgeObject]:
-        records = self.get_all_knowledge()
+    def search_knowledge(
+        self,
+        query: str,
+        limit: int = 5,
+        project_id: Optional[str] = None,
+        transferable_only: bool = False,
+    ) -> list[KnowledgeObject]:
+        records = self.get_all_knowledge(
+            project_id=project_id, transferable_only=transferable_only
+        )
         if not query:
             return records[:limit]
 

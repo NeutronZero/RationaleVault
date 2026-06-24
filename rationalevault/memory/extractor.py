@@ -31,6 +31,7 @@ def extract_memories_from_event(event: EventRecord) -> list[MemoryRecord]:
                 source_event_ids=[event_id],
                 source_type="decision",
                 confidence=1.0,
+                project_id=str(event.project_id),
             )
         )
 
@@ -49,6 +50,7 @@ def extract_memories_from_event(event: EventRecord) -> list[MemoryRecord]:
                     source_event_ids=[event_id],
                     source_type="decision_rationale",
                     confidence=1.0,
+                    project_id=str(event.project_id),
                 )
             )
 
@@ -67,6 +69,7 @@ def extract_memories_from_event(event: EventRecord) -> list[MemoryRecord]:
                 source_event_ids=[event_id],
                 source_type="reflection",
                 confidence=1.0,
+                project_id=str(event.project_id),
             )
         )
 
@@ -90,6 +93,7 @@ def extract_memories_from_event(event: EventRecord) -> list[MemoryRecord]:
                 source_event_ids=[event_id],
                 source_type="failure",
                 confidence=1.0,
+                project_id=str(event.project_id),
             )
         )
 
@@ -109,6 +113,7 @@ def extract_memories_from_event(event: EventRecord) -> list[MemoryRecord]:
                     source_event_ids=[event_id],
                     source_type="architecture",
                     confidence=1.0,
+                    project_id=str(event.project_id),
                 )
             )
 

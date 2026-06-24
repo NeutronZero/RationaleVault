@@ -11,6 +11,8 @@ from datetime import datetime
 from enum import Enum
 from typing import Any, Optional
 
+from rationalevault.knowledge.relation_types import RelationType
+
 
 class KnowledgeType(str, Enum):
     """Types of knowledge that can be synthesized from memories."""
@@ -40,11 +42,48 @@ class KnowledgeLifecycle(str, Enum):
     ARCHIVED = "ARCHIVED"
 
 
-def generate_knowledge_id(knowledge_type: str, title: str, content: str) -> str:
-    """Deterministic ID generation for knowledge objects."""
+class KnowledgeTransferability(str, Enum):
+    """Transferability — can this knowledge leave its project?"""
+    LOCAL_ONLY = "LOCAL_ONLY"
+    REUSABLE = "REUSABLE"
+    ORGANIZATIONAL = "ORGANIZATIONAL"
+
+
+def is_transferable(transferability: str) -> bool:
+    """Check if a transferability value allows cross-project transfer."""
+    return transferability in {
+        KnowledgeTransferability.REUSABLE.value,
+        KnowledgeTransferability.ORGANIZATIONAL.value,
+    }
+
+
+class EpistemicStatus(str, Enum):
+    """Epistemic status — how confident are we that this knowledge is true.
+
+    Orthogonal to KnowledgeLifecycle (freshness):
+      ACTIVE + VALIDATED = current and confident
+      ACTIVE + CONFLICTED = current but disputed
+      SUPERSEDED + VALIDATED = was confident when active, now replaced
+
+    Derived from evidence by KnowledgeProjection. Not stored in DB.
+    """
+    PROPOSED   = "PROPOSED"
+    VALIDATED  = "VALIDATED"
+    INVARIANT  = "INVARIANT"
+    CONFLICTED = "CONFLICTED"
+    TOMBSTONED = "TOMBSTONED"
+
+
+def generate_knowledge_id(
+    knowledge_type: str, title: str, content: str, project_id: str = "",
+) -> str:
+    """Deterministic ID generation for knowledge objects.
+
+    Includes project_id to prevent cross-project ID collisions.
+    """
     norm_content = " ".join(content.lower().strip().split())
     norm_title = " ".join(title.lower().strip().split())
-    data = f"{knowledge_type.lower()}:{norm_title}:{norm_content}"
+    data = f"{knowledge_type.lower()}:{project_id}:{norm_title}:{norm_content}"
     return hashlib.sha256(data.encode("utf-8")).hexdigest()
 
 
@@ -161,6 +200,8 @@ class KnowledgeObject:
     superseded_by: Optional[str] = None
     created_at: str = field(default_factory=lambda: datetime.now().isoformat())
     updated_at: str = field(default_factory=lambda: datetime.now().isoformat())
+    project_id: str = ""
+    transferability: str = KnowledgeTransferability.LOCAL_ONLY.value
 
     def to_dict(self) -> dict[str, Any]:
         return {
@@ -180,6 +221,8 @@ class KnowledgeObject:
             "superseded_by": self.superseded_by,
             "created_at": self.created_at,
             "updated_at": self.updated_at,
+            "project_id": self.project_id,
+            "transferability": self.transferability,
         }
 
     @classmethod
@@ -217,6 +260,8 @@ class KnowledgeObject:
             superseded_by=d.get("superseded_by"),
             created_at=d.get("created_at", datetime.now().isoformat()),
             updated_at=d.get("updated_at", datetime.now().isoformat()),
+            project_id=d.get("project_id", ""),
+            transferability=d.get("transferability", KnowledgeTransferability.LOCAL_ONLY.value),
         )
 
 
@@ -260,6 +305,8 @@ class ArchitecturePrinciple(KnowledgeObject):
             superseded_by=base.superseded_by,
             created_at=base.created_at,
             updated_at=base.updated_at,
+            project_id=base.project_id,
+            transferability=base.transferability,
             principle_strength=d.get("principle_strength", 0.0),
             supporting_decisions=d.get("supporting_decisions", []),
             supporting_rationales=d.get("supporting_rationales", []),
@@ -283,6 +330,7 @@ class ProjectInvariant(KnowledgeObject):
     def __post_init__(self) -> None:
         self.knowledge_type = KnowledgeType.PROJECT_INVARIANT
         self.importance = "critical"
+        self.transferability = KnowledgeTransferability.ORGANIZATIONAL.value
 
 
 @dataclass
@@ -290,25 +338,34 @@ class KnowledgeRelation:
     """Relationships between knowledge objects."""
     source_id: str
     target_id: str
-    relation_type: str  # SUPPORTS | CONTRADICTS | DERIVED_FROM | RELATED_TO
+    relation_type: RelationType
     confidence: float
     created_at: str = field(default_factory=lambda: datetime.now().isoformat())
+
+    def __post_init__(self) -> None:
+        if not isinstance(self.relation_type, RelationType):
+            raise TypeError(
+                f"relation_type must be a RelationType, got {type(self.relation_type).__name__}"
+            )
 
     def to_dict(self) -> dict[str, Any]:
         return {
             "source_id": self.source_id,
             "target_id": self.target_id,
-            "relation_type": self.relation_type,
+            "relation_type": self.relation_type.value,
             "confidence": self.confidence,
             "created_at": self.created_at,
         }
 
     @classmethod
     def from_dict(cls, d: dict[str, Any]) -> KnowledgeRelation:
+        rt = d["relation_type"]
+        if isinstance(rt, str):
+            rt = RelationType.from_str(rt)
         return cls(
             source_id=d["source_id"],
             target_id=d["target_id"],
-            relation_type=d["relation_type"],
+            relation_type=rt,
             confidence=d.get("confidence", 1.0),
             created_at=d.get("created_at", datetime.now().isoformat()),
         )

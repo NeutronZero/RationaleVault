@@ -1,4 +1,4 @@
-# RationaleVault (v1.0.0)
+# RationaleVault (v1.1.0)
 
 **Event-sourced cognitive continuity and memory layer for multi-agent AI workflows.**
 
@@ -11,6 +11,8 @@ RationaleVault enables any AI agent — Claude, OpenCode, ChatGPT, Cursor, Copil
 LLM agents lose context. As projects evolve over weeks or months, they accumulate decisions, lessons, failures, architectural constraints, and rationale. Standard RAG tools and vector databases fail to preserve these because they lack structural temporal order, resulting in context drift, memory duplication, and decision degradation.
 
 RationaleVault provides an event-sourced cognitive continuity layer. By treating events as the immutable source of truth and compiling memory, knowledge, and graphs as deterministic projections, RationaleVault ensures agents can reconstruct state and continue work with zero cognitive loss.
+
+Now in `v1.1.0`, RationaleVault expands from single-project memories to **cross-project organizational intelligence** and **proactive recommendation loops**, giving agents deep structural visibility across your entire development portfolio.
 
 ## What RationaleVault Is Not
 
@@ -42,11 +44,19 @@ Knowledge Evaluation (Density & Precision Gates)
       ↓
 Knowledge Graph Projection (Nodes & Edge Integrity)
       ↓
+Cross-Project Projection (Multi-Repo Blending & Isolation)
+      ↓
+Organization Graph (IN_CLUSTER & TRANSFER Relationships)
+      ↓
+Organization Continuation (Cross-Project Activity Level)
+      ↓
+Recommendation Engine (Drift, Blocker, & Merge Logic)
+      ↓
 Context Construction (Profile Slot Allocation Blending)
       ↓
 Context Evaluation (Completeness & Traceability)
       ↓
-Agent Compilers (Prompt Serialization / Adapters)
+Agent Compilers & MCP Server (Prompt Serialization / Adapters)
       ↓
 Continuity Validation (Handoff Integrity Verification)
 ```
@@ -95,7 +105,7 @@ For developers running from source:
 ```bash
 pytest
 ```
-All 283 tests will execute (269 pass; 14 require a live PostgreSQL database and are skipped by default).
+All 876 tests will execute (862 pass; 14 require a live PostgreSQL database and are skipped by default).
 
 ---
 
@@ -109,7 +119,10 @@ RationaleVault provides a unified command-line toolset for inspecting and managi
 - **`rationalevault memory`**: Query and manage the memory layer.
 - **`rationalevault knowledge`**: Inspect synthesized project invariants, rules, and architecture guidelines.
 - **`rationalevault context`**: Compile queries into formatted context packages ready for agent consumption.
-- **`rationalevault graph`**: Build, serialization (Mermaid, GraphML), and check statistics on the derived knowledge projection.
+- **`rationalevault graph`**: Build, serialize, and check statistics on the derived knowledge projection.
+- **`rationalevault organization`**: Multi-project graph topology, lineages, reachability, and cluster analysis.
+- **`rationalevault recommendation`**: Generate proactive merge recommendations, blockers, and drift warnings.
+- **`rationalevault mcp`**: Start the Model Context Protocol (MCP) server for native LLM agent tool integration.
 
 ---
 

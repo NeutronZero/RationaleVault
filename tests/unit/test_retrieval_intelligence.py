@@ -30,12 +30,12 @@ def test_rrf_blending() -> None:
     rec1 = MemoryRecord(
         id="mem-1", version=1, title="Test 1", content="Content 1",
         memory_type=MemoryType.DECISION, importance="medium", lifecycle_status="active",
-        source_event_ids=["e1"], source_type="test"
+        source_event_ids=["e1"], source_type="test", project_id="test"
     )
     rec2 = MemoryRecord(
         id="mem-2", version=1, title="Test 2", content="Content 2",
         memory_type=MemoryType.DECISION, importance="medium", lifecycle_status="active",
-        source_event_ids=["e2"], source_type="test"
+        source_event_ids=["e2"], source_type="test", project_id="test"
     )
     
     # keyword ranks: mem-1, mem-2
@@ -63,6 +63,7 @@ def test_explainable_citations_and_audit(tmp_path) -> None:
         lifecycle_status="active",
         source_event_ids=["evt-99"],
         source_type="decision",
+        project_id="test",
     )
     provider.add_record(rec)
     
@@ -101,12 +102,12 @@ def test_detailed_adversarial_audit_cases() -> None:
     rec1 = MemoryRecord(
         id="mem-1", version=1, title="Test 1", content="Content 1",
         memory_type=MemoryType.DECISION, importance="medium", lifecycle_status="active",
-        source_event_ids=["e1"], source_type="test"
+        source_event_ids=["e1"], source_type="test", project_id="test"
     )
     rec2 = MemoryRecord(
         id="mem-2", version=1, title="Test 2", content="Content 2",
         memory_type=MemoryType.DECISION, importance="medium", lifecycle_status="active",
-        source_event_ids=["e2"], source_type="test"
+        source_event_ids=["e2"], source_type="test", project_id="test"
     )
     cit1 = build_citation(rec1, "test", ["query_analyzer", "retrieval_planner"])
     cit2 = build_citation(rec2, "test", ["query_analyzer", "retrieval_planner"])

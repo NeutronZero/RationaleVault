@@ -166,10 +166,15 @@ def build_knowledge_citation(
     )
 
 
+import re
+
+TOKEN_RE = re.compile(r"\w+")
+
+
 def extract_keywords(query: str) -> list[str]:
     """Extract keywords from query (same pattern as query_analyzer and semantic_search)."""
     q_clean = query.lower().strip()
-    words = [w.strip("?,.:;\"'()[]{}") for w in q_clean.split()]
+    words = TOKEN_RE.findall(q_clean)
     stopwords = {
         "what", "is", "a", "the", "of", "and", "in", "to", "exist",
         "are", "about", "for", "with", "on", "exists", "did", "occur", "why",

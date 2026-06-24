@@ -58,3 +58,19 @@ class BaseEventStore(ABC):
     def get_event_count(self, project_id: UUID) -> int:
         """Return the total event count for a project."""
         pass
+
+    @abstractmethod
+    def get_session_events(self, project_id: UUID, session_id: str) -> list[EventRecord]:
+        """Return all events for a project's session ordered by event_sequence ASC."""
+        pass
+
+    @abstractmethod
+    def get_last_session_id(self, project_id: UUID) -> Optional[str]:
+        """Return the session_id of the most recent event of any type."""
+        pass
+
+    @abstractmethod
+    def get_recent_events(self, project_id: UUID, limit: int = 20) -> list[EventRecord]:
+        """Return the most recent events for a project ordered by event_sequence DESC."""
+        pass
+

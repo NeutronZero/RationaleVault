@@ -90,3 +90,13 @@ class EventStore(BaseEventStore):
 
     def get_event_count(self, project_id: UUID) -> int:
         return self._store.get_event_count(project_id)
+
+    def get_session_events(self, project_id: UUID, session_id: str) -> list[EventRecord]:
+        return self._store.get_session_events(project_id, session_id)
+
+    def get_last_session_id(self, project_id: UUID) -> Optional[str]:
+        return self._store.get_last_session_id(project_id)
+
+    def get_recent_events(self, project_id: UUID, limit: int = 20) -> list[EventRecord]:
+        return self._store.get_recent_events(project_id, limit)
+

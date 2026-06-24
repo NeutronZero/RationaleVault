@@ -60,6 +60,7 @@ def _make_knowledge(
         importance="high",
         provenance=provenance,
         supporting_memory_ids=["mem-1", "mem-2"],
+        project_id="test",
     )
 
 

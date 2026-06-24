@@ -37,7 +37,9 @@ class RetrievalExecution:
         }
 
 
-def get_profile_weights(profile: RetrievalProfile) -> dict[MemoryType, float]:
+from types import MappingProxyType
+
+def get_profile_weights(profile: RetrievalProfile) -> MappingProxyType[MemoryType, float]:
     """
     Returns weights for each MemoryType based on the active RetrievalProfile.
     """
@@ -57,10 +59,10 @@ def get_profile_weights(profile: RetrievalProfile) -> dict[MemoryType, float]:
     elif profile == RetrievalProfile.WORKFLOW_RETRIEVAL:
         weights[MemoryType.WORKFLOW] = 5.0
         
-    return weights
+    return MappingProxyType(weights)
 
 
-def get_knowledge_profile_weights(profile: RetrievalProfile) -> dict[KnowledgeType, float]:
+def get_knowledge_profile_weights(profile: RetrievalProfile) -> MappingProxyType[KnowledgeType, float]:
     """Returns weights for each KnowledgeType based on the active RetrievalProfile."""
     weights = {t: 1.0 for t in KnowledgeType}
 
@@ -91,7 +93,7 @@ def get_knowledge_profile_weights(profile: RetrievalProfile) -> dict[KnowledgeTy
         weights[KnowledgeType.DECISION_LINEAGE] = 5.0
         weights[KnowledgeType.ARCHITECTURE_PRINCIPLE] = 3.0
 
-    return weights
+    return MappingProxyType(weights)
 
 
 def execute_retrieval_plan(

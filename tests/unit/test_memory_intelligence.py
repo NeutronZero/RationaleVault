@@ -39,6 +39,7 @@ def test_retrieval_score_lifecycle_and_decay() -> None:
         reference_count=10,
         last_referenced_at=(datetime.now() - timedelta(days=5)).isoformat(),
         created_at=(datetime.now() - timedelta(days=10)).isoformat(),
+        project_id="test",
     )
     
     score = compute_retrieval_score(rec)
@@ -68,6 +69,7 @@ def test_reference_tracker(tmp_path: Path, monkeypatch) -> None:
         lifecycle_status="active",
         source_event_ids=["e1"],
         source_type="manual",
+        project_id="test",
     )
     provider.add_record(rec)
     
@@ -96,6 +98,7 @@ def test_automatic_supersession(tmp_path: Path, monkeypatch) -> None:
         lifecycle_status="active",
         source_event_ids=["e1"],
         source_type="decision",
+        project_id="test",
     )
     provider.add_record(rec1)
     
@@ -140,6 +143,7 @@ def test_consolidation_candidates_detection(tmp_path: Path, monkeypatch) -> None
         lifecycle_status="active",
         source_event_ids=["e1"],
         source_type="decision",
+        project_id="test",
     )
     rec2 = MemoryRecord(
         id="postgres-b",
@@ -151,6 +155,7 @@ def test_consolidation_candidates_detection(tmp_path: Path, monkeypatch) -> None
         lifecycle_status="active",
         source_event_ids=["e2"],
         source_type="decision",
+        project_id="test",
     )
     provider.add_record(rec1)
     provider.add_record(rec2)

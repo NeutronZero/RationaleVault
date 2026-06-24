@@ -5,6 +5,20 @@ This project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.htm
 
 ---
 
+## [1.1.0] — 2026-06-24
+
+### Added
+- **Organizational Intelligence (I11–I14)**: Introduced cross-project organization projection, graph topology, activity stream analysis, and continuation models.
+- **Recommendation Engine (I15)**: Added automated recommendations for duplicate cluster consolidation, drift warnings, and checklist additions.
+- **Audit Remediation**: Secured project isolation in storage layers, corrected compiler adapter signature mismatches, and filled provenance chain gaps.
+- **Determinism Contract**: Standardized all projections to support deterministic `reference_time` runs using a centralized helper.
+- **Performance Optimization**: Re-engineered Jaccard similarity union size arithmetic to reduce organization graph construction complexity from `O(C × S² × L)` to `O(L + C × S²)` with zero set allocations.
+- **Graph Safety**: Replaced all recursive graph traversals with memory-safe, stack-based iterative DFS traversals (`dependency_chain()`, `all_paths()`, `_dfs_cycles()`) to prevent recursion limits on deep structures.
+- **Retrieval Hardening**: Added module-level pre-compiled regex tokenization for triggers/intent classification, and made retrieval profiles and weight structures immutable using `MappingProxyType`.
+- **Registry Concurrency Lock**: Added atomic directory write-locking (`os.mkdir` lock) to serialize registry modifications and prevent corruption under concurrent runs.
+
+---
+
 ## [1.0.0] — 2026-06-22
 
 ### Added

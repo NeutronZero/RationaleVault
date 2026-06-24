@@ -18,6 +18,7 @@ from rationalevault.knowledge.models import (
     ProvenanceChain,
     generate_knowledge_id,
 )
+from rationalevault.knowledge.relation_types import RelationType
 from rationalevault.knowledge.evaluation import (
     KnowledgeMetrics,
     compute_knowledge_metrics,
@@ -56,6 +57,7 @@ def _make_memory(
         source_type="test",
         tags=tags or [],
         confidence=0.9,
+        project_id="test",
     )
 
 
@@ -91,6 +93,7 @@ def _make_knowledge(
         importance=importance,
         provenance=provenance,
         supporting_memory_ids=["mem-1"],
+        project_id="test",
     )
 
 
@@ -305,7 +308,7 @@ def test_relations_detection() -> None:
 
     relations = detect_relations([k1, k2])
     # Same type + similar content → SUPPORTS
-    supports = [r for r in relations if r.relation_type == "SUPPORTS"]
+    supports = [r for r in relations if r.relation_type == RelationType.SUPPORTS]
     assert len(supports) >= 0  # May or may not detect support based on threshold
 
 

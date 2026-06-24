@@ -67,6 +67,7 @@ def main() -> None:
         source_event_ids=["ev_1"],
         source_type="event",
         confidence=1.0,
+        project_id="example",
     )
     memory_provider.add_record(mem)
 

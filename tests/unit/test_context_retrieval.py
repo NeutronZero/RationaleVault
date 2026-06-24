@@ -90,6 +90,7 @@ def _make_knowledge(
         provenance=provenance,
         supporting_memory_ids=["mem-1", "mem-2"],
         tags=tags or [],
+        project_id="test",
     )
 
 
@@ -492,3 +493,92 @@ def test_redundancy_computation() -> None:
     assert total == 3
     assert unique == 2
     assert redundancy > 0.0
+
+
+def test_compile_context_integration(monkeypatch: pytest.MonkeyPatch, tmp_path: Path) -> None:
+    """Integration test to verify cross_project_state and organization_state are compiled."""
+    # Isolate project registry path for this test
+    monkeypatch.setattr("rationalevault.knowledge.project_registry.REGISTRY_FILE", tmp_path / "registry.yaml")
+    monkeypatch.setattr("rationalevault.knowledge.project_registry.REGISTRY_DIR", tmp_path)
+
+    # Register current project
+    from rationalevault.knowledge.project_registry import ProjectRegistry
+    registry = ProjectRegistry.load()
+    registry.register(str(tmp_path))
+
+    # Add a dummy knowledge object to store
+    from rationalevault.knowledge.factory import get_knowledge_provider
+    provider = get_knowledge_provider()
+    k1 = _make_knowledge("k1", "Test principle", "Test content")
+    k1.project_id = registry.projects[0].id
+    provider.add_knowledge(k1)
+
+    import uuid
+    # Compile context with target project id
+    pkg = compile_context("Test query", project_id=uuid.UUID(hex=registry.projects[0].id.ljust(32, '0')))
+    
+    # Assert that states are compiled and not None
+    assert pkg.cross_project_state is not None
+    assert pkg.organization_state is not None
+
+
+def test_projection_failure_visibility(monkeypatch: pytest.MonkeyPatch) -> None:
+    """Verify that when a projection fails, a UserWarning is raised and states degrade gracefully."""
+    from rationalevault.projections.knowledge import KnowledgeProjection
+    
+    # Mock projection to fail
+    def mock_project(*args, **kwargs):
+        raise RuntimeError("simulated database failure")
+    
+    monkeypatch.setattr(KnowledgeProjection, "project", mock_project)
+    
+    import uuid
+    dummy_id = uuid.uuid4()
+    
+    with pytest.warns(UserWarning, match="Knowledge projection failed"):
+        pkg = compile_context("Test query", project_id=dummy_id)
+        
+    assert pkg.cross_project_state is None
+    assert pkg.organization_state is None
+
+
+def test_retrieval_isolation_matrix(monkeypatch: pytest.MonkeyPatch, tmp_path: Path) -> None:
+    """Verify cross-project retrieval isolation constraints: LOCAL_ONLY, REUSABLE, and ORGANIZATIONAL."""
+    # Build clean database in temp path
+    from rationalevault.knowledge.store import SQLiteKnowledgeProvider
+    db_file = tmp_path / "test_retrieval.db"
+    provider = SQLiteKnowledgeProvider(db_path=db_file)
+    
+    # Mock get_knowledge_provider to return our isolated provider
+    monkeypatch.setattr("rationalevault.knowledge.knowledge_retrieval.get_knowledge_provider", lambda: provider)
+    
+    # Add matrix knowledge objects to project A
+    k_local = _make_knowledge("k_local", "A local note", "secret A content")
+    k_local.project_id = "proj_a"
+    k_local.transferability = "LOCAL_ONLY"
+    
+    k_reusable = _make_knowledge("k_reusable", "A reusable calibration workflow", "calibration content")
+    k_reusable.project_id = "proj_a"
+    k_reusable.transferability = "REUSABLE"
+    
+    k_org = _make_knowledge("k_org", "An organizational policy", "policy content")
+    k_org.project_id = "proj_a"
+    k_org.transferability = "ORGANIZATIONAL"
+    
+    provider.add_knowledge(k_local)
+    provider.add_knowledge(k_reusable)
+    provider.add_knowledge(k_org)
+
+    # 1. Project A querying: expects to see all (local, reusable, organizational)
+    citations_a, _ = retrieve_ranked_knowledge_citations("content", project_id="proj_a")
+    ids_a = {c.knowledge_id for c in citations_a}
+    assert "k_local" in ids_a
+    assert "k_reusable" in ids_a
+    assert "k_org" in ids_a
+
+    # 2. Project B querying: expects to see reusable and organizational, but NOT local_only
+    citations_b, _ = retrieve_ranked_knowledge_citations("content", project_id="proj_b")
+    ids_b = {c.knowledge_id for c in citations_b}
+    assert "k_local" not in ids_b
+    assert "k_reusable" in ids_b
+    assert "k_org" in ids_b
