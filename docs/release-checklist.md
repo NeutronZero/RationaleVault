@@ -6,7 +6,7 @@ Before releasing a new version of RationaleVault (e.g. `v1.1.0`), the following 
 
 ## 1. Automated Tests & Diagnostics
 
-- [ ] **Run Unit Tests**: All 876 tests must be collected. 862 pass; 14 are expected skips (require live PostgreSQL connection, marked with `@pytest.mark.db`).
+- [ ] **Run Unit Tests**: All 862 tests must be collected. 848 pass; 14 are expected skips (require live PostgreSQL connection, marked with `@pytest.mark.db`).
   ```bash
   pytest
   ```

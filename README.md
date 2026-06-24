@@ -105,7 +105,7 @@ For developers running from source:
 ```bash
 pytest
 ```
-All 876 tests will execute (862 pass; 14 require a live PostgreSQL database and are skipped by default).
+All 862 tests will execute (848 pass; 14 require a live PostgreSQL database and are skipped by default).
 
 ---
 
