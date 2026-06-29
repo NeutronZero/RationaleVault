@@ -133,30 +133,47 @@ def test_projection_equivalence():
     # Assert projected_state == projected_state_upcasted
 ```
 
-### Proof 3: Policy Authority
+### Proof 3: Policy Authority (T15)
 
-**Property:** Changing SchemaPolicy changes replay behavior without modifying ReplayResolver.
+**Property:** SchemaPolicy alone controls interpretation. Same input, same engine, different policy → different canonical output.
 
 ```python
 def test_policy_authority():
-    """Different policies produce different replay results."""
-    # Policy A: TASK_CREATED latest = v1 (no migration)
-    # Policy B: TASK_CREATED latest = v2 (migration applied)
-    # Replay v1 event with Policy A → v1 output
-    # Replay v1 event with Policy B → v2 output
-    # Replay engine identical, only policy changes
+    """Policy alone controls canonical interpretation."""
+    # Policy A: TASK_CREATED latest_version=1 (no migration)
+    # Policy B: TASK_CREATED latest_version=2 (migration applied)
+    # Same v1 input event, same replay engine
+    # Policy A → canonical v1 output
+    # Policy B → canonical v2 output
+    # Only SchemaPolicy changes
+
+def test_governance_compiles_different_policies():
+    """Different governance snapshots produce different policies."""
+    # GovernanceState at seq 50: TASK_CREATED latest=v1
+    # GovernanceState at seq 100: TASK_CREATED latest=v2
+    # SchemaPolicyFactory.compile_at_sequence(state, 50) → policy_v1
+    # SchemaPolicyFactory.compile_at_sequence(state, 100) → policy_v2
+    # Assert policy_v1 != policy_v2
+    # Assert both are immutable snapshots
 ```
 
 ### Proof 4: Migration Graph Safety
 
-**Property:** Incomplete migration graphs fail with UnknownSchemaError.
+**Property:** Incomplete or invalid migration graphs fail with UnknownSchemaError.
 
 ```python
 def test_unknown_schema_path_fails():
-    """Incomplete migration graph raises UnknownSchemaError."""
+    """Missing migration edge raises UnknownSchemaError."""
     # TASK_CREATED schema_version=3
     # Policy: latest=4, migration chain 3→4 missing
     # Assert UnknownSchemaError raised
+
+def test_cyclic_migration_graph_rejected():
+    """Cyclic migration graph is prevented at policy construction."""
+    # Policy: TASK_CREATED migration 1→2, 2→1 (cycle)
+    # Assert SchemaPolicyFactory rejects or SchemaPolicy.can_resolve returns False
+    # Note: cycles are prevented during SchemaPolicy construction,
+    # not at resolver execution time
 ```
 
 ### Proof 5: Determinism
@@ -277,13 +294,13 @@ Run full test suite. All tests must pass. No regressions.
 
 ---
 
-## Success Criteria
+## Acceptance Gates
 
-1. **Mixed replay** — 5 interleaved v1/v2 events replay to 5 canonical v2 events.
-2. **Projection equivalence** — native v2 == upcasted v1 (events + projected state).
-3. **Policy authority** — different policies produce different results; replay engine unchanged.
-4. **Migration graph safety** — incomplete paths raise UnknownSchemaError.
-5. **Determinism** — 10 replays produce identical results.
-6. **Performance** — migration overhead is measurable and bounded.
-7. **Architectural guards** — 5 T15 guards pass.
-8. **Full test suite** — 1990+ tests pass, no regressions.
+| Stage                    | Gate                                                     |
+|--------------------------|----------------------------------------------------------|
+| Migration Designer       | Migration specification approved                         |
+| Schema Evolution Steward | Policy completeness verified                             |
+| Validation Engineer      | Six proofs pass                                          |
+| Performance Engineer     | Overhead within threshold                                |
+| Theorem Guardian         | T15 + architectural guards pass                          |
+| Release                  | Full regression suite green (1990+ tests, 0 failures)    |
