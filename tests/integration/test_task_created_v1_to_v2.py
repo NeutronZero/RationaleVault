@@ -187,3 +187,85 @@ def test_governance_compiles_different_policies():
     # Both must be immutable snapshots
     assert isinstance(policy_v1, SchemaPolicy)
     assert isinstance(policy_v2, SchemaPolicy)
+
+
+def test_canonical_idempotence():
+    """Canonical event is never modified by replay.
+
+    Property: Canonical idempotence.
+    Exercises: ReplayPipeline (public API).
+    """
+    v2_event = _create_event(seq=1, schema_version=2, payload=V2_PAYLOAD)
+
+    context = ReplayContext(schema_policy=POLICY_V2)
+    registry = UpcasterRegistry.default()
+    pipeline = ReplayPipeline(context=context, registry=registry)
+
+    result_1 = pipeline.process([v2_event])
+    result_2 = pipeline.process([v2_event])
+
+    assert len(result_1) == 1
+    assert len(result_2) == 1
+    assert result_1[0].payload == result_2[0].payload
+    assert result_1[0].payload == V2_PAYLOAD
+
+
+def test_determinism():
+    """Repeated replays produce identical results.
+
+    Property: Deterministic replay.
+    Exercises: ReplayPipeline (public API).
+    """
+    events = [
+        _create_event(seq=1, schema_version=1, payload=V1_PAYLOAD),
+        _create_event(seq=2, schema_version=2, payload=V2_PAYLOAD),
+        _create_event(seq=3, schema_version=1, payload=V1_PAYLOAD),
+    ]
+
+    results = []
+    for _ in range(10):
+        state = _replay_via_pipeline(events, POLICY_V2)
+        results.append(copy.deepcopy(state))
+
+    for result in results[1:]:
+        assert result == results[0]
+
+
+def test_performance_baseline():
+    """Migration overhead remains within regression budget.
+
+    Property: Performance preservation.
+    Exercises: ReplayPipeline (public API).
+
+    Uses relative comparison to avoid CI instability.
+    """
+    events = []
+    for i in range(1000):
+        if i % 3 == 0:
+            events.append(_create_event(seq=i, schema_version=1, payload=V1_PAYLOAD))
+        else:
+            events.append(_create_event(seq=i, schema_version=2, payload=V2_PAYLOAD))
+
+    v2_events = [_create_event(seq=e.event_sequence, schema_version=2, payload=V2_PAYLOAD) for e in events]
+
+    start = time.perf_counter()
+    for _ in range(10):
+        context = ReplayContext(schema_policy=POLICY_V2)
+        registry = UpcasterRegistry.default()
+        pipeline = ReplayPipeline(context=context, registry=registry)
+        pipeline.process(v2_events)
+    baseline = time.perf_counter() - start
+
+    start = time.perf_counter()
+    for _ in range(10):
+        context = ReplayContext(schema_policy=POLICY_V2)
+        registry = UpcasterRegistry.default()
+        pipeline = ReplayPipeline(context=context, registry=registry)
+        pipeline.process(events)
+    measured = time.perf_counter() - start
+
+    overhead_ratio = measured / baseline if baseline > 0 else 0
+    REGRESSION_BUDGET = 10.0
+    assert overhead_ratio < REGRESSION_BUDGET, (
+        f"Overhead ratio {overhead_ratio:.2f} exceeds regression budget {REGRESSION_BUDGET}"
+    )
