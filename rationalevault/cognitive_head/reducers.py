@@ -145,7 +145,7 @@ class TaskReducer:
     Folds TASK_* events into a dict mapping task_id → TaskState.
 
     Relevant events:
-        TASK_CREATED  payload: { task_id, title, description?, assignee?,
+        TASK_CREATED  payload: { task_id, details: { summary, body }, assignee?,
                                   priority?, tags?, blocked_by? }
         TASK_MUTATED  payload: { task_id, <any TaskState field to update> }
         TASK_COMPLETED payload: { task_id }
@@ -167,10 +167,14 @@ class TaskReducer:
             if et == EventType.TASK_CREATED:
                 if not task_id:
                     continue
+                details = p["details"]
+                title = details["summary"]
+                description = details["body"]
+
                 tasks[task_id] = TaskState(
                     task_id=task_id,
-                    title=p.get("title", ""),
-                    description=p.get("description", ""),
+                    title=title,
+                    description=description,
                     status="open",
                     assignee=p.get("assignee"),
                     priority=p.get("priority", "normal"),

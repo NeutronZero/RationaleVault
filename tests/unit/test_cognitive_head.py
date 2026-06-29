@@ -126,7 +126,7 @@ class TestCognitiveHeadOutput:
         pid = uuid.uuid4()
         events = _bootstrap(pid)  # versions 1, 2, 3
         events.append(_event(EventType.TASK_CREATED, {
-            "task_id": "t1", "title": "Task"
+            "task_id": "t1", "details": {"summary": "Task", "body": ""}
         }, 4, pid))
         head = compile_cognitive_head(pid, store=_mock_store(events))
         assert head.ledger_version == 4
@@ -134,8 +134,8 @@ class TestCognitiveHeadOutput:
     def test_active_tasks_excludes_completed(self):
         pid = uuid.uuid4()
         events = _bootstrap(pid) + [
-            _event(EventType.TASK_CREATED, {"task_id": "t1", "title": "Active"}, 4, pid),
-            _event(EventType.TASK_CREATED, {"task_id": "t2", "title": "Done"}, 5, pid),
+            _event(EventType.TASK_CREATED, {"task_id": "t1", "details": {"summary": "Active", "body": ""}}, 4, pid),
+            _event(EventType.TASK_CREATED, {"task_id": "t2", "details": {"summary": "Done", "body": ""}}, 5, pid),
             _event(EventType.TASK_COMPLETED, {"task_id": "t2"}, 6, pid),
         ]
         head = compile_cognitive_head(pid, store=_mock_store(events))
@@ -207,13 +207,13 @@ class TestCognitiveHeadOutput:
         pid = uuid.uuid4()
         events = _bootstrap(pid) + [
             _event(EventType.TASK_CREATED, {
-                "task_id": "t_norm", "title": "Normal", "priority": "normal"
+                "task_id": "t_norm", "details": {"summary": "Normal", "body": ""}, "priority": "normal"
             }, 4, pid),
             _event(EventType.TASK_CREATED, {
-                "task_id": "t_crit", "title": "Critical", "priority": "critical"
+                "task_id": "t_crit", "details": {"summary": "Critical", "body": ""}, "priority": "critical"
             }, 5, pid),
             _event(EventType.TASK_CREATED, {
-                "task_id": "t_low", "title": "Low", "priority": "low"
+                "task_id": "t_low", "details": {"summary": "Low", "body": ""}, "priority": "low"
             }, 6, pid),
         ]
         head = compile_cognitive_head(pid, store=_mock_store(events))
@@ -229,7 +229,7 @@ class TestBlockerDetection:
         pid = uuid.uuid4()
         events = _bootstrap(pid) + [
             _event(EventType.TASK_CREATED, {
-                "task_id": "t1", "title": "Blocked Task",
+                "task_id": "t1", "details": {"summary": "Blocked Task", "body": ""},
                 "blocked_by": ["q1"]
             }, 4, pid),
             _event(EventType.OPEN_QUESTION_RAISED, {
@@ -245,7 +245,7 @@ class TestBlockerDetection:
         pid = uuid.uuid4()
         events = _bootstrap(pid) + [
             _event(EventType.TASK_CREATED, {
-                "task_id": "t2", "title": "Another Task"
+                "task_id": "t2", "details": {"summary": "Another Task", "body": ""}
             }, 4, pid),
             _event(EventType.OPEN_QUESTION_RAISED, {
                 "question_id": "q2", "title": "Question",
@@ -260,7 +260,7 @@ class TestBlockerDetection:
         pid = uuid.uuid4()
         events = _bootstrap(pid) + [
             _event(EventType.TASK_CREATED, {
-                "task_id": "t1", "title": "Task",
+                "task_id": "t1", "details": {"summary": "Task", "body": ""},
                 "blocked_by": ["q1"]
             }, 4, pid),
             _event(EventType.OPEN_QUESTION_RAISED, {
@@ -280,7 +280,7 @@ class TestDeterminism:
     def test_same_events_produce_identical_head(self):
         pid = uuid.uuid4()
         events = _bootstrap(pid) + [
-            _event(EventType.TASK_CREATED, {"task_id": "t1", "title": "Task"}, 4, pid),
+            _event(EventType.TASK_CREATED, {"task_id": "t1", "details": {"summary": "Task", "body": ""}}, 4, pid),
             _event(EventType.DECISION_PROPOSED, {"decision_id": "d1", "title": "D1"}, 5, pid),
             _event(EventType.DECISION_ACCEPTED, {"decision_id": "d1"}, 6, pid),
             _event(EventType.OPEN_QUESTION_RAISED, {

@@ -40,7 +40,7 @@ def test_storage_migration_replay_loop(temp_dbs):
     src_store.append_event(project_id, "main", EventType.PROJECT_CREATED, {"name": "Migration Project"}, m)
     src_store.append_event(project_id, "main", EventType.PROJECT_GOAL_SET, {"goal": "Migrate database backends"}, m)
     src_store.append_event(project_id, "main", EventType.PROJECT_FOCUS_CHANGED, {"focus": "Replay testing"}, m)
-    src_store.append_event(project_id, "tasks", EventType.TASK_CREATED, {"task_id": "t1", "title": "Migrate records"}, m)
+    src_store.append_event(project_id, "tasks", EventType.TASK_CREATED, {"task_id": "t1", "details": {"summary": "Migrate records", "body": ""}}, m)
     src_store.append_event(project_id, "decisions", EventType.DECISION_PROPOSED, {"decision_id": "d1", "title": "Decision 1"}, m)
     src_store.append_event(project_id, "decisions", EventType.DECISION_ACCEPTED, {"decision_id": "d1"}, m)
 

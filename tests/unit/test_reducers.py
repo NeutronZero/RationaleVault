@@ -105,7 +105,7 @@ class TestProjectReducer:
             _event(EventType.PROJECT_CREATED, {"name": "Relay"}, 1, pid),
             _event(EventType.PROJECT_GOAL_SET, {"goal": "Goal"}, 2, pid),
             _event(EventType.PROJECT_FOCUS_CHANGED, {"focus": "Focus"}, 3, pid),
-            _event(EventType.TASK_CREATED, {"task_id": "t1", "title": "Task"}, 4, pid),
+            _event(EventType.TASK_CREATED, {"task_id": "t1", "details": {"summary": "Task", "body": ""}}, 4, pid),
             _event(EventType.DECISION_PROPOSED, {"decision_id": "d1", "title": "D"}, 5, pid),
             _event(EventType.FACT_RECORDED, {"fact_id": "f1", "content": "Fact"}, 6, pid),
         ]
@@ -136,7 +136,8 @@ class TestProjectReducer:
 class TestTaskReducer:
     def test_task_created(self):
         events = [_event(EventType.TASK_CREATED, {
-            "task_id": "t1", "title": "Write EventStore",
+            "task_id": "t1",
+            "details": {"summary": "Write EventStore", "body": ""},
             "priority": "high", "tags": ["core"]
         }, 1)]
         tasks = TaskReducer.reduce(events)
@@ -149,7 +150,9 @@ class TestTaskReducer:
     def test_task_mutated_updates_specified_fields_only(self):
         events = [
             _event(EventType.TASK_CREATED, {
-                "task_id": "t1", "title": "Original", "priority": "low"
+                "task_id": "t1",
+                "details": {"summary": "Original", "body": ""},
+                "priority": "low"
             }, 1),
             _event(EventType.TASK_MUTATED, {
                 "task_id": "t1", "priority": "critical", "status": "in_progress"
@@ -162,7 +165,7 @@ class TestTaskReducer:
 
     def test_task_completed(self):
         events = [
-            _event(EventType.TASK_CREATED, {"task_id": "t1", "title": "Task"}, 1),
+            _event(EventType.TASK_CREATED, {"task_id": "t1", "details": {"summary": "Task", "body": ""}}, 1),
             _event(EventType.TASK_COMPLETED, {"task_id": "t1"}, 2),
         ]
         tasks = TaskReducer.reduce(events)
@@ -171,7 +174,7 @@ class TestTaskReducer:
 
     def test_full_lifecycle_open_to_completed(self):
         events = [
-            _event(EventType.TASK_CREATED, {"task_id": "t1", "title": "Task"}, 1),
+            _event(EventType.TASK_CREATED, {"task_id": "t1", "details": {"summary": "Task", "body": ""}}, 1),
             _event(EventType.TASK_MUTATED, {"task_id": "t1", "status": "in_progress"}, 2),
             _event(EventType.TASK_MUTATED, {"task_id": "t1", "assignee": "Claude"}, 3),
             _event(EventType.TASK_COMPLETED, {"task_id": "t1"}, 4),
@@ -182,8 +185,8 @@ class TestTaskReducer:
 
     def test_multiple_tasks_tracked_independently(self):
         events = [
-            _event(EventType.TASK_CREATED, {"task_id": "t1", "title": "Task 1"}, 1),
-            _event(EventType.TASK_CREATED, {"task_id": "t2", "title": "Task 2"}, 2),
+            _event(EventType.TASK_CREATED, {"task_id": "t1", "details": {"summary": "Task 1", "body": ""}}, 1),
+            _event(EventType.TASK_CREATED, {"task_id": "t2", "details": {"summary": "Task 2", "body": ""}}, 2),
             _event(EventType.TASK_COMPLETED, {"task_id": "t1"}, 3),
         ]
         tasks = TaskReducer.reduce(events)
@@ -191,7 +194,7 @@ class TestTaskReducer:
         assert tasks["t2"].status == "open"
 
     def test_missing_task_id_in_created_skipped(self):
-        events = [_event(EventType.TASK_CREATED, {"title": "No ID"}, 1)]
+        events = [_event(EventType.TASK_CREATED, {"details": {"summary": "No ID", "body": ""}}, 1)]
         tasks = TaskReducer.reduce(events)
         assert len(tasks) == 0
 
@@ -204,7 +207,8 @@ class TestTaskReducer:
 
     def test_blocked_by_preserved(self):
         events = [_event(EventType.TASK_CREATED, {
-            "task_id": "t1", "title": "Task",
+            "task_id": "t1",
+            "details": {"summary": "Task", "body": ""},
             "blocked_by": ["q1", "q2"]
         }, 1)]
         tasks = TaskReducer.reduce(events)
@@ -212,7 +216,7 @@ class TestTaskReducer:
 
     def test_determinism(self):
         events = [
-            _event(EventType.TASK_CREATED, {"task_id": "t1", "title": "Task"}, 1),
+            _event(EventType.TASK_CREATED, {"task_id": "t1", "details": {"summary": "Task", "body": ""}}, 1),
             _event(EventType.TASK_MUTATED, {"task_id": "t1", "status": "in_progress"}, 2),
         ]
         state_a = TaskReducer.reduce(events)

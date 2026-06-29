@@ -58,7 +58,7 @@ def continuation_setup():
         # 3. PROJECT_FOCUS_CHANGED
         _event(EventType.PROJECT_FOCUS_CHANGED, {"focus": "Sprint 1"}, 3, pid, recorded_at),
         # 4. TASK_CREATED (t1, "Implement MCP server")
-        _event(EventType.TASK_CREATED, {"task_id": "t1", "title": "Implement MCP server"}, 4, pid, recorded_at),
+        _event(EventType.TASK_CREATED, {"task_id": "t1", "details": {"summary": "Implement MCP server", "body": ""}}, 4, pid, recorded_at),
         # 5. DECISION_PROPOSED (d1, "Use mcp SDK", rationale="Best SDK available")
         _event(EventType.DECISION_PROPOSED, {"decision_id": "d1", "title": "Use mcp SDK", "rationale": "Best SDK available"}, 5, pid, recorded_at),
         # 6. DECISION_ACCEPTED (d1)

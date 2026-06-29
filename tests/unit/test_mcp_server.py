@@ -69,7 +69,7 @@ def mcp_setup():
         _event(EventType.PROJECT_CREATED, {"name": "Alpha Project"}, 1, pid, recorded_at),
         _event(EventType.PROJECT_GOAL_SET, {"goal": "Build awesome things"}, 2, pid, recorded_at),
         _event(EventType.PROJECT_FOCUS_CHANGED, {"focus": "Sprint 1"}, 3, pid, recorded_at),
-        _event(EventType.TASK_CREATED, {"task_id": "t1", "title": "Implement MCP server"}, 4, pid, recorded_at),
+        _event(EventType.TASK_CREATED, {"task_id": "t1", "details": {"summary": "Implement MCP server", "body": ""}}, 4, pid, recorded_at),
         _event(EventType.DECISION_PROPOSED, {"decision_id": "d1", "title": "Use mcp SDK", "rationale": "Best SDK available"}, 5, pid, recorded_at),
         _event(EventType.DECISION_ACCEPTED, {"decision_id": "d1"}, 6, pid, recorded_at),
         _event(EventType.TASK_MUTATED, {"task_id": "t1", "status": "in_progress"}, 7, pid, recorded_at),
