@@ -19,13 +19,19 @@ class ReplayService:
     passing them to compilers or projections.
     """
 
-    def __init__(self, store: Optional[Any] = None, registry: Optional[UpcasterRegistry] = None) -> None:
+    def __init__(
+        self,
+        store: Optional[Any] = None,
+        registry: Optional[UpcasterRegistry] = None,
+        policy_factory: Optional[Any] = None,
+    ) -> None:
         if store is None:
             from rationalevault.db.event_store import EventStore
             self._store = EventStore()
         else:
             self._store = store
         self._registry = registry
+        self._policy_factory = policy_factory
 
     def load_project_events(
         self,
@@ -44,6 +50,6 @@ class ReplayService:
             else:
                 replay_ctx = context
 
-        pipeline = ReplayPipeline(replay_ctx, self._registry)
+        pipeline = ReplayPipeline(replay_ctx, self._registry, self._policy_factory)
         raw_events = self._store.get_project_stream(project_id)
         return pipeline.process(raw_events)
