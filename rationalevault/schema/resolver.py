@@ -38,10 +38,10 @@ class ReplayResolver:
                 self._registry = registry
         elif isinstance(policy, SchemaPolicy):
             self._policy = policy
-            self._registry = registry or UpcasterRegistry()
+            self._registry = registry or UpcasterRegistry.default()
         else:
             self._policy = None
-            self._registry = registry or UpcasterRegistry()
+            self._registry = registry or UpcasterRegistry.default()
         # Legacy attributes kept for backward compatibility
         self.registry = self._registry
         self.target_schema_version = target_schema_version

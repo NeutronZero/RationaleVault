@@ -7,7 +7,7 @@ from typing import Any
 
 from rationalevault.schema.events import EventMetadata, EventRecord, EventType
 from rationalevault.schema.resolver import ReplayResolver, UnknownSchemaError
-from rationalevault.schema.upcaster import UpcasterRegistry
+from rationalevault.schema.upcaster import UpcasterRegistry, task_created_v1_to_v2
 from rationalevault.schema.policy import SchemaPolicy, EventSchema, MigrationPath, MigrationStep
 from rationalevault.projections.context import ReplayContext
 from rationalevault.projections.pipeline import ReplayPipeline
@@ -42,8 +42,6 @@ def test_resolver_resolves_schema_v2() -> None:
 def test_resolver_raises_unknown_schema_version_without_upcaster() -> None:
     # If target is 2 and we have a v1 event, we need an upcaster (if unregistered)
     registry = UpcasterRegistry()
-    # Wipe default register to force error
-    registry._upcasters.clear()
     resolver = ReplayResolver(registry, target_schema_version=2)
     event = _create_event(43, 1, {"title": "broken"}, event_type=EventType.TASK_CREATED)
     
@@ -54,7 +52,7 @@ def test_resolver_raises_unknown_schema_version_without_upcaster() -> None:
 
 
 def test_resolver_uses_upcaster_registry_v1_to_v2() -> None:
-    registry = UpcasterRegistry()
+    registry = UpcasterRegistry({"TASK_CREATED": {1: task_created_v1_to_v2}})
     resolver = ReplayResolver(registry, target_schema_version=2)
     event = _create_event(44, 1, {"title": "hello world", "description": "desc"}, event_type=EventType.TASK_CREATED)
     
@@ -64,7 +62,8 @@ def test_resolver_uses_upcaster_registry_v1_to_v2() -> None:
 
 
 def test_replay_pipeline_applies_context_filtering_and_resolution() -> None:
-    resolver = ReplayResolver(target_schema_version=2)
+    registry = UpcasterRegistry({"TASK_CREATED": {1: task_created_v1_to_v2}})
+    resolver = ReplayResolver(registry, target_schema_version=2)
     context = ReplayContext(max_sequence=50, resolver=resolver)
     pipeline = ReplayPipeline(context)
     
@@ -141,7 +140,7 @@ def test_resolver_upcasts_event_with_policy() -> None:
             migration_path=MigrationPath(steps=(MigrationStep(1, 2),)),
         )
     })
-    registry = UpcasterRegistry()
+    registry = UpcasterRegistry({"TASK_CREATED": {1: task_created_v1_to_v2}})
     resolver = ReplayResolver(policy=policy, registry=registry)
     event = _create_event(
         101, 1,
@@ -173,7 +172,7 @@ def test_resolver_policy_raises_on_unresolvable() -> None:
 
 
 def test_resolver_no_policy_falls_back_to_legacy() -> None:
-    registry = UpcasterRegistry()
+    registry = UpcasterRegistry({"TASK_CREATED": {1: task_created_v1_to_v2}})
     resolver = ReplayResolver(registry=registry, target_schema_version=2)
     event = _create_event(
         103, 1,
