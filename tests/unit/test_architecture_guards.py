@@ -1,0 +1,269 @@
+from __future__ import annotations
+
+import ast
+from pathlib import Path
+
+
+def _get_ast_tree(path: Path) -> ast.AST:
+    with open(path, "r", encoding="utf-8") as f:
+        return ast.parse(f.read(), filename=str(path))
+
+
+def test_projection_layer_imports_guard() -> None:
+    """
+    Asserts that base projections remain completely decoupled from replay pipeline
+    internals, upcasting registries, database engines, and governance parameters.
+    """
+    project_root = Path(__file__).resolve().parent.parent.parent
+    projections_dir = project_root / "rationalevault" / "projections"
+    assert projections_dir.exists()
+
+    forbidden_replay_imports = {
+        "ReplayResolver",
+        "SchemaResolver",
+        "UpcasterRegistry",
+        "ReplayPipeline",
+    }
+
+    forbidden_store_imports = {
+        "EventStore",
+        "SQLiteEventStore",
+        "PostgresEventStore",
+        "get_event_store",
+    }
+
+    orchestration_files = {"pipeline.py", "service.py", "context.py", "continuation.py"}
+
+    violations = []
+
+    for path in projections_dir.glob("*.py"):
+        if path.name == "__init__.py":
+            continue
+
+        tree = _get_ast_tree(path)
+
+        for node in ast.walk(tree):
+            # Check direct imports
+            if isinstance(node, ast.Import):
+                for name in node.names:
+                    imported_name = name.name.split(".")[-1]
+                    # Core projections check
+                    if path.name not in orchestration_files:
+                        if imported_name in forbidden_replay_imports:
+                            violations.append(f"Forbidden replay import '{imported_name}' in {path.name}")
+                        if imported_name in forbidden_store_imports:
+                            violations.append(f"Forbidden store import '{imported_name}' in {path.name}")
+
+            # Check from-imports
+            elif isinstance(node, ast.ImportFrom):
+                if node.module:
+                    for name in node.names:
+                        imported_name = name.name
+                        if path.name not in orchestration_files:
+                            if imported_name in forbidden_replay_imports:
+                                violations.append(f"Forbidden replay import '{imported_name}' in {path.name}")
+                            if imported_name in forbidden_store_imports:
+                                violations.append(f"Forbidden store import '{imported_name}' in {path.name}")
+                            if imported_name == "ReplayService":
+                                violations.append(f"Forbidden core ReplayService import in base projection {path.name}")
+
+    assert not violations, "Architectural boundary violations found:\n" + "\n".join(violations)
+
+
+def test_replay_canonical_gateway_guard() -> None:
+    """
+    Asserts that compilers and query paths ONLY query event streams via ReplayService.
+    No direct imports of ReplayPipeline or ReplayResolver are permitted outside projections.
+    """
+    project_root = Path(__file__).resolve().parent.parent.parent
+    check_paths = [
+        project_root / "rationalevault" / "cognitive_head",
+        project_root / "rationalevault" / "knowledge",
+    ]
+
+    forbidden_replay_internals = {
+        "ReplayPipeline",
+        "ReplayResolver",
+        "SchemaResolver",
+        "UpcasterRegistry",
+    }
+
+    violations = []
+
+    for base_path in check_paths:
+        for path in base_path.glob("**/*.py"):
+            tree = _get_ast_tree(path)
+            for node in ast.walk(tree):
+                if isinstance(node, ast.Import):
+                    for name in node.names:
+                        imported_name = name.name.split(".")[-1]
+                        if imported_name in forbidden_replay_internals:
+                            violations.append(f"Forbidden replay internal '{imported_name}' in {path.relative_to(project_root)}")
+                elif isinstance(node, ast.ImportFrom):
+                    for name in node.names:
+                        imported_name = name.name
+                        if imported_name in forbidden_replay_internals:
+                            violations.append(f"Forbidden replay internal '{imported_name}' in {path.relative_to(project_root)}")
+
+    assert not violations, "Compilers must only use ReplayService for replay operations:\n" + "\n".join(violations)
+
+
+def test_reducer_purity_ast_guard() -> None:
+    """
+    Asserts that state reducers do not invoke non-pure environment properties
+    such as os.environ, datetime.now, time.time, or sys.argv.
+    """
+    project_root = Path(__file__).resolve().parent.parent.parent
+    reducers_path = project_root / "rationalevault" / "cognitive_head" / "reducers.py"
+    
+    if not reducers_path.exists():
+        return
+
+    tree = _get_ast_tree(reducers_path)
+    violations = []
+
+    for node in ast.walk(tree):
+        # Prevent calling datetime.now() or datetime.utcnow() directly in reducers
+        if isinstance(node, ast.Call) and isinstance(node.func, ast.Attribute):
+            if node.func.attr in {"now", "utcnow", "environ", "argv"}:
+                violations.append(f"Reducer purity violation: Call to '{node.func.attr}' on line {node.lineno}")
+
+    assert not violations, "Reducers must remain pure functions:\n" + "\n".join(violations)
+
+
+# ── T14 Architecture Guards ──────────────────────────────────────────────────
+
+
+def test_t14_projection_canonical_boundary_guard() -> None:
+    """T14: Reducers must not reference schema_version or branch on payload version."""
+    project_root = Path(__file__).resolve().parent.parent.parent
+    reducers_path = project_root / "rationalevault" / "cognitive_head" / "reducers.py"
+    source = reducers_path.read_text(encoding="utf-8")
+    tree = ast.parse(source)
+
+    violations = []
+    for node in ast.walk(tree):
+        # Ban event.schema_version references in reducers
+        if isinstance(node, ast.Attribute):
+            if isinstance(node.value, ast.Name) and node.value.id == "event":
+                if node.attr == "schema_version":
+                    violations.append(
+                        f"Line {node.lineno}: event.schema_version reference"
+                    )
+        # Ban integer-literal comparisons that look like version branching
+        if isinstance(node, ast.Compare):
+            for comparator in node.comparators:
+                if isinstance(comparator, ast.Constant) and isinstance(
+                    comparator.value, int
+                ):
+                    if comparator.value in (1, 2, 3):
+                        violations.append(
+                            f"Line {node.lineno}: possible schema version branch"
+                        )
+
+    assert not violations, f"T14 Projection(E) violations: {violations}"
+
+
+def test_t14_reducer_imports_no_schema_version() -> None:
+    """T14: Reducers must not import SchemaPolicy or SchemaVersion types."""
+    project_root = Path(__file__).resolve().parent.parent.parent
+    reducers_path = project_root / "rationalevault" / "cognitive_head" / "reducers.py"
+    tree = _get_ast_tree(reducers_path)
+
+    forbidden = {"SchemaPolicy", "SchemaPolicyFactory", "SchemaVersion"}
+    violations = []
+
+    for node in ast.walk(tree):
+        if isinstance(node, ast.Import):
+            for name in node.names:
+                if name.name.split(".")[-1] in forbidden:
+                    violations.append(
+                        f"Line {node.lineno}: forbidden import '{name.name}'"
+                    )
+        elif isinstance(node, ast.ImportFrom):
+            for name in node.names:
+                if name.name in forbidden:
+                    violations.append(
+                        f"Line {node.lineno}: forbidden from-import '{name.name}'"
+                    )
+
+    assert not violations, f"T14 reducer import violations: {violations}"
+
+
+def test_schema_policy_immutability() -> None:
+    """SchemaPolicy is an immutable value object — frozen dataclass."""
+    from rationalevault.schema.policy import SchemaPolicy, EventSchema, MigrationPath
+
+    policy = SchemaPolicy(_schemas={})
+    try:
+        policy._schemas = {}
+        assert False, "SchemaPolicy._schemas should be frozen"
+    except AttributeError:
+        pass
+
+    event_schema = EventSchema(
+        event_type=__import__(
+            "rationalevault.schema.events", fromlist=["EventType"]
+        ).EventType.TASK_CREATED,
+        latest_version=1,
+        migration_path=MigrationPath(),
+    )
+    try:
+        event_schema.latest_version = 2
+        assert False, "EventSchema should be frozen"
+    except AttributeError:
+        pass
+
+    step = __import__(
+        "rationalevault.schema.policy", fromlist=["MigrationStep"]
+    ).MigrationStep(from_version=1, to_version=2)
+    try:
+        step.from_version = 3
+        assert False, "MigrationStep should be frozen"
+    except AttributeError:
+        pass
+
+    path = MigrationPath()
+    try:
+        path.steps = ()
+        assert False, "MigrationPath should be frozen"
+    except AttributeError:
+        pass
+
+
+def test_replay_context_purity() -> None:
+    """ReplayContext is a pure data structure — frozen, no resolver, no schema logic."""
+    from rationalevault.projections.context import ReplayContext
+    from rationalevault.schema.policy import SchemaPolicy
+
+    ctx = ReplayContext()
+
+    # Frozen: cannot mutate fields
+    try:
+        ctx.max_sequence = 999
+        assert False, "ReplayContext should be frozen"
+    except AttributeError:
+        pass
+
+    ctx_with_policy = ReplayContext(
+        schema_policy=SchemaPolicy(_schemas={}),
+    )
+    try:
+        ctx_with_policy.schema_policy = SchemaPolicy(_schemas={})
+        assert False, "ReplayContext.schema_policy should be frozen"
+    except AttributeError:
+        pass
+
+    # No resolver attribute
+    assert not hasattr(ctx, "resolver"), "ReplayContext must not contain a resolver"
+    assert not hasattr(
+        ctx_with_policy, "resolver"
+    ), "ReplayContext must not contain a resolver"
+
+    # No target_schema_version attribute
+    assert not hasattr(
+        ctx, "target_schema_version"
+    ), "ReplayContext must not contain target_schema_version"
+    assert not hasattr(
+        ctx_with_policy, "target_schema_version"
+    ), "ReplayContext must not contain target_schema_version"
