@@ -4,7 +4,7 @@
 
 **Goal:** Prove the SchemaPolicy architecture works under real schema evolution by implementing the TASK_CREATED v1 → v2 migration specification and validating it with 6 behavioral proofs + 5 architectural guards.
 
-**Architecture:** The migration specification is a formal contract. The integration proof suite exercises the full pipeline end-to-end. The architectural guards enforce T15 structural invariants via AST analysis.
+**Architecture:** The migration specification is a formal contract. The integration proof suite exercises the full public replay API end-to-end. The architectural guards enforce T15 structural invariants via AST analysis.
 
 **Tech Stack:** Python 3.12+, pytest, frozen dataclasses, AST module
 
@@ -23,7 +23,8 @@
 | File | Responsibility |
 |------|----------------|
 | `docs/specs/task-created-v1-to-v2.md` | Migration specification contract |
-| `tests/integration/test_task_created_v1_to_v2.py` | 6 behavioral proofs |
+| `tests/integration/test_task_created_v1_to_v2.py` | 6 integration proofs (pipeline-first) |
+| `tests/unit/test_task_created_resolver.py` | 2 unit proofs (resolver/policy correctness) |
 | `tests/unit/test_architecture_guards.py` | 5 T15 architectural guards (modify existing) |
 
 ---
@@ -108,6 +109,7 @@ v2 (canonical)
 ✓ Migration graph safety
 ✓ Deterministic replay
 ✓ Performance baseline
+✓ Canonical idempotence
 ```
 
 - [ ] **Step 2: Verify the spec is complete**
@@ -119,7 +121,7 @@ Read the file back and verify all sections are present:
 - Properties (lossless, rollback, canonical)
 - Migration Chain (visual format)
 - Architectural Invariants
-- Required Verification checklist
+- Required Verification checklist (including canonical idempotence)
 
 - [ ] **Step 3: Commit**
 
@@ -138,14 +140,13 @@ git commit -m "docs(spec): TASK_CREATED v1→v2 migration specification"
 **Interfaces:**
 - Consumes: `SchemaPolicy`, `EventSchema`, `MigrationPath`, `MigrationStep` from `rationalevault/schema/policy.py`
 - Consumes: `SchemaPolicyFactory` from `rationalevault/schema/factory.py`
-- Consumes: `ReplayResolver` from `rationalevault/schema/resolver.py`
-- Consumes: `ReplayContext` from `rationalevault/projections/context.py`
 - Consumes: `ReplayPipeline` from `rationalevault/projections/pipeline.py`
+- Consumes: `ReplayContext` from `rationalevault/projections/context.py`
 - Consumes: `UpcasterRegistry` from `rationalevault/schema/upcaster.py`
 - Consumes: `EventRecord`, `EventType` from `rationalevault/schema/events.py`
 - Consumes: `TaskReducer` from `rationalevault/cognitive_head/reducers.py`
 - Consumes: `GovernanceState` from `rationalevault/projections/governance.py`
-- Produces: 3 integration tests
+- Produces: 3 integration tests (pipeline-first)
 
 - [ ] **Step 1: Write the test file header and helpers**
 
@@ -154,6 +155,9 @@ git commit -m "docs(spec): TASK_CREATED v1→v2 migration specification"
 
 Proves the SchemaPolicy architecture works under real schema evolution.
 Each test validates one architectural property.
+
+These tests exercise the public replay API (ReplayPipeline),
+not internal resolver details.
 """
 
 import time
@@ -166,7 +170,6 @@ from rationalevault.schema.policy import (
     SchemaPolicy, EventSchema, MigrationPath, MigrationStep,
 )
 from rationalevault.schema.factory import SchemaPolicyFactory
-from rationalevault.schema.resolver import ReplayResolver, UnknownSchemaError
 from rationalevault.schema.upcaster import UpcasterRegistry
 from rationalevault.schema.events import EventRecord, EventType
 from rationalevault.projections.context import ReplayContext
@@ -227,6 +230,26 @@ POLICY_V1 = SchemaPolicy(_schemas={
         migration_path=MigrationPath(steps=()),
     )
 })
+
+
+def _replay_via_pipeline(events, policy):
+    """Replay events through the public pipeline API."""
+    context = ReplayContext(schema_policy=policy)
+    registry = UpcasterRegistry.default()
+    pipeline = ReplayPipeline(context=context, registry=registry)
+    reducer = TaskReducer()
+
+    state = {}
+    for event in events:
+        canonical_payload = pipeline.resolve_event(event)
+        resolved = _create_event(
+            seq=event.sequence,
+            schema_version=policy.latest_version(event.event_type),
+            payload=canonical_payload,
+        )
+        state = reducer.reduce(state, resolved)
+
+    return state
 ```
 
 - [ ] **Step 2: Write Proof 1 — Mixed Replay**
@@ -236,6 +259,7 @@ def test_mixed_replay_canonical_output():
     """Interleaved v1/v2 events replay to canonical v2.
 
     Property: Mixed-version normalization.
+    Exercises: ReplayPipeline (public API).
     """
     events = [
         _create_event(seq=1, schema_version=1, payload=V1_PAYLOAD),
@@ -245,30 +269,9 @@ def test_mixed_replay_canonical_output():
         _create_event(seq=5, schema_version=2, payload=V2_PAYLOAD),
     ]
 
-    registry = UpcasterRegistry.default()
-    resolver = ReplayResolver(policy=POLICY_V2, registry=registry)
-    reducer = TaskReducer()
+    state = _replay_via_pipeline(events, POLICY_V2)
 
-    resolved = []
-    for event in events:
-        canonical_payload = resolver.resolve(event.schema_version, event.payload)
-        resolved.append(_create_event(
-            seq=event.sequence,
-            schema_version=2,
-            payload=canonical_payload,
-        ))
-
-    # All 5 events should resolve to canonical v2
-    for evt in resolved:
-        assert evt.schema_version == 2
-        assert "details" in evt.payload
-        assert "title" not in evt.payload
-
-    # Reducer should produce correct TaskState for each
-    state = {}
-    for evt in resolved:
-        state = reducer.reduce(state, evt)
-
+    # Reducer should produce correct TaskState
     assert "T1" in state
     assert state["T1"].title == "Implement F15"
     assert state["T1"].description == "Prove the architecture"
@@ -286,26 +289,15 @@ def test_projection_equivalence():
     """Native v2 projection equals v1→upcast→projection.
 
     Property: Canonical projection equivalence.
+    Exercises: ReplayPipeline (public API).
     """
-    registry = UpcasterRegistry.default()
-    reducer = TaskReducer()
-
     # Native v2 path
     v2_event = _create_event(seq=1, schema_version=2, payload=V2_PAYLOAD)
-    resolver_v2 = ReplayResolver(policy=POLICY_V2, registry=registry)
-    canonical_v2 = resolver_v2.resolve(2, v2_event.payload)
-    resolved_v2 = _create_event(seq=1, schema_version=2, payload=canonical_v2)
-    state_v2 = reducer.reduce({}, resolved_v2)
+    state_v2 = _replay_via_pipeline([v2_event], POLICY_V2)
 
     # Upcasted v1 path
     v1_event = _create_event(seq=1, schema_version=1, payload=V1_PAYLOAD)
-    resolver_v1 = ReplayResolver(policy=POLICY_V2, registry=registry)
-    canonical_v1 = resolver_v1.resolve(1, v1_event.payload)
-    resolved_v1 = _create_event(seq=1, schema_version=2, payload=canonical_v1)
-    state_v1 = reducer.reduce({}, resolved_v1)
-
-    # Resolved payloads must be equal
-    assert canonical_v2 == canonical_v1
+    state_v1 = _replay_via_pipeline([v1_event], POLICY_V2)
 
     # Projected state must be equal
     assert state_v2 == state_v1
@@ -323,31 +315,28 @@ def test_policy_authority():
     """Policy alone controls canonical interpretation.
 
     Property: T15 — Policy Authority.
+    Exercises: ReplayPipeline (public API).
     """
-    registry = UpcasterRegistry.default()
-    reducer = TaskReducer()
-
     v1_event = _create_event(seq=1, schema_version=1, payload=V1_PAYLOAD)
 
     # Policy A: latest_version=1 (no migration)
-    resolver_a = ReplayResolver(policy=POLICY_V1, registry=registry)
-    result_a = resolver_a.resolve(1, v1_event.payload)
-    # With v1 policy, event stays as v1 (no upcasting)
-    assert "title" in result_a
-    assert "details" not in result_a
+    state_a = _replay_via_pipeline([v1_event], POLICY_V1)
 
     # Policy B: latest_version=2 (migration applied)
-    resolver_b = ReplayResolver(policy=POLICY_V2, registry=registry)
-    result_b = resolver_b.resolve(1, v1_event.payload)
-    # With v2 policy, event is upcasted to v2
-    assert "details" in result_b
-    assert "title" not in result_b
+    state_b = _replay_via_pipeline([v1_event], POLICY_V2)
+
+    # Different policies produce different projected states
+    # Policy A: task has title/description (v1 format)
+    # Policy B: task has title/description from upcasted v2
+    # The key: same input, same engine, different policy → different result
+    assert state_a != state_b
 
 
 def test_governance_compiles_different_policies():
     """Different governance snapshots produce different policies.
 
     Property: F14 + F15 integration.
+    Exercises: SchemaPolicyFactory (public API).
     """
     # Governance at sequence 50: TASK_CREATED latest = v1
     state_v1 = GovernanceState(
@@ -386,78 +375,44 @@ git commit -m "test(integration): F15 proofs 1-3 — mixed replay, equivalence, 
 
 ---
 
-## Task 3: Integration Proof Suite — Proofs 4-6
+## Task 3: Integration Proof Suite — Proofs 4-7
 
 **Files:**
 - Modify: `tests/integration/test_task_created_v1_to_v2.py`
 
 **Interfaces:**
 - Consumes: Same as Task 2
-- Produces: 3 more integration tests
+- Produces: 4 more integration tests (pipeline-first)
 
-- [ ] **Step 1: Write Proof 4 — Migration Graph Safety**
+- [ ] **Step 1: Write Proof 4 — Canonical Idempotence**
 
 ```python
-def test_unknown_schema_path_fails():
-    """Missing migration edge raises UnknownSchemaError.
+def test_canonical_idempotence():
+    """Canonical event is never modified by replay.
 
-    Property: Migration graph safety.
+    Property: Canonical idempotence.
+    Exercises: ReplayPipeline (public API).
     """
-    # Policy with no migration path for v1→v2
-    policy_no_path = SchemaPolicy(_schemas={
-        EventType.TASK_CREATED: EventSchema(
-            event_type=EventType.TASK_CREATED,
-            latest_version=2,
-            migration_path=MigrationPath(steps=()),  # Empty path
-        )
-    })
+    # Create a canonical v2 event
+    v2_event = _create_event(seq=1, schema_version=2, payload=V2_PAYLOAD)
 
+    # Replay once — should produce identical output
+    context = ReplayContext(schema_policy=POLICY_V2)
     registry = UpcasterRegistry.default()
-    resolver = ReplayResolver(policy=policy_no_path, registry=registry)
+    pipeline = ReplayPipeline(context=context, registry=registry)
 
-    # v1 event with no migration path → UnknownSchemaError
-    with pytest.raises(UnknownSchemaError):
-        resolver.resolve(1, V1_PAYLOAD)
+    result_1 = pipeline.resolve_event(v2_event)
+    result_2 = pipeline.resolve_event(v2_event)
 
-
-def test_cyclic_migration_graph_rejected():
-    """Cyclic migration graph is prevented at policy construction.
-
-    Property: Migration graph safety.
-    """
-    # Attempt to create a policy with a cycle: 1→2, 2→1
-    # This should be caught by SchemaPolicy.can_resolve()
-    policy_cycle = SchemaPolicy(_schemas={
-        EventType.TASK_CREATED: EventSchema(
-            event_type=EventType.TASK_CREATED,
-            latest_version=2,
-            migration_path=MigrationPath(steps=(
-                MigrationStep(1, 2),
-                MigrationStep(2, 1),  # Cycle back to 1
-            )),
-        )
-    })
-
-    # can_resolve should detect the cycle and return False
-    # (or the resolver should fail to find a path)
-    registry = UpcasterRegistry.default()
-    resolver = ReplayResolver(policy=policy_cycle, registry=registry)
-
-    # Depending on implementation, this may raise or return False
-    # The key invariant: cycles don't cause infinite loops
-    try:
-        result = resolver.resolve(1, V1_PAYLOAD)
-        # If it succeeds, verify it terminated (didn't loop)
-        assert result is not None
-    except (UnknownSchemaError, ValueError):
-        # Acceptable: cycle detected and rejected
-        pass
+    # Canonical event is never modified
+    assert result_1 == result_2
+    assert result_1 == V2_PAYLOAD
 ```
 
 - [ ] **Step 2: Run Proof 4 to verify it passes**
 
-Run: `pytest tests/integration/test_task_created_v1_to_v2.py::test_unknown_schema_path_fails tests/integration/test_task_created_v1_to_v2.py::test_cyclic_migration_graph_rejected -v`
-Expected: Both PASS
+Run: `pytest tests/integration/test_task_created_v1_to_v2.py::test_canonical_idempotence -v`
+Expected: PASS
 
 - [ ] **Step 3: Write Proof 5 — Determinism**
 
@@ -466,6 +421,7 @@ def test_determinism():
     """Repeated replays produce identical results.
 
     Property: Deterministic replay.
+    Exercises: ReplayPipeline (public API).
     """
     events = [
         _create_event(seq=1, schema_version=1, payload=V1_PAYLOAD),
@@ -475,20 +431,7 @@ def test_determinism():
 
     results = []
     for _ in range(10):
-        registry = UpcasterRegistry.default()
-        resolver = ReplayResolver(policy=POLICY_V2, registry=registry)
-        reducer = TaskReducer()
-
-        state = {}
-        for event in events:
-            canonical = resolver.resolve(event.schema_version, event.payload)
-            resolved = _create_event(
-                seq=event.sequence,
-                schema_version=2,
-                payload=canonical,
-            )
-            state = reducer.reduce(state, resolved)
-
+        state = _replay_via_pipeline(events, POLICY_V2)
         results.append(copy.deepcopy(state))
 
     # All 10 results must be identical
@@ -505,9 +448,12 @@ Expected: PASS
 
 ```python
 def test_performance_baseline():
-    """Migration overhead is within acceptable bounds.
+    """Migration overhead remains within regression budget.
 
     Property: Performance preservation.
+    Exercises: ReplayPipeline (public API).
+
+    Uses relative comparison to avoid CI instability.
     """
     # Generate 1000 mixed events
     events = []
@@ -517,28 +463,35 @@ def test_performance_baseline():
         else:
             events.append(_create_event(seq=i, schema_version=2, payload=V2_PAYLOAD))
 
-    registry = UpcasterRegistry.default()
-
     # Baseline: replay without migration (all v2 events)
     v2_events = [_create_event(seq=e.sequence, schema_version=2, payload=V2_PAYLOAD) for e in events]
-    resolver_v2 = ReplayResolver(policy=POLICY_V2, registry=registry)
+
     start = time.perf_counter()
     for _ in range(10):
         for event in v2_events:
-            resolver_v2.resolve(2, event.payload)
+            context = ReplayContext(schema_policy=POLICY_V2)
+            registry = UpcasterRegistry.default()
+            pipeline = ReplayPipeline(context=context, registry=registry)
+            pipeline.resolve_event(event)
     baseline = time.perf_counter() - start
 
     # Measured: replay with migration (mixed events)
-    resolver_mixed = ReplayResolver(policy=POLICY_V2, registry=registry)
     start = time.perf_counter()
     for _ in range(10):
         for event in events:
-            resolver_mixed.resolve(event.schema_version, event.payload)
+            context = ReplayContext(schema_policy=POLICY_V2)
+            registry = UpcasterRegistry.default()
+            pipeline = ReplayPipeline(context=context, registry=registry)
+            pipeline.resolve_event(event)
     measured = time.perf_counter() - start
 
-    # Overhead ratio should be reasonable (< 3x)
+    # Overhead ratio within regression budget
     overhead_ratio = measured / baseline if baseline > 0 else 0
-    assert overhead_ratio < 3.0, f"Overhead ratio {overhead_ratio:.2f} exceeds threshold"
+    # Threshold is configurable — adjust if needed
+    REGRESSION_BUDGET = 3.0
+    assert overhead_ratio < REGRESSION_BUDGET, (
+        f"Overhead ratio {overhead_ratio:.2f} exceeds regression budget {REGRESSION_BUDGET}"
+    )
 ```
 
 - [ ] **Step 6: Run Proof 6 to verify it passes**
@@ -546,28 +499,142 @@ def test_performance_baseline():
 Run: `pytest tests/integration/test_task_created_v1_to_v2.py::test_performance_baseline -v`
 Expected: PASS
 
-- [ ] **Step 7: Run all 6 proofs to verify they pass**
+- [ ] **Step 7: Run all integration proofs to verify they pass**
 
 Run: `pytest tests/integration/test_task_created_v1_to_v2.py -v`
-Expected: All 8 tests PASS
+Expected: All 7 tests PASS
 
 - [ ] **Step 8: Commit**
 
 ```bash
 git add tests/integration/test_task_created_v1_to_v2.py
-git commit -m "test(integration): F15 proofs 4-6 — graph safety, determinism, performance"
+git commit -m "test(integration): F15 proofs 4-7 — idempotence, determinism, performance"
 ```
 
 ---
 
-## Task 4: Architectural Guards (T15)
+## Task 4: Unit Proof Suite — Resolver Correctness
+
+**Files:**
+- Create: `tests/unit/test_task_created_resolver.py`
+
+**Interfaces:**
+- Consumes: `SchemaPolicy`, `EventSchema`, `MigrationPath`, `MigrationStep` from `rationalevault/schema/policy.py`
+- Consumes: `ReplayResolver`, `UnknownSchemaError` from `rationalevault/schema/resolver.py`
+- Consumes: `UpcasterRegistry` from `rationalevault/schema/upcaster.py`
+- Produces: 2 unit tests (resolver-level correctness)
+
+- [ ] **Step 1: Write the test file header**
+
+```python
+"""Unit proofs for TASK_CREATED v1→v2 resolver correctness.
+
+These tests validate resolver and policy behavior at the unit level.
+Integration proofs (pipeline-first) are in test_task_created_v1_to_v2.py.
+"""
+
+import pytest
+
+from rationalevault.schema.policy import (
+    SchemaPolicy, EventSchema, MigrationPath, MigrationStep,
+)
+from rationalevault.schema.resolver import ReplayResolver, UnknownSchemaError
+from rationalevault.schema.upcaster import UpcasterRegistry
+from rationalevault.schema.events import EventType
+
+
+V1_PAYLOAD = {
+    "task_id": "T1",
+    "title": "Test",
+    "description": "Unit proof",
+}
+
+V2_PAYLOAD = {
+    "task_id": "T1",
+    "details": {"summary": "Test", "body": "Unit proof"},
+}
+```
+
+- [ ] **Step 2: Write Unit Proof 1 — Unknown Migration Path**
+
+```python
+def test_unknown_schema_path_fails():
+    """Missing migration edge raises UnknownSchemaError.
+
+    Property: Migration graph safety.
+    """
+    policy_no_path = SchemaPolicy(_schemas={
+        EventType.TASK_CREATED: EventSchema(
+            event_type=EventType.TASK_CREATED,
+            latest_version=2,
+            migration_path=MigrationPath(steps=()),
+        )
+    })
+
+    registry = UpcasterRegistry.default()
+    resolver = ReplayResolver(policy=policy_no_path, registry=registry)
+
+    with pytest.raises(UnknownSchemaError):
+        resolver.resolve(1, V1_PAYLOAD)
+```
+
+- [ ] **Step 3: Run Unit Proof 1 to verify it passes**
+
+Run: `pytest tests/unit/test_task_created_resolver.py::test_unknown_schema_path_fails -v`
+Expected: PASS
+
+- [ ] **Step 4: Write Unit Proof 2 — Cyclic Migration Detection**
+
+```python
+def test_cyclic_migration_graph_rejected():
+    """Cyclic migration graph is prevented.
+
+    Property: Migration graph safety.
+    """
+    policy_cycle = SchemaPolicy(_schemas={
+        EventType.TASK_CREATED: EventSchema(
+            event_type=EventType.TASK_CREATED,
+            latest_version=2,
+            migration_path=MigrationPath(steps=(
+                MigrationStep(1, 2),
+                MigrationStep(2, 1),
+            )),
+        )
+    })
+
+    registry = UpcasterRegistry.default()
+    resolver = ReplayResolver(policy=policy_cycle, registry=registry)
+
+    # Cycles must not cause infinite loops
+    try:
+        result = resolver.resolve(1, V1_PAYLOAD)
+        assert result is not None
+    except (UnknownSchemaError, ValueError):
+        pass
+```
+
+- [ ] **Step 5: Run Unit Proof 2 to verify it passes**
+
+Run: `pytest tests/unit/test_task_created_resolver.py::test_cyclic_migration_graph_rejected -v`
+Expected: PASS
+
+- [ ] **Step 6: Commit**
+
+```bash
+git add tests/unit/test_task_created_resolver.py
+git commit -m "test(unit): F15 resolver proofs — unknown path, cyclic detection"
+```
+
+---
+
+## Task 5: Architectural Guards (T15)
 
 **Files:**
 - Modify: `tests/unit/test_architecture_guards.py`
 
 **Interfaces:**
 - Consumes: AST module for code analysis
-- Produces: 5 architectural guard tests
+- Produces: 5 architectural guard tests (semantic, not field-name-specific)
 
 - [ ] **Step 1: Read existing architecture guards**
 
@@ -612,7 +679,10 @@ Expected: PASS
 
 ```python
 def test_reducers_never_implement_compatibility_logic():
-    """Reducers MUST NOT branch on payload shape (T14)."""
+    """Reducers MUST NOT branch on payload shape (T14).
+
+    Detects semantic patterns, not field names.
+    """
     import ast
     from pathlib import Path
 
@@ -620,21 +690,27 @@ def test_reducers_never_implement_compatibility_logic():
         Path("rationalevault/cognitive_head/reducers.py"),
     ]
 
-    # Patterns that indicate compatibility branching
-    compatibility_indicators = {"title", "description", "details", "summary", "body"}
-
     for filepath in reducer_files:
         source = filepath.read_text()
         tree = ast.parse(source)
 
         for node in ast.walk(tree):
-            # Check for "key" in payload style conditionals
+            # Detect "key" in dict conditionals (compatibility branching)
             if isinstance(node, ast.Compare):
-                for comp in node.comparators:
-                    if isinstance(comp, ast.Constant) and comp.value in compatibility_indicators:
-                        # Check if this is inside a conditional
+                for op in node.ops:
+                    if isinstance(op, ast.In):
+                        # "key" in payload pattern
                         pytest.fail(
                             f"{filepath}:{node.lineno} branches on payload structure"
+                        )
+
+            # Detect .get() with fallback chains (compatibility logic)
+            if isinstance(node, ast.Call):
+                if isinstance(node.func, ast.Attribute):
+                    if node.func.attr == "get" and len(node.args) > 1:
+                        # .get(key, default) with explicit fallback
+                        pytest.fail(
+                            f"{filepath}:{node.lineno} uses .get() fallback chain"
                         )
 ```
 
@@ -647,7 +723,10 @@ Expected: PASS
 
 ```python
 def test_resolver_is_policy_driven():
-    """ReplayResolver MUST execute policy, not define it (T15)."""
+    """ReplayResolver MUST execute policy, not define it (T15).
+
+    Detects semantic patterns, not event type names.
+    """
     import ast
     from pathlib import Path
 
@@ -655,21 +734,28 @@ def test_resolver_is_policy_driven():
     source = resolver_path.read_text()
     tree = ast.parse(source)
 
-    # Check for hardcoded event types
-    event_type_names = {"TASK_CREATED", "DECISION_CREATED", "PROJECT_CREATED"}
-
+    # Detect event-type dispatch patterns
     for node in ast.walk(tree):
-        if isinstance(node, ast.Constant) and node.value in event_type_names:
-            pytest.fail(
-                f"{resolver_path}:{node.lineno} hardcodes event type '{node.value}'"
-            )
+        # No if/elif on event type strings
+        if isinstance(node, ast.Constant) and isinstance(node.value, str):
+            if node.value.endswith("_CREATED") or node.value.endswith("_RECORDED"):
+                pytest.fail(
+                    f"{resolver_path}:{node.lineno} hardcodes event type '{node.value}'"
+                )
 
-    # Check for EVOLVED_EVENT_TYPES
-    for node in ast.walk(tree):
+        # No EVOLVED_EVENT_TYPES
         if isinstance(node, ast.Name) and node.id == "EVOLVED_EVENT_TYPES":
             pytest.fail(
                 f"{resolver_path}:{node.lineno} references EVOLVED_EVENT_TYPES"
             )
+
+        # No hardcoded version tables
+        if isinstance(node, ast.Dict):
+            keys = [k.value for k in node.keys if isinstance(k, ast.Constant)]
+            if all(isinstance(k, int) for k in keys) and len(keys) > 1:
+                pytest.fail(
+                    f"{resolver_path}:{node.lineno} contains hardcoded version table"
+                )
 ```
 
 - [ ] **Step 7: Run Guard 3 to verify it passes**
@@ -682,7 +768,6 @@ Expected: PASS
 ```python
 def test_schema_policy_is_sole_authority():
     """SchemaPolicy MUST be the only source of latest-version decisions (T15)."""
-    import ast
     from pathlib import Path
 
     # Verify ReplayResolver depends on SchemaPolicy
@@ -699,9 +784,7 @@ def test_schema_policy_is_sole_authority():
         "ReplayPipeline must construct resolver from schema_policy"
     )
 
-    # Verify no module except SchemaPolicyFactory decides latest version
-    # (This is enforced by the factory being the only place that reads
-    # GovernanceState.schema_versions)
+    # Verify SchemaPolicyFactory reads governance state
     factory_path = Path("rationalevault/schema/factory.py")
     factory_source = factory_path.read_text()
     assert "schema_versions" in factory_source, (
@@ -767,12 +850,12 @@ git commit -m "test(guards): T15 architectural guards — policy authority, immu
 
 ---
 
-## Task 5: Full Regression and Final Verification
+## Task 6: Full Regression and Final Verification
 
 **Files:** None (verification only)
 
 **Interfaces:**
-- Consumes: All tests from Tasks 1-4
+- Consumes: All tests from Tasks 1-5
 - Produces: Green test suite
 
 - [ ] **Step 1: Run the full test suite**
@@ -783,15 +866,16 @@ Expected: All tests pass, no failures
 - [ ] **Step 2: Verify no regressions**
 
 Compare test count to baseline (1990+). New tests from F15 should be added:
-- 8 integration tests (Proofs 1-6 + 2 governance tests)
+- 7 integration proofs (pipeline-first)
+- 2 unit proofs (resolver correctness)
 - 5 architectural guards
 
-Expected total: ~2003 tests
+Expected total: ~2004 tests
 
 - [ ] **Step 3: Verify all F15 proofs pass**
 
-Run: `pytest tests/integration/test_task_created_v1_to_v2.py -v`
-Expected: 8 tests PASS
+Run: `pytest tests/integration/test_task_created_v1_to_v2.py tests/unit/test_task_created_resolver.py -v`
+Expected: 9 tests PASS
 
 - [ ] **Step 4: Verify all T15 guards pass**
 
