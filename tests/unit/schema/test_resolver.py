@@ -29,89 +29,6 @@ def _create_event(sequence: int, schema_version: int, payload: dict[str, Any], e
     )
 
 
-def test_resolver_resolves_schema_v2() -> None:
-    # Now defaults to target version 2
-    resolver = ReplayResolver(target_schema_version=2)
-    event = _create_event(42, 2, {"name": "test project"})
-    
-    resolved = resolver.resolve(event)
-    assert resolved is event
-    assert resolved.schema_version == 2
-
-
-def test_resolver_raises_unknown_schema_version_without_upcaster() -> None:
-    # If target is 2 and we have a v1 event, we need an upcaster (if unregistered)
-    registry = UpcasterRegistry()
-    resolver = ReplayResolver(registry, target_schema_version=2)
-    event = _create_event(43, 1, {"title": "broken"}, event_type=EventType.TASK_CREATED)
-    
-    with pytest.raises(UnknownSchemaError) as exc_info:
-        resolver.resolve(event)
-        
-    assert "No upcaster registered" in str(exc_info.value)
-
-
-def test_resolver_uses_upcaster_registry_v1_to_v2() -> None:
-    registry = UpcasterRegistry({"TASK_CREATED": {1: task_created_v1_to_v2}})
-    resolver = ReplayResolver(registry, target_schema_version=2)
-    event = _create_event(44, 1, {"title": "hello world", "description": "desc"}, event_type=EventType.TASK_CREATED)
-    
-    resolved = resolver.resolve(event)
-    assert resolved.schema_version == 2
-    assert resolved.payload == {"details": {"summary": "hello world", "body": "desc"}}
-
-
-def test_replay_pipeline_applies_context_filtering_and_resolution() -> None:
-    registry = UpcasterRegistry({"TASK_CREATED": {1: task_created_v1_to_v2}})
-    policy = SchemaPolicy(_schemas={
-        EventType.TASK_CREATED: EventSchema(
-            event_type=EventType.TASK_CREATED,
-            latest_version=2,
-            migration_path=MigrationPath(steps=(MigrationStep(1, 2),)),
-        )
-    })
-    context = ReplayContext(max_sequence=50, schema_policy=policy)
-    pipeline = ReplayPipeline(context, registry)
-    
-    events = [
-        _create_event(10, 1, {"title": "first", "description": "body1"}, event_type=EventType.TASK_CREATED),
-        _create_event(20, 2, {"details": {"summary": "second", "body": "body2"}}, event_type=EventType.TASK_CREATED),
-        _create_event(60, 1, {"title": "too far", "description": "body3"}, event_type=EventType.TASK_CREATED),
-    ]
-    
-    processed = pipeline.process(events)
-    assert len(processed) == 2
-    
-    assert processed[0].event_sequence == 10
-    assert processed[0].payload == {"details": {"summary": "first", "body": "body1"}}
-    assert processed[0].schema_version == 2
-    
-    assert processed[1].event_sequence == 20
-    assert processed[1].payload == {"details": {"summary": "second", "body": "body2"}}
-    assert processed[1].schema_version == 2
-
-
-def test_replay_service_loads_and_processes_events() -> None:
-    from unittest.mock import MagicMock
-    from rationalevault.projections.service import ReplayService
-
-    mock_store = MagicMock()
-    events = [
-        _create_event(10, 1, {"name": "first"}),
-        _create_event(20, 1, {"name": "second"}),
-    ]
-    mock_store.get_project_stream.return_value = events
-
-    policy = SchemaPolicy(_schemas={})
-    context = ReplayContext(max_sequence=15, schema_policy=policy)
-    service = ReplayService(mock_store)
-
-    replayed = service.load_project_events(uuid.uuid4(), context)
-    assert len(replayed) == 1
-    assert replayed[0].event_sequence == 10
-    mock_store.get_project_stream.assert_called_once()
-
-
 def test_resolver_with_schema_policy() -> None:
     policy = SchemaPolicy(_schemas={})
     registry = UpcasterRegistry()
@@ -178,14 +95,152 @@ def test_resolver_policy_raises_on_unresolvable() -> None:
         resolver.resolve(event)
 
 
-def test_resolver_no_policy_falls_back_to_legacy() -> None:
+def test_replay_pipeline_applies_context_filtering_and_resolution() -> None:
     registry = UpcasterRegistry({"TASK_CREATED": {1: task_created_v1_to_v2}})
-    resolver = ReplayResolver(registry=registry, target_schema_version=2)
-    event = _create_event(
-        103, 1,
-        {"title": "hello", "description": "world"},
-        event_type=EventType.TASK_CREATED,
-    )
+    policy = SchemaPolicy(_schemas={
+        EventType.TASK_CREATED: EventSchema(
+            event_type=EventType.TASK_CREATED,
+            latest_version=2,
+            migration_path=MigrationPath(steps=(MigrationStep(1, 2),)),
+        )
+    })
+    context = ReplayContext(max_sequence=50, schema_policy=policy)
+    pipeline = ReplayPipeline(context, registry)
+    
+    events = [
+        _create_event(10, 1, {"title": "first", "description": "body1"}, event_type=EventType.TASK_CREATED),
+        _create_event(20, 2, {"details": {"summary": "second", "body": "body2"}}, event_type=EventType.TASK_CREATED),
+        _create_event(60, 1, {"title": "too far", "description": "body3"}, event_type=EventType.TASK_CREATED),
+    ]
+    
+    processed = pipeline.process(events)
+    assert len(processed) == 2
+    
+    assert processed[0].event_sequence == 10
+    assert processed[0].payload == {"details": {"summary": "first", "body": "body1"}}
+    assert processed[0].schema_version == 2
+    
+    assert processed[1].event_sequence == 20
+    assert processed[1].payload == {"details": {"summary": "second", "body": "body2"}}
+    assert processed[1].schema_version == 2
+
+
+def test_replay_service_loads_and_processes_events() -> None:
+    from unittest.mock import MagicMock
+    from rationalevault.projections.service import ReplayService
+
+    mock_store = MagicMock()
+    events = [
+        _create_event(10, 1, {"name": "first"}),
+        _create_event(20, 1, {"name": "second"}),
+    ]
+    mock_store.get_project_stream.return_value = events
+
+    policy = SchemaPolicy(_schemas={})
+    context = ReplayContext(max_sequence=15, schema_policy=policy)
+    service = ReplayService(mock_store)
+
+    replayed = service.load_project_events(uuid.uuid4(), context)
+    assert len(replayed) == 1
+    assert replayed[0].event_sequence == 10
+    mock_store.get_project_stream.assert_called_once()
+
+
+def test_resolver_can_resolve_with_event_type() -> None:
+    policy = SchemaPolicy(_schemas={
+        EventType.TASK_CREATED: EventSchema(
+            event_type=EventType.TASK_CREATED,
+            latest_version=2,
+            migration_path=MigrationPath(steps=(MigrationStep(1, 2),)),
+        )
+    })
+    registry = UpcasterRegistry()
+    resolver = ReplayResolver(policy=policy, registry=registry)
+    assert resolver.can_resolve(1, EventType.TASK_CREATED) is True
+    assert resolver.can_resolve(2, EventType.TASK_CREATED) is True
+    assert resolver.can_resolve(3, EventType.TASK_CREATED) is False
+
+
+def test_resolver_can_resolve_without_event_type() -> None:
+    policy = SchemaPolicy(_schemas={})
+    registry = UpcasterRegistry()
+    resolver = ReplayResolver(policy=policy, registry=registry)
+    assert resolver.can_resolve(1) is True
+    assert resolver.can_resolve(100) is True
+
+
+def test_resolver_unknown_event_type_with_empty_policy() -> None:
+    policy = SchemaPolicy(_schemas={})
+    registry = UpcasterRegistry()
+    resolver = ReplayResolver(policy=policy, registry=registry)
+    event = _create_event(1, 1, {"name": "test"}, event_type=EventType.PROJECT_CREATED)
     result = resolver.resolve(event)
-    assert result.schema_version == 2
-    assert result.payload == {"details": {"summary": "hello", "body": "world"}}
+    assert result.schema_version == 1
+    assert result.payload == event.payload
+
+
+def test_resolver_raises_on_missing_upcaster() -> None:
+    policy = SchemaPolicy(_schemas={
+        EventType.TASK_CREATED: EventSchema(
+            event_type=EventType.TASK_CREATED,
+            latest_version=2,
+            migration_path=MigrationPath(steps=(MigrationStep(1, 2),)),
+        )
+    })
+    registry = UpcasterRegistry()
+    resolver = ReplayResolver(policy=policy, registry=registry)
+    event = _create_event(1, 1, {"title": "test", "description": "desc"}, event_type=EventType.TASK_CREATED)
+    with pytest.raises(UnknownSchemaError) as exc_info:
+        resolver.resolve(event)
+    assert "No upcaster registered" in str(exc_info.value)
+
+
+def test_resolver_multi_step_migration() -> None:
+    def upcaster_v1_to_v2(payload: dict[str, Any]) -> dict[str, Any]:
+        payload_copy = dict(payload)
+        payload_copy["details"] = {"summary": payload_copy.pop("title", ""), "body": payload_copy.pop("description", "")}
+        return payload_copy
+
+    def upcaster_v2_to_v3(payload: dict[str, Any]) -> dict[str, Any]:
+        payload_copy = dict(payload)
+        payload_copy["details"]["priority"] = "normal"
+        return payload_copy
+
+    policy = SchemaPolicy(_schemas={
+        EventType.TASK_CREATED: EventSchema(
+            event_type=EventType.TASK_CREATED,
+            latest_version=3,
+            migration_path=MigrationPath(steps=(MigrationStep(1, 2), MigrationStep(2, 3))),
+        )
+    })
+    registry = UpcasterRegistry({
+        "TASK_CREATED": {1: upcaster_v1_to_v2, 2: upcaster_v2_to_v3}
+    })
+    resolver = ReplayResolver(policy=policy, registry=registry)
+    
+    event = _create_event(1, 1, {"title": "test", "description": "desc"}, event_type=EventType.TASK_CREATED)
+    result = resolver.resolve(event)
+    
+    assert result.schema_version == 3
+    assert result.payload == {"details": {"summary": "test", "body": "desc", "priority": "normal"}}
+
+
+def test_resolver_partial_migration_path() -> None:
+    def upcaster_v1_to_v2(payload: dict[str, Any]) -> dict[str, Any]:
+        payload_copy = dict(payload)
+        payload_copy["details"] = {"summary": payload_copy.pop("title", ""), "body": payload_copy.pop("description", "")}
+        return payload_copy
+
+    policy = SchemaPolicy(_schemas={
+        EventType.TASK_CREATED: EventSchema(
+            event_type=EventType.TASK_CREATED,
+            latest_version=3,
+            migration_path=MigrationPath(steps=(MigrationStep(1, 2),)),
+        )
+    })
+    registry = UpcasterRegistry({"TASK_CREATED": {1: upcaster_v1_to_v2}})
+    resolver = ReplayResolver(policy=policy, registry=registry)
+    
+    event = _create_event(1, 1, {"title": "test", "description": "desc"}, event_type=EventType.TASK_CREATED)
+    with pytest.raises(UnknownSchemaError):
+        resolver.resolve(event)
