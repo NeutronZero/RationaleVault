@@ -1,4 +1,5 @@
 from rationalevault.schema.policy import SchemaPolicy, EventSchema, MigrationPath
+from rationalevault.schema.events import EventType
 from rationalevault.projections.governance import GovernanceState
 
 class SchemaPolicyFactory:
@@ -12,7 +13,6 @@ class SchemaPolicyFactory:
         """Build SchemaPolicy from current governance state."""
         schemas = {}
         for event_type_str, (version, _eff_seq) in governance_state.schema_versions.items():
-            from rationalevault.schema.events import EventType
             try:
                 event_type = EventType(event_type_str)
             except ValueError:
@@ -29,7 +29,6 @@ class SchemaPolicyFactory:
         schemas = {}
         for event_type_str, (version, eff_seq) in governance_state.schema_versions.items():
             if eff_seq <= sequence:
-                from rationalevault.schema.events import EventType
                 try:
                     event_type = EventType(event_type_str)
                 except ValueError:
