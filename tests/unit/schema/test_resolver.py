@@ -63,9 +63,15 @@ def test_resolver_uses_upcaster_registry_v1_to_v2() -> None:
 
 def test_replay_pipeline_applies_context_filtering_and_resolution() -> None:
     registry = UpcasterRegistry({"TASK_CREATED": {1: task_created_v1_to_v2}})
-    resolver = ReplayResolver(registry, target_schema_version=2)
-    context = ReplayContext(max_sequence=50, resolver=resolver)
-    pipeline = ReplayPipeline(context)
+    policy = SchemaPolicy(_schemas={
+        EventType.TASK_CREATED: EventSchema(
+            event_type=EventType.TASK_CREATED,
+            latest_version=2,
+            migration_path=MigrationPath(steps=(MigrationStep(1, 2),)),
+        )
+    })
+    context = ReplayContext(max_sequence=50, schema_policy=policy)
+    pipeline = ReplayPipeline(context, registry)
     
     events = [
         _create_event(10, 1, {"title": "first", "description": "body1"}, event_type=EventType.TASK_CREATED),
@@ -96,7 +102,8 @@ def test_replay_service_loads_and_processes_events() -> None:
     ]
     mock_store.get_project_stream.return_value = events
 
-    context = ReplayContext(max_sequence=15, target_schema_version=1)
+    policy = SchemaPolicy(_schemas={})
+    context = ReplayContext(max_sequence=15, schema_policy=policy)
     service = ReplayService(mock_store)
 
     replayed = service.load_project_events(uuid.uuid4(), context)

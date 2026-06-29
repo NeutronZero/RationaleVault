@@ -3,7 +3,7 @@ from dataclasses import dataclass, field
 from enum import Enum
 from typing import Optional
 
-from rationalevault.schema.resolver import ReplayResolver
+from rationalevault.schema.policy import SchemaPolicy
 from rationalevault.projections.governance import GovernanceState
 
 
@@ -16,24 +16,14 @@ class ReplayMode(str, Enum):
 
 @dataclass(frozen=True)
 class ReplayContext:
-    """
-    Context parameters for a replay execution session.
-    
-    Acts as the parameter envelope for controlling schema versions,
-    sequence bounds, and other constraints. Owns the ReplayResolver
-    to define how the replay is interpreted.
+    """Session parameters for replay execution.
+
+    Contains NO schema version logic.
+    Contains NO resolver — that belongs in ReplayPipeline.
+    SchemaPolicy is the single source of truth for schema decisions.
     """
     max_sequence: Optional[int] = None
-    target_schema_version: int = 2
-    resolver: ReplayResolver = field(default_factory=ReplayResolver)
-
-    def __post_init__(self) -> None:
-        if self.resolver.target_schema_version != self.target_schema_version:
-            object.__setattr__(
-                self,
-                "resolver",
-                ReplayResolver(self.resolver.registry, self.target_schema_version)
-            )
+    schema_policy: SchemaPolicy = field(default_factory=lambda: SchemaPolicy(_schemas={}))
 
 
 @dataclass(frozen=True)
@@ -74,34 +64,19 @@ class InterpretiveContextBuilder:
         if request.mode == ReplayMode.COUNTERFACTUAL:
             raise NotImplementedError("Counterfactual replay mode is not supported in the current epoch.")
 
-        from rationalevault.schema.upcaster import UpcasterRegistry
-        from rationalevault.schema.resolver import ReplayResolver
+        from rationalevault.schema.factory import SchemaPolicyFactory
 
-        # 1. Resolve resolver config based on mode and sequence bounds
-        registry = UpcasterRegistry.default()
+        factory = SchemaPolicyFactory()
+        policy = factory.compile(governance)
+
         max_seq = request.sequence
 
         if request.mode == ReplayMode.CURRENT:
             max_seq = None
-            # Current mode uses the latest schema resolvers / registry directly
-        
-        elif request.mode == ReplayMode.HISTORICAL:
-            # Historical mode enforces sequence limits, but uses default unmigrated resolvers
-            pass
-            
-        elif request.mode == ReplayMode.INTERPRETIVE:
-            # Interpretive mode configures upcasters effective at request.sequence
-            # Note: We query the registry for upcasters matching effective schemas
-            # projected by the GovernanceState at request.sequence.
-            pass
 
-        resolver = ReplayResolver(registry, target_schema_version=2)
-
-        # 2. Build downstream ReplayContext (execution parameters)
         replay_context = ReplayContext(
             max_sequence=max_seq,
-            target_schema_version=2,
-            resolver=resolver,
+            schema_policy=policy,
         )
 
         return InterpretiveContext(
