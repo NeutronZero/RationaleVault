@@ -3,6 +3,8 @@ from __future__ import annotations
 import ast
 from pathlib import Path
 
+import pytest
+
 
 def _get_ast_tree(path: Path) -> ast.AST:
     with open(path, "r", encoding="utf-8") as f:
@@ -267,3 +269,146 @@ def test_replay_context_purity() -> None:
     assert not hasattr(
         ctx_with_policy, "target_schema_version"
     ), "ReplayContext must not contain target_schema_version"
+
+
+# ── T15 Architectural Guards ────────────────────────────────────────────────
+
+
+def test_reducers_have_zero_schema_knowledge() -> None:
+    """Reducers MUST NOT reference schema evolution infrastructure (T2)."""
+    project_root = Path(__file__).resolve().parent.parent.parent
+    reducer_files = [
+        project_root / "rationalevault" / "cognitive_head" / "reducers.py",
+    ]
+
+    forbidden_names = {
+        "schema_version", "SchemaPolicy", "MigrationPath",
+        "ReplayResolver", "UpcasterRegistry", "ReplayContext",
+    }
+
+    for filepath in reducer_files:
+        if not filepath.exists():
+            continue
+        tree = ast.parse(filepath.read_text(encoding="utf-8"))
+        for node in ast.walk(tree):
+            if isinstance(node, ast.Name) and node.id in forbidden_names:
+                pytest.fail(
+                    f"{filepath}:{node.lineno} references forbidden name '{node.id}'"
+                )
+            if isinstance(node, ast.Attribute) and node.attr in forbidden_names:
+                pytest.fail(
+                    f"{filepath}:{node.lineno} references forbidden attribute '{node.attr}'"
+                )
+
+
+def test_reducers_never_implement_compatibility_logic() -> None:
+    """Reducers MUST NOT branch on payload shape (T14).
+
+    Detects semantic patterns, not field names.
+    """
+    project_root = Path(__file__).resolve().parent.parent.parent
+    reducer_files = [
+        project_root / "rationalevault" / "cognitive_head" / "reducers.py",
+    ]
+
+    for filepath in reducer_files:
+        if not filepath.exists():
+            continue
+        source = filepath.read_text(encoding="utf-8")
+        tree = ast.parse(source)
+
+        for node in ast.walk(tree):
+            # Detect "key" in dict conditionals (compatibility branching)
+            if isinstance(node, ast.Compare):
+                for op in node.ops:
+                    if isinstance(op, ast.In):
+                        # "key" in payload pattern
+                        pytest.fail(
+                            f"{filepath}:{node.lineno} branches on payload structure"
+                        )
+
+
+def test_resolver_is_policy_driven() -> None:
+    """ReplayResolver MUST execute policy, not define it (T15).
+
+    Detects semantic patterns, not event type names.
+    """
+    project_root = Path(__file__).resolve().parent.parent.parent
+    resolver_path = project_root / "rationalevault" / "schema" / "resolver.py"
+
+    if not resolver_path.exists():
+        pytest.skip("resolver.py not found")
+
+    source = resolver_path.read_text(encoding="utf-8")
+    tree = ast.parse(source)
+
+    for node in ast.walk(tree):
+        if isinstance(node, ast.Constant) and isinstance(node.value, str):
+            if node.value.endswith("_CREATED") or node.value.endswith("_RECORDED"):
+                pytest.fail(
+                    f"{resolver_path}:{node.lineno} hardcodes event type '{node.value}'"
+                )
+
+        if isinstance(node, ast.Name) and node.id == "EVOLVED_EVENT_TYPES":
+            pytest.fail(
+                f"{resolver_path}:{node.lineno} references EVOLVED_EVENT_TYPES"
+            )
+
+        if isinstance(node, ast.Dict):
+            keys = [k.value for k in node.keys if isinstance(k, ast.Constant)]
+            if all(isinstance(k, int) for k in keys) and len(keys) > 1:
+                pytest.fail(
+                    f"{resolver_path}:{node.lineno} contains hardcoded version table"
+                )
+
+
+def test_schema_policy_is_sole_authority() -> None:
+    """SchemaPolicy MUST be the only source of latest-version decisions (T15)."""
+    project_root = Path(__file__).resolve().parent.parent.parent
+
+    resolver_path = project_root / "rationalevault" / "schema" / "resolver.py"
+    if resolver_path.exists():
+        resolver_source = resolver_path.read_text(encoding="utf-8")
+        assert "SchemaPolicy" in resolver_source, (
+            "ReplayResolver must depend on SchemaPolicy"
+        )
+
+    pipeline_path = project_root / "rationalevault" / "projections" / "pipeline.py"
+    if pipeline_path.exists():
+        pipeline_source = pipeline_path.read_text(encoding="utf-8")
+        assert "schema_policy" in pipeline_source, (
+            "ReplayPipeline must construct resolver from schema_policy"
+        )
+
+    factory_path = project_root / "rationalevault" / "schema" / "factory.py"
+    if factory_path.exists():
+        factory_source = factory_path.read_text(encoding="utf-8")
+        assert "schema_versions" in factory_source, (
+            "SchemaPolicyFactory must read schema_versions from GovernanceState"
+        )
+
+
+def test_schema_policy_is_immutable() -> None:
+    """SchemaPolicy is a snapshot, never a mutable session object (T1)."""
+    from rationalevault.schema.policy import SchemaPolicy, EventSchema, MigrationPath
+    from rationalevault.schema.events import EventType
+
+    assert hasattr(SchemaPolicy, "__dataclass_params__")
+    assert SchemaPolicy.__dataclass_params__.frozen is True
+
+    policy = SchemaPolicy(_schemas={
+        EventType.TASK_CREATED: EventSchema(
+            event_type=EventType.TASK_CREATED,
+            latest_version=2,
+            migration_path=MigrationPath(steps=()),
+        )
+    })
+
+    with pytest.raises(AttributeError):
+        policy._schemas = {}
+
+    assert hasattr(EventSchema, "__dataclass_params__")
+    assert EventSchema.__dataclass_params__.frozen is True
+
+    assert hasattr(MigrationPath, "__dataclass_params__")
+    assert MigrationPath.__dataclass_params__.frozen is True
