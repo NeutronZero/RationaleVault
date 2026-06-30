@@ -1,5 +1,5 @@
 """RationaleVault — Event-sourced cognitive continuity and memory platform for multi-agent workflows."""
 from __future__ import annotations
 
-__version__ = "1.1.0"
+__version__ = "1.2.0"
 SCHEMA_VERSION = "1.0"

@@ -4,7 +4,7 @@ build-backend = "hatchling.build"
 
 [project]
 name = "rationalevault"
-version = "1.1.0"
+version = "1.2.0"
 description = "RationaleVault — Event-sourced cognitive continuity and memory layer for multi-agent AI workflows"
 readme = "README.md"
 requires-python = ">=3.12"
@@ -20,6 +20,8 @@ rationalevault = "rationalevault.cli.main:main"
 dev = [
     "pytest>=8.0",
     "pytest-asyncio>=0.23",
+    "pytest-xdist>=3.0",
+    "mcp>=1.0",
 ]
 mcp = ["mcp>=1.0"]
 
@@ -28,6 +30,7 @@ testpaths = ["tests"]
 python_files = ["test_*.py"]
 python_classes = ["Test*"]
 python_functions = ["test_*"]
+addopts = "-n auto"
 markers = [
     "db: marks tests that require a live PostgreSQL database",
 ]
