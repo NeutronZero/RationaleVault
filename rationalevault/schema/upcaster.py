@@ -19,6 +19,14 @@ def task_created_v1_to_v2(payload: dict[str, Any]) -> dict[str, Any]:
     return payload_copy
 
 
+def decision_proposed_v1_to_v2(payload: dict[str, Any]) -> dict[str, Any]:
+    """Upcasts DECISION_PROPOSED payload from v1 to v2 by adding context and category."""
+    payload_copy = dict(payload)
+    payload_copy.setdefault("context", "")
+    payload_copy.setdefault("category", "general")
+    return payload_copy
+
+
 class UpcasterRegistry:
     """Pure data structure mapping (EventType, source_version) to upcaster callables.
 
@@ -37,7 +45,10 @@ class UpcasterRegistry:
     @classmethod
     def default(cls) -> UpcasterRegistry:
         """Create a registry pre-populated with all production upcasters."""
-        return cls({"TASK_CREATED": {1: task_created_v1_to_v2}})
+        return cls({
+            "TASK_CREATED": {1: task_created_v1_to_v2},
+            "DECISION_PROPOSED": {1: decision_proposed_v1_to_v2},
+        })
 
     def register(self, event_type: EventType, source_version: int, upcaster: UpcasterCallable) -> None:
         """Register an upcaster function for a specific event type and source schema version."""
