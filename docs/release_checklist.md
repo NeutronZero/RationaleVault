@@ -23,9 +23,9 @@ Before releasing a new version of RationaleVault (e.g. `v1.1.0`), the following 
 
 ## 2. Examples Validation
 
-- [ ] **Event → Memory Flow**: Confirm `examples/basic_memory/main.py` executes successfully.
-- [ ] **Memory → Knowledge → Graph Flow**: Confirm `examples/knowledge_synthesis/main.py` executes successfully.
-- [ ] **Context → Compiler → Handoff Flow**: Confirm `examples/multi_agent_handoff/main.py` executes successfully.
+- [ ] **Event → Memory Flow**: Confirm `python -m rationalevault.examples.basic_memory` executes successfully.
+- [ ] **Memory → Knowledge → Graph Flow**: Confirm `python -m rationalevault.examples.knowledge_synthesis` executes successfully.
+- [ ] **Context → Compiler → Handoff Flow**: Confirm `python -m rationalevault.examples.multi_agent_handoff` executes successfully.
 
 ---
 

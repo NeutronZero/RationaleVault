@@ -54,6 +54,6 @@ This builds and checks quality scores (such as completeness, keyword precision, 
 ## 5. Execute Examples
 
 Check out the executable examples to see how the system operates under different layers:
-- **Event to Memory Extraction**: `python examples/basic_memory/main.py`
-- **Memory to Knowledge Graph Projection**: `python examples/knowledge_synthesis/main.py`
-- **Context Compilation and Adapter Rendering**: `python examples/multi_agent_handoff/main.py`
+- **Event to Memory Extraction**: `python -m rationalevault.examples.basic_memory`
+- **Memory to Knowledge Graph Projection**: `python -m rationalevault.examples.knowledge_synthesis`
+- **Context Compilation and Adapter Rendering**: `python -m rationalevault.examples.multi_agent_handoff`
