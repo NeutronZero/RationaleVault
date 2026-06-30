@@ -211,7 +211,7 @@ RationaleVault provides a unified command-line toolset for inspecting and managi
 ```
 README (orientation)
     ↓
-ARCHITECTURE.md (structural overview)
+architecture.md (structural overview)
     ↓
 SchemaPolicy Design (policy-driven schema evolution)
     ↓
@@ -222,13 +222,13 @@ roadmap.md (planned evolution)
 
 | Document | Purpose |
 |----------|---------|
-| [ARCHITECTURE.md](docs/ARCHITECTURE.md) | Data-flow pipelines and projection hierarchy |
+| [architecture.md](docs/architecture.md) | Data-flow pipelines and projection hierarchy |
 | [SchemaPolicy Design](docs/superpowers/specs/2026-06-29-schema-policy-design.md) | Policy-driven schema evolution architecture |
 | [F15 Spec](docs/superpowers/specs/2026-06-29-f15-production-schema-v2.md) | First production schema migration proof |
 | [F16 Spec](docs/superpowers/specs/2026-06-30-f16-multi-version-production.md) | Independent multi-event-type evolution proof |
 | [ADRs](docs/adr/) | Architecture Decision Records — why each choice was made |
 | [Skill Runtime](docs/skill_runtime_architecture.md) | Epic C design specification (Decision→Skill→Execution) |
-| [Freeze Levels](docs/FREEZE_LEVELS.md) | L1/L2/L3 taxonomy and change-process requirements |
+| [Freeze Levels](docs/freeze_levels.md) | L1/L2/L3 taxonomy and change-process requirements |
 | [Roadmap](docs/roadmap.md) | Engineering commitments and research vision |
 | [Philosophy](docs/philosophy.md) | Core design principles |
 
