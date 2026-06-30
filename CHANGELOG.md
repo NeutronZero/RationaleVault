@@ -5,6 +5,46 @@ This project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.htm
 
 ---
 
+## [1.2.0] — 2026-06-30
+
+### Added
+- **SchemaPolicy Architecture (F11–F16)**: Complete policy-driven schema evolution infrastructure.
+  - `SchemaPolicy`: Immutable value object answering schema questions per-event-type.
+  - `SchemaPolicyFactory`: Compiles policy from `GovernanceState`.
+  - `ReplayResolver`: Pure policy executor with zero schema knowledge.
+  - `UpcasterRegistry`: Pure data structure mapping event types to upcaster callables.
+  - `ReplayContext`: Pure dataclass carrying `max_sequence` and `schema_policy`.
+- **Production Schema Evolution**: Two independent production migrations validated.
+  - `TASK_CREATED` v1→v2: Flat title/description to nested details structure.
+  - `DECISION_PROPOSED` v1→v2: Enrichment with `context` and `category` fields.
+- **Governance Integration**: Schema changes driven by `GovernanceState` projections.
+- **Migration Specifications**: Formal contracts for each schema migration.
+- **Integration Proof Suites**: 15 behavioral proofs across F15 and F16.
+- **Architectural Guards**: AST-based enforcement of T14/T15 invariants.
+- **Performance Baselines**: Relative regression budget testing for migration overhead.
+
+### Changed
+- `DecisionReducer`: Now consumes canonical `DECISION_PROPOSED` v2 schema (version-agnostic).
+- `UpcasterRegistry.default()`: Pre-populated with both production upcasters.
+
+### Frozen APIs
+The following APIs are now stable and will be preserved except through documented deprecation:
+- `SchemaPolicy`, `EventSchema`, `MigrationPath`, `MigrationStep`
+- `SchemaPolicyFactory`
+- `ReplayResolver`
+- `ReplayPipeline`
+- `ReplayContext`, `InterpretiveContext`
+- `ReplayRequest`
+- `GovernanceProjection`, `GovernanceState`
+
+### Known Limitations
+- `compile_at_sequence()` historical governance not yet production-complete (planned F17).
+- `Replay Auditor` designed but not yet active (planned F18).
+- Only two production event migrations currently exist.
+- `COUNTERFACTUAL` replay mode reserved and not implemented.
+
+---
+
 ## [1.1.0] — 2026-06-24
 
 ### Added
