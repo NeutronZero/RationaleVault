@@ -74,7 +74,7 @@ def test_failure_taxonomy() -> None:
 
 def test_run_handoff_suite_execution() -> None:
     # Run run_handoff_suite.py via subprocess to test exit codes
-    project_root = Path(__file__).resolve().parent.parent.parent
+    project_root = Path(__file__).resolve().parent.parent.parent.parent
     runner_path = project_root / "rationalevault" / "evaluation" / "run_handoff_suite.py"
 
     # Default run should pass the regression gate (exit code 0)
