@@ -1,5 +1,10 @@
 # RationaleVault (v1.2.0) — Event-Sourced Cognitive Memory & Context Optimization Layer for AI Agents
 
+[![GitHub](https://img.shields.io/badge/GitHub-NeutronZero%2FRationaleVault-181717?style=flat&logo=github)](https://github.com/NeutronZero/RationaleVault)
+[![Python 3.12+](https://img.shields.io/badge/Python-3.12+-3776AB?style=flat&logo=python&logoColor=white)](https://www.python.org/)
+[![Tests](https://img.shields.io/badge/Tests-2022%20passing-brightgreen)](https://github.com/NeutronZero/RationaleVault)
+[![Version](https://img.shields.io/badge/Version-v1.2.0-blue)](https://github.com/NeutronZero/RationaleVault/releases/tag/v1.2.0)
+
 **Event-sourced cognitive continuity, multi-agent context compression, and shared memory infrastructure for AI workflows.**
 
 RationaleVault enables autonomous LLM agents — Claude, ChatGPT, Cursor, Copilot, and custom Model Context Protocol (MCP) clients — to resume work on complex codebases with full context continuity, within seconds, eliminating manual summarization and context drift.
@@ -84,6 +89,43 @@ Canonical Event (normalized to latest version)
 - Migration graphs are isolated per event type — no cross-event-type dependencies
 - Adding a new migrated event type requires only registration, not engine changes
 - Replay is deterministic and idempotent across all event types
+
+---
+
+## v1.1 → v1.2 Comparison
+
+| Dimension | v1.1.0 | v1.2.0 |
+|-----------|--------|--------|
+| **Schema Evolution** | Single global `target_schema_version` | Per-event-type `SchemaPolicy` |
+| **Migration Authority** | Embedded in replay code | `SchemaPolicy` — sole authority |
+| **Event Type Independence** | Not validated | Proved with 2 independent migrations |
+| **Governance** | Theoretical | Production-validated via `GovernanceState` |
+| **Reducer Coupling** | reducers could reference schema versions | reducers consume only canonical payloads |
+| **Upcaster Registry** | Manual registration | `UpcasterRegistry.default()` pre-populated |
+| **Architectural Guards** | T14 (canonical boundary) | T14 + T15 (policy authority, immutability) |
+| **Integration Proofs** | 5 tests (F15) | 15 tests (F15 + F16) |
+| **Test Count** | ~1990 | 2022 |
+| **Frozen APIs** | None formally frozen | 9 APIs formally frozen |
+| **Production Migrations** | 1 (TASK_CREATED v1→v2) | 2 (TASK_CREATED + DECISION_PROPOSED) |
+
+### What Changed Architecturally
+
+**v1.1** introduced organizational intelligence, recommendation engines, and performance optimizations. The replay infrastructure existed but schema evolution was synthetic.
+
+**v1.2** proves the architecture works under real schema evolution:
+- Two independent production migrations (TASK_CREATED, DECISION_PROPOSED)
+- SchemaPolicy is the sole authority for canonical version selection
+- Reducers are completely isolated from historical representation
+- Adding a new migrated event type requires only registration — no engine changes
+
+### What Stayed the Same
+
+- All v1.1 features remain fully functional
+- Event ledger integrity (F11) unchanged
+- Projection layer unchanged
+- Cognitive runtime unchanged
+- Delivery layer unchanged
+- CLI interface unchanged
 
 ---
 
