@@ -160,6 +160,19 @@ Construct a registry missing only the DECISION_PROPOSED migration. Verify:
 - Replay does not silently substitute another migration path
 - Failures are localized per event type
 
+### Proof 8: Registry Completeness
+
+Verify that every migration declared by SchemaPolicy exists in UpcasterRegistry:
+
+```python
+for event_type in policy.event_types():
+    path = policy.migration_path(event_type)
+    for step in path.steps:
+        assert registry.has(event_type, step.from_version, step.to_version)
+```
+
+This catches the failure mode where governance declares a migration, SchemaPolicy compiles successfully, but the upcoder was never registered. The problem would be silent until replay time.
+
 ## Architectural Guards
 
 ### Event-Type Local Migration (T3 + T15)
@@ -201,7 +214,7 @@ Unit
  └── Resolver/Upcaster edge cases
 ```
 
-### Integration (7 new)
+### Integration (8 new)
 
 ```
 Integration
@@ -211,15 +224,16 @@ Integration
  ├── Canonical Idempotence
  ├── Determinism
  ├── Performance Baseline
- └── Event-Type Isolation
+ ├── Event-Type Isolation
+ └── Registry Completeness
 ```
 
 ### Expected Totals
 
 ```
 Baseline:    ~2004 passing
-F16:         +11 new tests
-Expected:    ~2015 passing
+F16:         +12 new tests
+Expected:    ~2016 passing
 ```
 
 ## Acceptance Criteria
@@ -228,18 +242,18 @@ Expected:    ~2015 passing
 - ✅ Existing benchmarks remain within budget
 - ✅ No frozen API changes
 - ✅ No new architectural guard failures
-- ✅ No replay engine modifications
+- ✅ No changes to ReplayPipeline, ReplayResolver, ReplayContext, or SchemaPolicy infrastructure are required to introduce a second migrated event type
 
-The last item is critical. F16's strongest architectural claim:
+F16's strongest architectural claim:
 
-> **Adding a new migrated event type requires no changes to the replay infrastructure.**
+> **Adding a new migrated event type requires only registration — not replay-engine changes.**
 
 ## Files Affected
 
 ### New
 
 - `docs/specs/decision-proposed-v1-to-v2.md` — Migration specification
-- `tests/integration/test_decision_proposed_v1_to_v2.py` — Integration proofs (7 tests)
+- `tests/integration/test_decision_proposed_v1_to_v2.py` — Integration proofs (8 tests)
 - `tests/unit/test_decision_proposed_resolver.py` — Unit proofs (3 tests)
 
 ### Modified
