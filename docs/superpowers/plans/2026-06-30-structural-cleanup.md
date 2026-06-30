@@ -61,13 +61,13 @@ git rm docs/event-ledger.md
 
 - [ ] **Step 4: Grep for old filename references across repo**
 
-Run: `grep -rn "AGENT_COMPILERS\|ARCHITECTURE\|COGNITIVE_HEAD\|CONTEXT_PLANNER\|EVENT_LEDGER\|FREEZE_LEVELS\|KNOWLEDGE_COMPILER\|evaluation-gates\|release-checklist\|event-ledger" --include="*.md" --include="*.yml" --include="*.yaml" --include="*.toml" --include="*.py" .`
-Expected: Only matches in the files we just renamed (which are now gone from their old paths)
+Run: `grep -rn "AGENT_COMPILERS\|ARCHITECTURE\|COGNITIVE_HEAD\|CONTEXT_PLANNER\|EVENT_LEDGER\|FREEZE_LEVELS\|KNOWLEDGE_COMPILER\|evaluation-gates\|release-checklist\|event-ledger" --include="*.md" --include="*.yml" --include="*.yaml" --include="*.toml" --include="*.py" . .relay/`
+Expected: Only matches in the files we just renamed (which are now gone from their old paths). Also check `.relay/` directory for any references.
 
 - [ ] **Step 5: Audit pyproject.toml for doc references**
 
 Run: `grep -n "readme\|\.md\|doc" pyproject.toml`
-Expected: Only `readme = "README.md"` — no renames needed
+Expected: Only `readme = "README.md"` — no renames needed there. Also verify no static path listings reference old uppercase filenames (Linux CI runners are case-sensitive).
 
 - [ ] **Step 6: Audit CI workflows for doc references**
 
