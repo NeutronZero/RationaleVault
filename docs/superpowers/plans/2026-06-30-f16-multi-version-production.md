@@ -4,7 +4,7 @@
 
 **Goal:** Validate that the SchemaPolicy architecture scales to multiple independently evolving event types by implementing the DECISION_PROPOSED v1→v2 migration and proving independent per-event-type evolution with 8 integration proofs + 6 unit proofs + 1 architectural guard.
 
-**Architecture:** The upcoder is a pure transformation function registered in UpcasterRegistry. The integration proof suite exercises the full public replay API with mixed event-type ledgers. The architectural guard enforces event-type local migration via AST analysis.
+**Architecture:** The upcaster is a pure transformation function registered in UpcasterRegistry. The integration proof suite exercises the full public replay API with mixed event-type ledgers. The architectural guard enforces event-type local migration via AST analysis.
 
 **Tech Stack:** Python 3.12+, pytest, frozen dataclasses, AST module
 
@@ -16,6 +16,8 @@
 - ReplayResolver executes policy, never defines policy
 - No changes to ReplayPipeline, ReplayResolver, ReplayContext, or SchemaPolicy infrastructure
 - Migration graphs are local to each event type — no cross-event-type references
+- Future schema evolution should not require reducer changes (after F16, canonical payload is consumed as-is)
+- Shared migration helpers are intentionally deferred until three or more production migrations demonstrate genuine commonality
 
 ---
 
@@ -147,7 +149,7 @@ git commit -m "docs(spec): DECISION_PROPOSED v1→v2 migration specification"
 
 ---
 
-## Task 2: Upcoder Implementation
+## Task 2: Upcaster Implementation
 
 **Files:**
 - Modify: `rationalevault/schema/upcaster.py`
@@ -156,7 +158,7 @@ git commit -m "docs(spec): DECISION_PROPOSED v1→v2 migration specification"
 - Consumes: None (standalone function)
 - Produces: `decision_proposed_v1_to_v2()` function, registered in `UpcasterRegistry.default()`
 
-- [ ] **Step 1: Write the upcoder function**
+- [ ] **Step 1: Write the upcaster function**
 
 Add to `rationalevault/schema/upcaster.py` after the `task_created_v1_to_v2` function:
 
@@ -197,7 +199,7 @@ git commit -m "feat(upcaster): add decision_proposed_v1_to_v2 + register"
 
 ---
 
-## Task 3: Unit Proofs — Upcoder Correctness
+## Task 3: Unit Proofs — Upcaster Correctness
 
 **Files:**
 - Create: `tests/unit/test_decision_proposed_resolver.py`
@@ -277,7 +279,7 @@ Expected: All 6 tests PASS
 
 ```bash
 git add tests/unit/test_decision_proposed_resolver.py
-git commit -m "test(unit): decision_proposed_v1_to_v2 upcoder correctness proofs"
+git commit -m "test(unit): decision_proposed_v1_to_v2 upcaster correctness proofs"
 ```
 
 ---
@@ -673,7 +675,7 @@ class TestEventTypeIsolation:
 
 
 class TestRegistryCompleteness:
-    """Proof 8: All policy migrations exist in registry."""
+    """Proof 8: All policy migrations form complete executable chains."""
 
     def test_all_migrations_registered(self) -> None:
         """Every migration declared by SchemaPolicy exists in UpcasterRegistry."""
@@ -687,6 +689,25 @@ class TestRegistryCompleteness:
                     assert registry.is_registered(event_type, step.from_version), (
                         f"Migration {event_type.value} v{step.from_version}→v{step.to_version} "
                         f"not registered in UpcasterRegistry"
+                    )
+
+    def test_all_migrations_callable(self) -> None:
+        """Every registered migration is a callable, not None or wrong function."""
+        policy = _make_policy()
+        registry = UpcasterRegistry.default()
+
+        for event_type in [EventType.TASK_CREATED, EventType.DECISION_PROPOSED]:
+            schema = policy._schemas.get(event_type)
+            if schema and schema.migration_path:
+                for step in schema.migration_path.steps:
+                    fn = registry.get_upcaster(event_type, step.from_version)
+                    assert fn is not None, (
+                        f"Migration {event_type.value} v{step.from_version}→v{step.to_version} "
+                        f"returned None from registry"
+                    )
+                    assert callable(fn), (
+                        f"Migration {event_type.value} v{step.from_version}→v{step.to_version} "
+                        f"is not callable: {fn}"
                     )
 ```
 
@@ -784,6 +805,17 @@ def test_event_type_local_migration() -> None:
             f"Migration function {func.name} has {len(owning_types)} owning types: "
             f"{owning_types}. Expected exactly 1."
         )
+
+    # Verify upcasters never import reducers or projections
+    # (migration code must remain below the projection layer)
+    reducer_imports = ["reducers", "Reducer", "cognitive_head"]
+    projection_imports = ["projections", "pipeline", "ReplayPipeline"]
+    for func in upcaster_funcs:
+        func_source = ast.get_source_segment(source, func) or ""
+        for import_name in reducer_imports + projection_imports:
+            assert import_name not in func_source, (
+                f"Upcaster {func.name} references layer above migration: {import_name}"
+            )
 ```
 
 - [ ] **Step 2: Run the guard test**
