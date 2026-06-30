@@ -67,15 +67,28 @@ class TaskState:
 @dataclass
 class DecisionState:
     """
-    Compiled state for a single decision.
+    State of a single decision, folded from DECISION_* events.
 
-    Lifecycle:  proposed → accepted (or superseded at any point)
+    Fields:
+        decision_id:  Unique identifier
+        title:        Human-readable title
+        description:  Longer explanation
+        status:       "proposed" | "accepted" | "superseded"
+        rationale:    Reasoning behind the decision
+        context:      Additional context (canonical v2)
+        category:     Decision category (canonical v2, default "general")
+        superseded_by: decision_id that superseded this one, if any
+        created_at:   ISO timestamp of DECISION_PROPOSED
+        accepted_at:  ISO timestamp of DECISION_ACCEPTED
+        created_by:   Actor who proposed the decision
     """
     decision_id: str
     title: str
     description: str = ""
     status: str = "proposed"
     rationale: str = ""
+    context: str = ""
+    category: str = "general"
     superseded_by: Optional[str] = None
     created_at: Optional[str] = None
     accepted_at: Optional[str] = None
@@ -230,7 +243,7 @@ class DecisionReducer:
 
     Relevant events:
         DECISION_PROPOSED   payload: { decision_id, title, description?,
-                                        rationale? }
+                                        rationale?, context?, category? }
         DECISION_ACCEPTED   payload: { decision_id }
         DECISION_SUPERSEDED payload: { decision_id, superseded_by? }
 
@@ -257,6 +270,9 @@ class DecisionReducer:
                     description=p.get("description", ""),
                     status="proposed",
                     rationale=p.get("rationale", ""),
+                    context=p.get("context", ""),
+                    category=p.get("category", "general"),
+                    superseded_by=None,
                     created_at=(
                         event.recorded_at.isoformat()
                         if event.recorded_at else None
