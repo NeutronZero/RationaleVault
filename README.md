@@ -1,4 +1,4 @@
-# RationaleVault (v1.1.0) — Event-Sourced Cognitive Memory & Context Optimization Layer for AI Agents
+# RationaleVault (v1.2.0) — Event-Sourced Cognitive Memory & Context Optimization Layer for AI Agents
 
 **Event-sourced cognitive continuity, multi-agent context compression, and shared memory infrastructure for AI workflows.**
 
@@ -12,7 +12,7 @@ LLM agents lose context. As projects evolve over weeks or months, they accumulat
 
 RationaleVault provides an event-sourced cognitive continuity layer. By treating events as the immutable source of truth and compiling memory, knowledge, and graphs as deterministic projections, RationaleVault ensures agents can reconstruct state and continue work with zero cognitive loss.
 
-Now in `v1.1.0`, RationaleVault expands from single-project memories to **cross-project organizational intelligence** and **proactive recommendation loops**, giving agents deep structural visibility across your entire development portfolio.
+Now in `v1.2.0`, RationaleVault provides a complete policy-driven schema evolution architecture, validated through multiple independent production migrations across different event types.
 
 ## What RationaleVault Is Not
 
@@ -30,36 +30,60 @@ To understand RationaleVault, it is helpful to clarify what it is not:
 Every layer of RationaleVault has an implementation, evaluation metrics, and validation exit gates.
 
 ```text
-Events (Ledger)
-      ↓
-Memory Extraction (Provenance / Deduplication)
-      ↓
-Memory Intelligence (Reference Counts / Recency)
-      ↓
-Retrieval Intelligence (Ranking & Keywords)
-      ↓
-Knowledge Synthesis (Synthesized Facts & Contradictions)
-      ↓
-Knowledge Evaluation (Density & Precision Gates)
-      ↓
-Knowledge Graph Projection (Nodes & Edge Integrity)
-      ↓
-Cross-Project Projection (Multi-Repo Blending & Isolation)
-      ↓
-Organization Graph (IN_CLUSTER & TRANSFER Relationships)
-      ↓
-Organization Continuation (Cross-Project Activity Level)
-      ↓
-Recommendation Engine (Drift, Blocker, & Merge Logic)
-      ↓
-Context Construction (Profile Slot Allocation Blending)
-      ↓
-Context Evaluation (Completeness & Traceability)
-      ↓
-Agent Compilers & MCP Server (Prompt Serialization / Adapters)
-      ↓
-Continuity Validation (Handoff Integrity Verification)
+Event Ledger (Immutable Ledger Store)
+      │
+      ▼
+SchemaPolicy (Per-Event-Type Migration Authority)
+      │
+      ▼
+Replay Pipeline (Policy-Driven Resolver + Upcaster Registry)
+      │
+      ▼
+Canonical Events (Schema-Normalized, Version-Agnostic)
+      │
+      ▼
+Deterministic Projection Layer
+  ├── Base Projections (Memory Projection)
+  ├── Derived Projections (Knowledge Projection)
+  └── Composite Projections (Context, Graph, Org Projections)
+      │
+      ▼
+Cognitive Runtime (Retrieval Engine, Recommendation Engine, Skill Runtime)
+      │
+      ▼
+Delivery Layer (Agent Compiler, MCP Server, CLI, REST, SDK)
+      │
+      ▼
+External Consumers (Claude, OpenCode, Codex, Cursor, CI/CD, Developers)
 ```
+
+---
+
+## SchemaPolicy Architecture
+
+RationaleVault uses a policy-driven approach to schema evolution. Each event type has its own independent migration path, governed by `SchemaPolicy` — the sole authority for canonical version selection.
+
+```text
+GovernanceState
+      │
+      ▼
+SchemaPolicyFactory
+      │
+      ▼
+SchemaPolicy (per event type)
+      │
+      ▼
+ReplayResolver + UpcasterRegistry
+      │
+      ▼
+Canonical Event (normalized to latest version)
+```
+
+**Key properties:**
+- Reducers never inspect schema versions — they consume canonical payloads
+- Migration graphs are isolated per event type — no cross-event-type dependencies
+- Adding a new migrated event type requires only registration, not engine changes
+- Replay is deterministic and idempotent across all event types
 
 ---
 
@@ -105,7 +129,7 @@ For developers running from source:
 ```bash
 pytest
 ```
-All 862 tests will execute (848 pass; 14 require a live PostgreSQL database and are skipped by default).
+All 2022 tests will execute (2022 pass; 25 require a live PostgreSQL database and are skipped by default).
 
 ---
 
@@ -131,4 +155,38 @@ RationaleVault provides a unified command-line toolset for inspecting and managi
 - **Determinism**: Identical event streams project to identical memory, knowledge, and graph states.
 - **Provenance Traceability**: Every context citation carries strict lineage back to the originating event IDs.
 - **Zero-Dependency Core**: Standard configuration runs local-first on SQLite with zero external database setup.
+- **Projection Composition**: Higher-level projections may depend only on immutable state or lower-level projections.
+- **Evaluation-Driven Evolution**: Every new projection, engine, or retrieval strategy must introduce deterministic evaluation metrics and regression gates before becoming part of the architecture.
+- **Projection Monotonicity**: A projection may consume only immutable state or lower-level projections. Projections must never depend on runtime outputs, delivery artifacts, or other execution results.
+
+> [!IMPORTANT]
+> **State flows downward; behavior flows upward.** Immutable events produce persistent state. Persistent state produces deterministic projections. Projections feed the Cognitive Runtime. The Cognitive Runtime produces outputs through the Delivery Layer. No runtime component may mutate projections or persistent state directly; every state transition must occur exclusively through appending new events to the Event Ledger.
+>
+> **Projection Dependency Rule:** Projection dependencies form a Directed Acyclic Graph (DAG). Every projection depends only on immutable state or lower-level projections. Cyclic projection dependencies are prohibited.
+
+## Architecture Governance
+
+```
+README (orientation)
+    ↓
+ARCHITECTURE.md (structural overview)
+    ↓
+SchemaPolicy Design (policy-driven schema evolution)
+    ↓
+docs/adr/ (rationale behind decisions)
+    ↓
+roadmap.md (planned evolution)
+```
+
+| Document | Purpose |
+|----------|---------|
+| [ARCHITECTURE.md](docs/ARCHITECTURE.md) | Data-flow pipelines and projection hierarchy |
+| [SchemaPolicy Design](docs/superpowers/specs/2026-06-29-schema-policy-design.md) | Policy-driven schema evolution architecture |
+| [F15 Spec](docs/superpowers/specs/2026-06-29-f15-production-schema-v2.md) | First production schema migration proof |
+| [F16 Spec](docs/superpowers/specs/2026-06-30-f16-multi-version-production.md) | Independent multi-event-type evolution proof |
+| [ADRs](docs/adr/) | Architecture Decision Records — why each choice was made |
+| [Skill Runtime](docs/skill_runtime_architecture.md) | Epic C design specification (Decision→Skill→Execution) |
+| [Freeze Levels](docs/FREEZE_LEVELS.md) | L1/L2/L3 taxonomy and change-process requirements |
+| [Roadmap](docs/roadmap.md) | Engineering commitments and research vision |
+| [Philosophy](docs/philosophy.md) | Core design principles |
 
