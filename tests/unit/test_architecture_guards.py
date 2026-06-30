@@ -412,3 +412,82 @@ def test_schema_policy_is_immutable() -> None:
 
     assert hasattr(MigrationPath, "__dataclass_params__")
     assert MigrationPath.__dataclass_params__.frozen is True
+
+
+# ── T3+T15 Architectural Guards ──────────────────────────────────────────────
+
+
+def test_event_type_local_migration() -> None:
+    """Migration graphs are local to each event type (T3 + T15).
+
+    Each event type owns an independent migration graph.
+    No migration graph may depend upon another event type's graph.
+    """
+    import ast
+    from pathlib import Path
+
+    from rationalevault.schema.events import EventType
+
+    project_root = Path(__file__).resolve().parent.parent.parent
+    upcaster_path = project_root / "rationalevault" / "schema" / "upcaster.py"
+    if not upcaster_path.exists():
+        return
+
+    source = upcaster_path.read_text(encoding="utf-8")
+    tree = ast.parse(source)
+
+    # Find all upcaster functions (name contains "v1_to_v2" or similar pattern)
+    upcaster_funcs = []
+    for node in ast.walk(tree):
+        if isinstance(node, ast.FunctionDef) and "_to_" in node.name:
+            upcaster_funcs.append(node)
+
+    # Get all event type names
+    event_type_names = [et.value for et in EventType]
+
+    for func in upcaster_funcs:
+        func_source = ast.get_source_segment(source, func) or ""
+        func_name = func.name
+
+        # Determine which event type this upcaster belongs to
+        owning_type = None
+        for et_name in event_type_names:
+            if et_name.lower() in func_name:
+                owning_type = et_name
+                break
+
+        if owning_type is None:
+            continue  # Can't determine ownership, skip
+
+        # Check that no other event type is referenced
+        for et_name in event_type_names:
+            if et_name == owning_type:
+                continue
+            assert et_name not in func_source, (
+                f"Upcaster {func_name} (owns {owning_type}) references "
+                f"another event type: {et_name}"
+            )
+
+    # Verify each migration function has exactly one owning event type
+    for func in upcaster_funcs:
+        if "_to_" not in func.name:
+            continue
+        owning_types = [
+            et_name for et_name in event_type_names
+            if et_name.lower() in func.name
+        ]
+        assert len(owning_types) == 1, (
+            f"Migration function {func.name} has {len(owning_types)} owning types: "
+            f"{owning_types}. Expected exactly 1."
+        )
+
+    # Verify upcasters never import reducers or projections
+    # (migration code must remain below the projection layer)
+    reducer_imports = ["reducers", "Reducer", "cognitive_head"]
+    projection_imports = ["projections", "pipeline", "ReplayPipeline"]
+    for func in upcaster_funcs:
+        func_source = ast.get_source_segment(source, func) or ""
+        for import_name in reducer_imports + projection_imports:
+            assert import_name not in func_source, (
+                f"Upcaster {func.name} references layer above migration: {import_name}"
+            )
