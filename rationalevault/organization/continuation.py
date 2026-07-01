@@ -16,7 +16,6 @@ from rationalevault.projections.base import BaseProjection, ProjectionKind, SemV
 from rationalevault.organization.activity import OrganizationActivityState, OrganizationActivityProjection
 from rationalevault.organization.graph import OrganizationGraphState, OrganizationGraphProjection
 from rationalevault.organization.models import OrganizationState
-from rationalevault.organization.relation_types import OrganizationRelationType
 from rationalevault.organization.utils import resolve_compiled_at
 from rationalevault.organization.projection import OrganizationProjection
 

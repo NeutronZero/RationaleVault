@@ -7,11 +7,11 @@ Observable facts only. No recommendations, no prioritization, no next actions.
 from __future__ import annotations
 
 from dataclasses import dataclass, field
-from datetime import datetime, timedelta
+from datetime import datetime
 from typing import Any, ClassVar
 from rationalevault.projections.base import BaseProjection, ProjectionKind, SemVer
 
-from rationalevault.organization.models import OrganizationState, KnowledgeLineage, CrossProjectConflict
+from rationalevault.organization.models import OrganizationState
 from rationalevault.organization.projection import OrganizationProjection
 from rationalevault.organization.utils import resolve_compiled_at
 

@@ -6,7 +6,6 @@ from __future__ import annotations
 
 from rationalevault.knowledge.context_compiler import ContextPackage
 from rationalevault.knowledge.context_types import ContextCitation
-from rationalevault.memory.models import MemoryRecord, MemoryType
 from rationalevault.compilers.registry import get_context_compiler
 
 

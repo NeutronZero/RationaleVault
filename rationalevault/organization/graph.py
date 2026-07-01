@@ -13,6 +13,7 @@ from dataclasses import dataclass, field
 from datetime import datetime
 from typing import Any
 
+from itertools import combinations
 from rationalevault.organization.models import OrganizationState
 from rationalevault.organization.relation_types import OrganizationRelationType
 from rationalevault.organization.utils import resolve_compiled_at
@@ -327,10 +328,9 @@ class OrganizationGraphProjection(BaseProjection):
         shared_agg: dict[tuple[str, str], int] = {}
         for sk in org_state.shared_knowledge:
             projects = sorted(sk.present_in_projects)
-            for i in range(len(projects)):
-                for j in range(i + 1, len(projects)):
-                    key = (projects[i], projects[j])
-                    shared_agg[key] = shared_agg.get(key, 0) + 1
+            for src, tgt in combinations(projects, 2):
+                key = (src, tgt)
+                shared_agg[key] = shared_agg.get(key, 0) + 1
 
         conflict_agg: dict[tuple[str, str], dict[str, float]] = {}
         for conflict in org_state.cross_project_conflicts:
@@ -387,26 +387,25 @@ class OrganizationGraphProjection(BaseProjection):
 
         # Build IN_CLUSTER edges (bidirectional)
         for cluster in org_state.project_clusters:
-            for i in range(len(cluster)):
-                for j in range(i + 1, len(cluster)):
-                    a_kids = project_knowledge_sets.get(cluster[i], set())
-                    b_kids = project_knowledge_sets.get(cluster[j], set())
-                    intersection = len(a_kids & b_kids)
-                    a_size = project_knowledge_sizes.get(cluster[i], 0)
-                    b_size = project_knowledge_sizes.get(cluster[j], 0)
-                    union = a_size + b_size - intersection
-                    jaccard = intersection / union if union > 0 else 0.0
+            for p_a, p_b in combinations(cluster, 2):
+                a_kids = project_knowledge_sets.get(p_a, set())
+                b_kids = project_knowledge_sets.get(p_b, set())
+                intersection = len(a_kids & b_kids)
+                a_size = project_knowledge_sizes.get(p_a, 0)
+                b_size = project_knowledge_sizes.get(p_b, 0)
+                union = a_size + b_size - intersection
+                jaccard = intersection / union if union > 0 else 0.0
 
-                    edges.append(OrganizationEdge(
-                        source=cluster[i], target=cluster[j],
-                        relation_type=OrganizationRelationType.IN_CLUSTER,
-                        weight=float(intersection), confidence=jaccard,
-                    ))
-                    edges.append(OrganizationEdge(
-                        source=cluster[j], target=cluster[i],
-                        relation_type=OrganizationRelationType.IN_CLUSTER,
-                        weight=float(intersection), confidence=jaccard,
-                    ))
+                edges.append(OrganizationEdge(
+                    source=p_a, target=p_b,
+                    relation_type=OrganizationRelationType.IN_CLUSTER,
+                    weight=float(intersection), confidence=jaccard,
+                ))
+                edges.append(OrganizationEdge(
+                    source=p_b, target=p_a,
+                    relation_type=OrganizationRelationType.IN_CLUSTER,
+                    weight=float(intersection), confidence=jaccard,
+                ))
 
         # Filter orphaned edges (HIGH-4: source/target not in project_ids)
         edges = [e for e in edges if e.source in valid_ids and e.target in valid_ids]

@@ -34,8 +34,14 @@ def get_dsn() -> str:
     port = os.environ.get("RELAY_DB_PORT", "5432")
     dbname = os.environ.get("RELAY_DB_NAME", "relay")
     user = os.environ.get("RELAY_DB_USER", "relay")
-    password = os.environ.get("RELAY_DB_PASSWORD", "relay")
-    return f"host={host} port={port} dbname={dbname} user={user} password={password} connect_timeout=3"
+    password = os.environ.get("RELAY_DB_PASSWORD")
+    if os.environ.get("RELAY_ENV") == "production" and not password:
+        raise RuntimeError("RELAY_DB_PASSWORD must be set in production.")
+    
+    if password:
+        return f"host={host} port={port} dbname={dbname} user={user} password={password} connect_timeout=3"
+    else:
+        return f"host={host} port={port} dbname={dbname} user={user} connect_timeout=3"
 
 
 @contextmanager

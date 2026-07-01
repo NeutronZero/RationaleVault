@@ -41,14 +41,19 @@ def search_knowledge_rrf(
 
     scored: list[tuple[KnowledgeObject, int]] = []
     for k in all_knowledge:
+        title_lower = k.title.lower()
+        content_lower = k.content.lower()
+        tags_lower = tuple(tag.lower() for tag in k.tags)
+        type_lower = k.knowledge_type.value.lower()
+        domain_lower = k.knowledge_domain.value.lower()
         match_count = 0
         for kw in keywords:
             if (
-                kw in k.title.lower()
-                or kw in k.content.lower()
-                or any(kw in tag.lower() for tag in k.tags)
-                or kw in k.knowledge_type.value.lower()
-                or kw in k.knowledge_domain.value.lower()
+                kw in title_lower
+                or kw in content_lower
+                or any(kw in tag for tag in tags_lower)
+                or kw in type_lower
+                or kw in domain_lower
             ):
                 match_count += 1
         if match_count > 0:

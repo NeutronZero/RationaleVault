@@ -56,15 +56,19 @@ def search_memories_rrf(
 
     keyword_tuples = []
     for r in all_records:
+        title_lower = r.title.lower()
+        content_lower = r.content.lower()
+        tags_lower = tuple(tag.lower() for tag in r.tags)
+        type_lower = r.memory_type.value.lower()
         match_count = 0
         for kw in keywords:
             # check word stems / substring matching
             if (
-                kw in r.title.lower() or
-                kw in r.content.lower() or
-                any(kw in tag.lower() for tag in r.tags) or
-                r.memory_type.value.lower() in kw or
-                kw in r.memory_type.value.lower()
+                kw in title_lower or
+                kw in content_lower or
+                any(kw in tag for tag in tags_lower) or
+                type_lower in kw or
+                kw in type_lower
             ):
                 match_count += 1
         if match_count > 0:
