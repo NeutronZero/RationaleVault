@@ -50,6 +50,34 @@ def run_full_evaluation() -> EvaluationResult:
     k_prov = get_knowledge_provider()
     event_store = get_event_store()
 
+    # Clear residual records to prevent graph pollution from test suites
+    # 1. Clear Markdown files
+    for filename in ("knowledge.md", "memory.md"):
+        path = Path.cwd() / ".rationalevault" / filename
+        if path.exists():
+            try:
+                path.unlink()
+            except Exception:
+                pass
+
+    # 2. Clear SQLite databases
+    if hasattr(k_prov, "_get_conn"):
+        try:
+            conn = k_prov._get_conn()
+            conn.execute("DELETE FROM rationalevault_knowledge")
+            conn.commit()
+            conn.close()
+        except Exception:
+            pass
+    if hasattr(mem_prov, "_get_conn"):
+        try:
+            conn = mem_prov._get_conn()
+            conn.execute("DELETE FROM rationalevault_memories")
+            conn.commit()
+            conn.close()
+        except Exception:
+            pass
+
     # Create mock memories
     mock_m1 = MemoryRecord(
         id="eval_temp_mem_1",
@@ -62,7 +90,7 @@ def run_full_evaluation() -> EvaluationResult:
         source_event_ids=["eval_temp_ev_1"],
         source_type="event",
         confidence=1.0,
-        project_id="test",
+        project_id=str(project_uuid),
     )
     mock_m2 = MemoryRecord(
         id="eval_temp_mem_2",
@@ -75,7 +103,7 @@ def run_full_evaluation() -> EvaluationResult:
         source_event_ids=["eval_temp_ev_2"],
         source_type="event",
         confidence=1.0,
-        project_id="test",
+        project_id=str(project_uuid),
     )
 
     # Create mock knowledge
@@ -99,7 +127,8 @@ def run_full_evaluation() -> EvaluationResult:
         importance="critical",
         provenance=prov1,
         tags=["test"],
-        project_id="test",
+        project_id=str(project_uuid),
+        lifecycle_status="ACTIVE",
     )
     prov2 = ProvenanceChain(
         knowledge_id="eval_temp_k_2",
@@ -113,14 +142,15 @@ def run_full_evaluation() -> EvaluationResult:
         id="eval_temp_k_2",
         version=1,
         title="Test Knowledge Two",
-        content="Test query project invariant description.",
-        knowledge_type=KnowledgeType.PROJECT_INVARIANT,
+        content="Test query principle for system diagnostics.",
+        knowledge_type=KnowledgeType.ARCHITECTURE_PRINCIPLE,
         knowledge_domain=KnowledgeDomain.ARCHITECTURE,
         confidence=k_conf,
         importance="critical",
         provenance=prov2,
         tags=["test"],
-        project_id="test",
+        project_id=str(project_uuid),
+        lifecycle_status="ACTIVE",
     )
 
     # State variables for evaluation
@@ -160,15 +190,34 @@ def run_full_evaluation() -> EvaluationResult:
         event_store.append_event(
             project_id=project_uuid,
             stream_id="main",
+            event_type=EventType.DECISION_PROPOSED,
+            payload={
+                "decision_id": "d1",
+                "title": "Test query decision accepted",
+                "rationale": "",
+                "description": "Test description",
+            },
+            metadata=metadata,
+        )
+        event_store.append_event(
+            project_id=project_uuid,
+            stream_id="main",
             event_type=EventType.DECISION_ACCEPTED,
-            payload={"decision_id": "d1", "title": "Test query decision accepted", "rationale": "Test rationale"},
+            payload={"decision_id": "d1"},
             metadata=metadata,
         )
         event_store.append_event(
             project_id=project_uuid,
             stream_id="tasks",
             event_type=EventType.TASK_CREATED,
-            payload={"task_id": "t1", "title": "Test task", "priority": "high"},
+            payload={
+                "task_id": "t1",
+                "priority": "high",
+                "details": {
+                    "summary": "Test task",
+                    "body": "Test description",
+                }
+            },
             metadata=metadata,
         )
         event_store.append_event(
@@ -312,9 +361,9 @@ def run_full_evaluation() -> EvaluationResult:
             metrics["graph_projection"] = gp_result.to_dict()
             if not gp_passed:
                 graph_projection_passed = False
-        except Exception:
+        except Exception as ex:
             graph_projection_passed = False
-            metrics["graph_projection"] = {"error": "Graph projection evaluation failed"}
+            metrics["graph_projection"] = {"error": f"Graph projection evaluation failed: {str(ex)}"}
 
     except Exception as e:
         # Any exception in pipeline means failure
