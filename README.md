@@ -1,9 +1,9 @@
-# RationaleVault (v1.2.0) — Event-Sourced Cognitive Memory & Context Optimization Layer for AI Agents
+# RationaleVault (v1.2.1) — Event-Sourced Cognitive Memory & Context Optimization Layer for AI Agents
 
 [![GitHub](https://img.shields.io/badge/GitHub-NeutronZero%2FRationaleVault-181717?style=flat&logo=github)](https://github.com/NeutronZero/RationaleVault)
 [![Python 3.12+](https://img.shields.io/badge/Python-3.12+-3776AB?style=flat&logo=python&logoColor=white)](https://www.python.org/)
-[![Tests](https://img.shields.io/badge/Tests-2022%20passing-brightgreen)](https://github.com/NeutronZero/RationaleVault)
-[![Version](https://img.shields.io/badge/Version-v1.2.0-blue)](https://github.com/NeutronZero/RationaleVault/releases/tag/v1.2.0)
+[![Tests](https://img.shields.io/badge/Tests-1991%20passing-brightgreen)](https://github.com/NeutronZero/RationaleVault)
+[![Version](https://img.shields.io/badge/Version-v1.2.1-blue)](https://github.com/NeutronZero/RationaleVault/releases/tag/v1.2.1)
 
 **Event-sourced cognitive continuity, multi-agent context compression, and shared memory infrastructure for AI workflows.**
 
@@ -17,7 +17,7 @@ LLM agents lose context. As projects evolve over weeks or months, they accumulat
 
 RationaleVault provides an event-sourced cognitive continuity layer. By treating events as the immutable source of truth and compiling memory, knowledge, and graphs as deterministic projections, RationaleVault ensures agents can reconstruct state and continue work with zero cognitive loss.
 
-Now in `v1.2.0`, RationaleVault provides a complete policy-driven schema evolution architecture, validated through multiple independent production migrations across different event types.
+Now in `v1.2.1`, RationaleVault provides a complete policy-driven schema evolution architecture, validated through multiple independent production migrations across different event types.
 
 ## What RationaleVault Is Not
 
