@@ -80,6 +80,7 @@ class PostgresEventStore(BaseEventStore):
                 payload=payload,
                 parent_id=parent_id,
                 recorded_at=result["recorded_at"],
+                schema_version=payload.get("schema_version", 1) if isinstance(payload, dict) else 1,
             )
 
         if conn is not None:
@@ -208,6 +209,12 @@ class PostgresEventStore(BaseEventStore):
         if isinstance(raw_payload, str):
             raw_payload = json.loads(raw_payload)
 
+        schema_version = 1
+        if "schema_version" in row:
+            schema_version = row["schema_version"]
+        elif isinstance(raw_payload, dict) and "schema_version" in raw_payload:
+            schema_version = raw_payload["schema_version"]
+
         return EventRecord(
             event_sequence=row["event_sequence"],
             id=UUID(str(row["id"])),
@@ -219,4 +226,5 @@ class PostgresEventStore(BaseEventStore):
             payload=raw_payload,
             parent_id=UUID(str(row["parent_id"])) if row["parent_id"] else None,
             recorded_at=row["recorded_at"],
+            schema_version=schema_version,
         )

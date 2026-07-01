@@ -10,7 +10,8 @@ from __future__ import annotations
 
 from dataclasses import dataclass, field
 from datetime import datetime, timezone
-from typing import Optional
+from typing import Optional, ClassVar, Any
+from rationalevault.projections.base import BaseProjection, ProjectionKind, SemVer
 
 from rationalevault.knowledge.models import (
     KnowledgeObject,
@@ -88,12 +89,18 @@ class CrossProjectState:
 
 # ── CrossProjectProjection ───────────────────────────────────────────────────
 
-class CrossProjectProjection:
+class CrossProjectProjection(BaseProjection):
     """Builds cross-project knowledge state from KnowledgeObject collections.
 
     Consumes primary state (KnowledgeObjects), never derived state (KnowledgeStates).
     Deterministic: same inputs → identical output.
     """
+    projection_name: ClassVar[str] = "CrossProject"
+    version: ClassVar[SemVer] = SemVer(1, 0, 0)
+    projection_kind: ClassVar[ProjectionKind] = ProjectionKind.DERIVED
+    dependencies: ClassVar[list[type[BaseProjection]]] = []
+    architectural_dependencies: ClassVar[list[str]] = []
+    build_priority: ClassVar[int] = 40
 
     @staticmethod
     def project(

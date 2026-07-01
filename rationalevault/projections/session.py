@@ -1,8 +1,9 @@
 from __future__ import annotations
 
 from dataclasses import dataclass
-from typing import Optional, Any
+from typing import Optional, Any, ClassVar
 from rationalevault.schema.events import EventRecord
+from rationalevault.projections.base import BaseProjection, ProjectionKind, SemVer
 
 @dataclass
 class SessionSummary:
@@ -26,8 +27,14 @@ class SessionSummary:
         }
 
 
-class SessionProjection:
+class SessionProjection(BaseProjection):
     """Derives session summaries by grouping events on metadata.session_id."""
+    projection_name: ClassVar[str] = "Session"
+    version: ClassVar[SemVer] = SemVer(1, 0, 0)
+    projection_kind: ClassVar[ProjectionKind] = ProjectionKind.BASE
+    dependencies: ClassVar[list[type[BaseProjection]]] = []
+    architectural_dependencies: ClassVar[list[str]] = []
+    build_priority: ClassVar[int] = 1
 
     @staticmethod
     def project(events: list[EventRecord]) -> list[SessionSummary]:

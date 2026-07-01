@@ -16,6 +16,9 @@ from typing import Any
 from rationalevault.organization.models import OrganizationState
 from rationalevault.organization.relation_types import OrganizationRelationType
 from rationalevault.organization.utils import resolve_compiled_at
+from rationalevault.projections.base import BaseProjection, ProjectionKind, SemVer
+from rationalevault.organization.projection import OrganizationProjection
+from typing import ClassVar
 
 
 @dataclass(frozen=True)
@@ -107,9 +110,9 @@ class OrganizationGraphState:
                 rt.value: len(edges) for rt, edges in self.edges_by_relation.items()
             },
             "knowledge_flow_balance": self.knowledge_flow_balance,
-            "knowledge_producers": self.knowledge_producers,
-            "knowledge_consumers": self.knowledge_consumers,
-            "contradiction_hotspots": self.contradiction_hotspots,
+            "knowledge_producers": [list(x) for x in self.knowledge_producers],
+            "knowledge_consumers": [list(x) for x in self.knowledge_consumers],
+            "contradiction_hotspots": [list(x) for x in self.contradiction_hotspots],
             "health": {
                 "connectivity": round(self.health.connectivity, 4),
                 "density": round(self.health.density, 4),
@@ -120,13 +123,100 @@ class OrganizationGraphState:
             },
         }
 
+    @classmethod
+    def from_dict(cls, d: dict[str, Any]) -> OrganizationGraphState:
+        # Deserialize nodes
+        nodes = {}
+        for pid, n in d.get("nodes", {}).items():
+            nodes[pid] = OrganizationNode(
+                project_id=n["project_id"],
+                name=n["name"],
+                knowledge_count=n["knowledge_count"],
+                transferable_count=n["transferable_count"],
+                shared_count=n["shared_count"],
+                conflict_count=n["conflict_count"],
+                is_cluster_center=n["is_cluster_center"],
+                health_score=n["health_score"],
+            )
 
-class OrganizationGraphProjection:
+        # Deserialize edges
+        edges = []
+        for e in d.get("edges", []):
+            edges.append(OrganizationEdge(
+                source=e["source"],
+                target=e["target"],
+                relation_type=OrganizationRelationType(e["relation_type"]),
+                weight=e["weight"],
+                confidence=e["confidence"],
+            ))
+
+        # Recompute adjacency and reverse adjacency dynamically
+        adjacency: dict[str, list[OrganizationEdge]] = {pid: [] for pid in nodes}
+        reverse_adjacency: dict[str, list[OrganizationEdge]] = {pid: [] for pid in nodes}
+        for edge in edges:
+            if edge.source in adjacency:
+                adjacency[edge.source].append(edge)
+            if edge.target in reverse_adjacency:
+                reverse_adjacency[edge.target].append(edge)
+
+        # Deserialize health
+        h = d.get("health", {})
+        health = OrganizationGraphHealth(
+            connectivity=h.get("connectivity", 0.0),
+            density=h.get("density", 0.0),
+            conflict_density=h.get("conflict_density", 0.0),
+            cluster_cohesion=h.get("cluster_cohesion", 0.0),
+            producer_consumer_balance=h.get("producer_consumer_balance", 0.0),
+            overall=h.get("overall", 0.0),
+        )
+
+        # Reconstruct edges_by_relation grouping
+        edges_by_relation = {}
+        for edge in edges:
+            edges_by_relation.setdefault(edge.relation_type, []).append(edge)
+        edges_by_relation = {rt: tuple(el) for rt, el in edges_by_relation.items()}
+
+        knowledge_producers = [
+            (item[0], float(item[1])) for item in d.get("knowledge_producers", [])
+        ]
+        knowledge_consumers = [
+            (item[0], float(item[1])) for item in d.get("knowledge_consumers", [])
+        ]
+        contradiction_hotspots = [
+            (item[0], float(item[1])) for item in d.get("contradiction_hotspots", [])
+        ]
+
+        return cls(
+            compiled_at=d["compiled_at"],
+            projection_version=d.get("projection_version", "1.0"),
+            nodes=nodes,
+            edges=edges,
+            adjacency=adjacency,
+            reverse_adjacency=reverse_adjacency,
+            clusters=d.get("clusters", []),
+            density=d.get("density", 0.0),
+            conflicted_nodes=set(d.get("conflicted_nodes", [])),
+            edges_by_relation=edges_by_relation,
+            knowledge_flow_balance=d.get("knowledge_flow_balance", {}),
+            knowledge_producers=knowledge_producers,
+            knowledge_consumers=knowledge_consumers,
+            contradiction_hotspots=contradiction_hotspots,
+            health=health,
+        )
+
+
+class OrganizationGraphProjection(BaseProjection):
     """Projects OrganizationState into a project-centric graph.
 
     Nodes = projects. Edges = relationships between projects.
     All edges traceable to existing OrganizationState data.
     """
+    projection_name: ClassVar[str] = "OrganizationGraph"
+    version: ClassVar[SemVer] = SemVer(1, 0, 0)
+    projection_kind: ClassVar[ProjectionKind] = ProjectionKind.DERIVED
+    dependencies: ClassVar[list[type[BaseProjection]]] = [OrganizationProjection]
+    architectural_dependencies: ClassVar[list[str]] = []
+    build_priority: ClassVar[int] = 60
 
     @staticmethod
     def project(

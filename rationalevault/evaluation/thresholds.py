@@ -141,3 +141,12 @@ CCS_WEIGHTS: dict[str, float] = {
     "knowledge": 0.3,
     "graph": 0.3,
 }
+
+
+@dataclass
+class ExecutionThresholds:
+    profile_name: str = "default"
+    min_success_rate: float = 0.95
+    max_timeout_rate: float = 0.05
+    max_denial_rate: float = 0.05
+    min_overall_score: float = 0.95

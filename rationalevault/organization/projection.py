@@ -9,7 +9,8 @@ from __future__ import annotations
 
 import hashlib
 from datetime import datetime, timezone
-from typing import Optional
+from typing import Optional, ClassVar, Any
+from rationalevault.projections.base import BaseProjection, ProjectionKind, SemVer
 
 from rationalevault.knowledge.models import (
     KnowledgeObject,
@@ -24,7 +25,7 @@ from rationalevault.organization.models import (
     SharedKnowledge,
     TransferabilityTelemetry,
 )
-from rationalevault.projections.cross_project import CrossProjectState
+from rationalevault.projections.cross_project import CrossProjectState, CrossProjectProjection
 
 
 def _lexical_similarity(text_a: str, text_b: str) -> float:
@@ -44,13 +45,19 @@ def _deterministic_id(a: str, b: str) -> str:
     return hashlib.sha256(pair.encode()).hexdigest()[:16]
 
 
-class OrganizationProjection:
+class OrganizationProjection(BaseProjection):
     """Builds organizational knowledge state from CrossProjectStates and raw KnowledgeObjects.
 
     CrossProjectState is treated as an optimization layer.
     KnowledgeObjects remain the authority. OrganizationProjection may use both.
     Deterministic: same inputs → identical output.
     """
+    projection_name: ClassVar[str] = "Organization"
+    version: ClassVar[SemVer] = SemVer(1, 0, 0)
+    projection_kind: ClassVar[ProjectionKind] = ProjectionKind.DERIVED
+    dependencies: ClassVar[list[type[BaseProjection]]] = [CrossProjectProjection]
+    architectural_dependencies: ClassVar[list[str]] = []
+    build_priority: ClassVar[int] = 50
 
     @staticmethod
     def project(

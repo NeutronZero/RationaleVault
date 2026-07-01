@@ -134,6 +134,40 @@ class TestEpistemicStatus:
                lifecycle=KnowledgeLifecycle.ARCHIVED.value)
         assert _derive_epistemic_status(k) == EpistemicStatus.TOMBSTONED
 
+    def test_from_dict_backward_compat_no_epistemic_status(self):
+        """Verify KnowledgeObject.from_dict defaults epistemic_status to PROPOSED
+        when the field is absent (backward compatibility with pre-1.2.1 dicts)."""
+        d = {
+            "id": "k-001",
+            "title": "Legacy knowledge",
+            "content": "Some content",
+            "knowledge_type": "ARCHITECTURE_PRINCIPLE",
+            "domain": "ARCHITECTURE",
+            "confidence": {"score": 0.8, "basis": "evidence"},
+            "importance": "high",
+            "provenance": {"source_events": [], "source_memories": [], "derivation_method": "manual"},
+            "tags": ["test"],
+            "supporting_memory_ids": [],
+            "contradicting_memory_ids": [],
+            "lifecycle_status": "active",
+            "created_at": "2026-01-01T00:00:00",
+            "updated_at": "2026-01-01T00:00:00",
+            "project_id": "proj-001",
+            "transferability": "local_only",
+        }
+        k = KnowledgeObject.from_dict(d)
+        assert k.epistemic_status == EpistemicStatus.PROPOSED
+
+    def test_from_dict_roundtrip_preserves_epistemic_status(self):
+        """Verify KnowledgeObject.from_dict preserves epistemic_status through roundtrip."""
+        k = _k("Roundtrip", "content",
+               confidence_score=0.9, memory_count=5,
+               supporting_memory_ids=[f"m{i}" for i in range(5)])
+        k.epistemic_status = EpistemicStatus.INVARIANT
+        d = k.to_dict()
+        k2 = KnowledgeObject.from_dict(d)
+        assert k2.epistemic_status == EpistemicStatus.INVARIANT
+
 
 # ── Conflict ID Determinism ─────────────────────────────────────────────────
 

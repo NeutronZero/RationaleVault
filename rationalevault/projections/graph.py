@@ -26,10 +26,11 @@ import heapq
 from collections import deque
 from dataclasses import dataclass, field
 from datetime import datetime, timezone
-from typing import Any, Optional
+from typing import Any, Optional, ClassVar
+from rationalevault.projections.base import BaseProjection, ProjectionKind, SemVer
 
 from rationalevault.knowledge.models import KnowledgeLifecycle, KnowledgeObject
-from rationalevault.projections.knowledge import ConflictRecord, KnowledgeState
+from rationalevault.projections.knowledge import ConflictRecord, KnowledgeState, KnowledgeProjection
 
 
 MAX_PATHS = 100
@@ -682,7 +683,7 @@ class GraphState:
 
 # ── GraphProjection ──────────────────────────────────────────────────────────
 
-class GraphProjection:
+class GraphProjection(BaseProjection):
     """Builds GraphState from KnowledgeState.
 
     Relations are derived from KnowledgeState adjacency structures:
@@ -690,6 +691,12 @@ class GraphProjection:
       - derivation_chains → DERIVED_FROM edges
       - conflict_queue → CONTRADICTS edges
     """
+    projection_name: ClassVar[str] = "Knowledge Graph"
+    version: ClassVar[SemVer] = SemVer(1, 0, 0)
+    projection_kind: ClassVar[ProjectionKind] = ProjectionKind.DERIVED
+    dependencies: ClassVar[list[type[BaseProjection]]] = [KnowledgeProjection]
+    architectural_dependencies: ClassVar[list[str]] = []
+    build_priority: ClassVar[int] = 30
 
     @staticmethod
     def project(knowledge_state: KnowledgeState, reference_time: Optional[datetime] = None) -> GraphState:

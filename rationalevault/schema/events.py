@@ -93,6 +93,19 @@ class EventType(str, Enum):
     TASK_PROGRESS_NOTED        = "TASK_PROGRESS_NOTED"
     CONTEXT_SNAPSHOT_RECORDED  = "CONTEXT_SNAPSHOT_RECORDED"
 
+    # ── Governance ─────────────────────────────────────────────────────────
+    GOVERNANCE_DECISION_RECORDED = "GOVERNANCE_DECISION_RECORDED"
+
+    # ── Skills ─────────────────────────────────────────────────────────────
+    SKILL_EXECUTED = "SKILL_EXECUTED"
+
+    # ── Knowledge Promotion ────────────────────────────────────────────────
+    KNOWLEDGE_PROMOTION_CANDIDATE = "KNOWLEDGE_PROMOTION_CANDIDATE"
+    KNOWLEDGE_PROMOTION_ASSESSED = "KNOWLEDGE_PROMOTION_ASSESSED"
+    KNOWLEDGE_PROMOTION_GATED = "KNOWLEDGE_PROMOTION_GATED"
+    KNOWLEDGE_PROMOTION_APPROVED = "KNOWLEDGE_PROMOTION_APPROVED"
+    KNOWLEDGE_PROMOTION_REJECTED = "KNOWLEDGE_PROMOTION_REJECTED"
+
 
 
 @dataclass
@@ -184,6 +197,7 @@ class EventRecord:
     payload: dict[str, Any]
     parent_id: Optional[UUID]
     recorded_at: datetime
+    schema_version: int = 1
 
     def __repr__(self) -> str:
         return (
@@ -193,4 +207,55 @@ class EventRecord:
             f"v={self.version}, "
             f"actor={self.metadata.actor!r}"
             f")"
+        )
+
+
+class GovernanceDomain(str, Enum):
+    POLICY = "POLICY"
+    PROJECTION = "PROJECTION"
+    SCHEMA = "SCHEMA"
+
+
+class GovernanceAction(str, Enum):
+    ADJUSTED = "ADJUSTED"
+    TOPOLOGY_CHANGED = "TOPOLOGY_CHANGED"
+    MIGRATION_APPLIED = "MIGRATION_APPLIED"
+    DEPRECATED = "DEPRECATED"
+    DISABLED = "DISABLED"
+
+
+@dataclass(frozen=True)
+class GovernanceRecord:
+    domain: GovernanceDomain
+    action: GovernanceAction
+    target: str
+    previous_version: Optional[str] = None
+    new_version: Optional[str] = None
+    rationale: str = ""
+    approved_by: Optional[str] = None
+    effective_sequence: int = 0
+
+    def to_dict(self) -> dict[str, Any]:
+        return {
+            "domain": self.domain.value,
+            "action": self.action.value,
+            "target": self.target,
+            "previous_version": self.previous_version,
+            "new_version": self.new_version,
+            "rationale": self.rationale,
+            "approved_by": self.approved_by,
+            "effective_sequence": self.effective_sequence,
+        }
+
+    @classmethod
+    def from_dict(cls, d: dict[str, Any]) -> GovernanceRecord:
+        return cls(
+            domain=GovernanceDomain(d["domain"]),
+            action=GovernanceAction(d["action"]),
+            target=d["target"],
+            previous_version=d.get("previous_version"),
+            new_version=d.get("new_version"),
+            rationale=d.get("rationale", ""),
+            approved_by=d.get("approved_by"),
+            effective_sequence=d.get("effective_sequence", 0),
         )

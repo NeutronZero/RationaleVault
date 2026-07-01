@@ -202,6 +202,7 @@ class KnowledgeObject:
     updated_at: str = field(default_factory=lambda: datetime.now().isoformat())
     project_id: str = ""
     transferability: str = KnowledgeTransferability.LOCAL_ONLY.value
+    epistemic_status: EpistemicStatus = EpistemicStatus.PROPOSED
 
     def to_dict(self) -> dict[str, Any]:
         return {
@@ -223,6 +224,7 @@ class KnowledgeObject:
             "updated_at": self.updated_at,
             "project_id": self.project_id,
             "transferability": self.transferability,
+            "epistemic_status": self.epistemic_status.value,
         }
 
     @classmethod
@@ -262,6 +264,7 @@ class KnowledgeObject:
             updated_at=d.get("updated_at", datetime.now().isoformat()),
             project_id=d.get("project_id", ""),
             transferability=d.get("transferability", KnowledgeTransferability.LOCAL_ONLY.value),
+            epistemic_status=EpistemicStatus(d.get("epistemic_status", "PROPOSED")),
         )
 
 

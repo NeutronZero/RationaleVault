@@ -2,8 +2,9 @@ from __future__ import annotations
 
 from dataclasses import dataclass, field
 from datetime import datetime, timezone
-from typing import Any, Optional
+from typing import Any, Optional, ClassVar
 from uuid import UUID
+from rationalevault.projections.base import BaseProjection, ProjectionKind, SemVer
 
 from rationalevault.cognitive_head.compiler import MissingProjectBootstrapError
 from rationalevault.cognitive_head.reducers import (
@@ -124,7 +125,13 @@ class ContinuationState:
         }
 
 
-class ContinuationProjection:
+class ContinuationProjection(BaseProjection):
+    projection_name: ClassVar[str] = "Continuation"
+    version: ClassVar[SemVer] = SemVer(1, 0, 0)
+    projection_kind: ClassVar[ProjectionKind] = ProjectionKind.DERIVED
+    dependencies: ClassVar[list[type[BaseProjection]]] = [SessionProjection]
+    architectural_dependencies: ClassVar[list[str]] = []
+    build_priority: ClassVar[int] = 10
     @staticmethod
     def project(project_id: UUID, store=None, reference_time: Optional[datetime] = None) -> ContinuationState:
         if store is None:

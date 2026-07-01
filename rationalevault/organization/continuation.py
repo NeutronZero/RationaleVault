@@ -10,13 +10,15 @@ from __future__ import annotations
 
 from dataclasses import dataclass, field
 from datetime import datetime
-from typing import Any
+from typing import Any, ClassVar
+from rationalevault.projections.base import BaseProjection, ProjectionKind, SemVer
 
-from rationalevault.organization.activity import OrganizationActivityState
-from rationalevault.organization.graph import OrganizationGraphState
+from rationalevault.organization.activity import OrganizationActivityState, OrganizationActivityProjection
+from rationalevault.organization.graph import OrganizationGraphState, OrganizationGraphProjection
 from rationalevault.organization.models import OrganizationState
 from rationalevault.organization.relation_types import OrganizationRelationType
 from rationalevault.organization.utils import resolve_compiled_at
+from rationalevault.organization.projection import OrganizationProjection
 
 
 @dataclass
@@ -64,11 +66,21 @@ class OrganizationContinuationState:
         }
 
 
-class OrganizationContinuationProjection:
+class OrganizationContinuationProjection(BaseProjection):
     """Projects organizational continuation from activity + graph + org state.
 
     Interpretation layer. All outputs derived from existing projections.
     """
+    projection_name: ClassVar[str] = "OrganizationContinuation"
+    version: ClassVar[SemVer] = SemVer(1, 0, 0)
+    projection_kind: ClassVar[ProjectionKind] = ProjectionKind.DERIVED
+    dependencies: ClassVar[list[type[BaseProjection]]] = [
+        OrganizationProjection,
+        OrganizationGraphProjection,
+        OrganizationActivityProjection,
+    ]
+    architectural_dependencies: ClassVar[list[str]] = []
+    build_priority: ClassVar[int] = 80
 
     @staticmethod
     def project(

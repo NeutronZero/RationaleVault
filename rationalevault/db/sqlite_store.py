@@ -121,6 +121,7 @@ class SQLiteEventStore(BaseEventStore):
                 payload=payload,
                 parent_id=parent_id,
                 recorded_at=datetime.fromisoformat(recorded_at),
+                schema_version=payload.get("schema_version", 1) if isinstance(payload, dict) else 1,
             )
 
         if conn is not None:
@@ -251,6 +252,12 @@ class SQLiteEventStore(BaseEventStore):
         except Exception:
             recorded_at = datetime.now(timezone.utc)
 
+        schema_version = 1
+        if "schema_version" in row.keys():
+            schema_version = row["schema_version"]
+        elif isinstance(raw_payload, dict) and "schema_version" in raw_payload:
+            schema_version = raw_payload["schema_version"]
+
         return EventRecord(
             event_sequence=row["event_sequence"],
             id=UUID(row["id"]),
@@ -262,4 +269,5 @@ class SQLiteEventStore(BaseEventStore):
             payload=raw_payload,
             parent_id=UUID(row["parent_id"]) if row["parent_id"] else None,
             recorded_at=recorded_at,
+            schema_version=schema_version,
         )

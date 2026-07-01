@@ -14,7 +14,7 @@ def test_diagnostics_doctor() -> None:
     report = run_diagnostics()
 
     # 2. Check structure
-    assert report.rationalevault_version == "1.1.0"
+    assert report.rationalevault_version == "1.2.1"
     assert len(report.checks) > 0
     assert report.overall_passed is True
 
@@ -29,7 +29,7 @@ def test_unified_evaluator_and_manifest() -> None:
     result = run_full_evaluation()
 
     # 2. Verify result fields
-    assert result.rationalevault_version == "1.1.0"
+    assert result.rationalevault_version == "1.2.1"
     assert result.schema_version == "1.0"
     # graph_projection_passed may be False on minimal test data (2 nodes, 0 edges)
     # so we check that the field exists rather than requiring True
@@ -42,7 +42,7 @@ def test_unified_evaluator_and_manifest() -> None:
     with open(manifest_path, "r", encoding="utf-8") as f:
         manifest = json.load(f)
 
-    assert manifest["rationalevault_version"] == "1.1.0"
+    assert manifest["rationalevault_version"] == "1.2.1"
     assert manifest["schema_version"] == "1.0"
     assert "evaluations" in manifest
     assert "examples" in manifest

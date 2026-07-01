@@ -22,7 +22,8 @@ from __future__ import annotations
 import hashlib
 from dataclasses import dataclass, field
 from datetime import datetime, timezone
-from typing import Any, Optional
+from typing import Any, Optional, ClassVar
+from rationalevault.projections.base import BaseProjection, ProjectionKind, SemVer
 
 from rationalevault.knowledge.models import (
     EpistemicStatus,
@@ -258,11 +259,17 @@ class KnowledgeState:
 
 # ── KnowledgeProjection ──────────────────────────────────────────────────────
 
-class KnowledgeProjection:
+class KnowledgeProjection(BaseProjection):
     """Derives KnowledgeState from knowledge objects.
 
     Relations are derived (not persisted). Same knowledge → same relations.
     """
+    projection_name: ClassVar[str] = "Knowledge"
+    version: ClassVar[SemVer] = SemVer(1, 0, 0)
+    projection_kind: ClassVar[ProjectionKind] = ProjectionKind.DERIVED
+    dependencies: ClassVar[list[type[BaseProjection]]] = []
+    architectural_dependencies: ClassVar[list[str]] = []
+    build_priority: ClassVar[int] = 20
 
     @staticmethod
     def project(

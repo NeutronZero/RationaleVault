@@ -8,9 +8,11 @@ from __future__ import annotations
 
 from dataclasses import dataclass, field
 from datetime import datetime, timedelta
-from typing import Any
+from typing import Any, ClassVar
+from rationalevault.projections.base import BaseProjection, ProjectionKind, SemVer
 
 from rationalevault.organization.models import OrganizationState, KnowledgeLineage, CrossProjectConflict
+from rationalevault.organization.projection import OrganizationProjection
 from rationalevault.organization.utils import resolve_compiled_at
 
 
@@ -123,12 +125,68 @@ class OrganizationActivityState:
             "overall_activity_level": round(self.overall_activity_level, 4),
         }
 
+    @classmethod
+    def from_dict(cls, d: dict[str, Any]) -> OrganizationActivityState:
+        return cls(
+            compiled_at=d["compiled_at"],
+            projection_version=d.get("projection_version", "1.0"),
+            activity_window_hours=d.get("activity_window_hours", 72),
+            project_count=d.get("project_count", 0),
+            active_projects=[
+                ProjectActivity(
+                    project_id=p["project_id"],
+                    recent_event_count=p["recent_event_count"],
+                    last_event_at=p["last_event_at"],
+                    recent_knowledge_count=p.get("recent_knowledge_count", 0),
+                    recent_memory_count=p.get("recent_memory_count", 0),
+                )
+                for p in d.get("active_projects", [])
+            ],
+            inactive_projects=d.get("inactive_projects", []),
+            recent_transfers=[
+                OrgTransferEvent(
+                    knowledge_id=t["knowledge_id"],
+                    knowledge_title=t["knowledge_title"],
+                    source_project=t["source_project"],
+                    target_project=t["target_project"],
+                    created_at=t["created_at"],
+                )
+                for t in d.get("recent_transfers", [])
+            ],
+            recent_conflicts=[
+                OrgConflictEvent(
+                    conflict_id=c["conflict_id"],
+                    project_a=c["project_a"],
+                    project_b=c["project_b"],
+                    detected_at=c["detected_at"],
+                )
+                for c in d.get("recent_conflicts", [])
+            ],
+            recent_knowledge=[
+                KnowledgeSummary(
+                    knowledge_id=k["knowledge_id"],
+                    title=k["title"],
+                    project_id=k["project_id"],
+                    knowledge_type=k["knowledge_type"],
+                    created_at=k["created_at"],
+                )
+                for k in d.get("recent_knowledge", [])
+            ],
+            overall_activity_level=d.get("overall_activity_level", 0.0),
+        )
 
-class OrganizationActivityProjection:
+
+class OrganizationActivityProjection(BaseProjection):
     """Projects temporal signals into activity observations.
 
     Pure observation layer. No interpretation. No recommendations.
     """
+    projection_name: ClassVar[str] = "OrganizationActivity"
+    version: ClassVar[SemVer] = SemVer(1, 0, 0)
+    projection_kind: ClassVar[ProjectionKind] = ProjectionKind.DERIVED
+    dependencies: ClassVar[list[type[BaseProjection]]] = [OrganizationProjection]
+    architectural_dependencies: ClassVar[list[str]] = []
+    build_priority: ClassVar[int] = 70
 
     @staticmethod
     def project(

@@ -5,6 +5,24 @@ This project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.htm
 
 ---
 
+## [1.2.1] — 2026-07-01
+
+### Added
+- **BaseProjection Alignment**: All 9 projection classes now inherit from `BaseProjection` with declared `ClassVar` metadata (`projection_kind`, `build_version`, `dependencies`). Projections: `SessionProjection`, `ContinuationProjection`, `KnowledgeProjection`, `GraphProjection`, `CrossProjectProjection`, `OrganizationProjection`, `OrganizationGraphProjection`, `OrganizationActivityProjection`, `OrganizationContinuationProjection`.
+- **Epistemic Status**: Added `epistemic_status` attribute to `KnowledgeObject` with full serialization/deserialization support. States: `PROPOSED`, `VALIDATED`, `INVARIANT`, `CONFLICTED`, `TOMBSTONED`.
+- **Canonical Event Registration**: Added `GOVERNANCE_DECISION_RECORDED`, `SKILL_EXECUTED`, `KNOWLEDGE_PROMOTION_CANDIDATE`, `KNOWLEDGE_PROMOTION_ASSESSED`, `KNOWLEDGE_PROMOTION_GATED`, `KNOWLEDGE_PROMOTION_APPROVED`, `KNOWLEDGE_PROMOTION_REJECTED` to `EventType` enum.
+- **Governance Structures**: Added `GovernanceDomain`, `GovernanceAction` enums and `GovernanceRecord` frozen dataclass with `to_dict`/`from_dict` support.
+- **EventRecord Schema Version**: Added `schema_version: int = 1` field to `EventRecord` dataclass, resolving a defect where `SchemaPolicy` and `ReplayResolver` referenced `event.schema_version` on a type that lacked it.
+
+### Changed
+- Version bumped from `1.2.0` to `1.2.1` in `pyproject.toml` and `__init__.py`.
+- `OrganizationActivityState` and `OrganizationGraphState` now have `from_dict()` class methods for full serialization roundtrip support.
+
+### Fixed
+- Fixed mocked data type mismatch in `tests/unit/organization/test_graph_projection.py`.
+
+---
+
 ## [1.2.0] — 2026-06-30
 
 ### Added
