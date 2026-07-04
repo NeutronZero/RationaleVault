@@ -106,7 +106,7 @@ class PostgresEventStore(BaseEventStore):
         with get_connection() as conn:
             with conn.cursor() as cur:
                 cur.execute(sql, (str(project_id), since_sequence))
-                return [self._row_to_record(row) for row in cur.fetchall()]
+                return [self._row_to_record(row) for row in cur]
 
     def replay_stream(
         self,

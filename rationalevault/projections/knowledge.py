@@ -21,16 +21,14 @@ from __future__ import annotations
 
 import hashlib
 from dataclasses import dataclass, field
-from datetime import datetime, timezone
+from datetime import datetime
 from typing import Any, Optional, ClassVar
 from rationalevault.projections.base import BaseProjection, ProjectionKind, SemVer
 
 from rationalevault.knowledge.models import (
     EpistemicStatus,
-    KnowledgeConfidence,
     KnowledgeLifecycle,
     KnowledgeObject,
-    KnowledgeRelation,
     KnowledgeType,
 )
 from rationalevault.knowledge.relation_types import RelationType

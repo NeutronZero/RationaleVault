@@ -1,0 +1,44 @@
+{
+  "schema_version": 1,
+  "compiled_at": "2026-06-24T12:00:00Z",
+  "projection_version": "1.0",
+  "activity_window_hours": 72,
+  "project_count": 2,
+  "active_projects": [
+    {
+      "project_id": "proj-a",
+      "recent_event_count": 10,
+      "last_event_at": "2026-06-24T11:50:00Z",
+      "recent_knowledge_count": 2,
+      "recent_memory_count": 1
+    }
+  ],
+  "inactive_projects": ["proj-b"],
+  "recent_transfers": [
+    {
+      "knowledge_id": "k-1",
+      "knowledge_title": "Transfer Knowledge",
+      "source_project": "proj-b",
+      "target_project": "proj-a",
+      "created_at": "2026-06-24T11:30:00Z"
+    }
+  ],
+  "recent_conflicts": [
+    {
+      "conflict_id": "c-1",
+      "project_a": "proj-a",
+      "project_b": "proj-b",
+      "detected_at": "2026-06-24T11:40:00Z"
+    }
+  ],
+  "recent_knowledge": [
+    {
+      "knowledge_id": "k-1",
+      "title": "Transfer Knowledge",
+      "project_id": "proj-a",
+      "knowledge_type": "FACT",
+      "created_at": "2026-06-24T11:30:00Z"
+    }
+  ],
+  "overall_activity_level": 0.5
+}

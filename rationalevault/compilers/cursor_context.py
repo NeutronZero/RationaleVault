@@ -16,7 +16,6 @@ from rationalevault.compilers.context_compiler_base import ContextPackageCompile
 if TYPE_CHECKING:
     from rationalevault.knowledge.context_compiler import ContextPackage
     from rationalevault.knowledge.context_types import ContextCitation
-    from rationalevault.projections.continuation import ContinuationState
 
 
 class CursorContextCompiler(ContextPackageCompiler):

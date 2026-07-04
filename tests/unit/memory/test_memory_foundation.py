@@ -166,3 +166,42 @@ def test_compile_memory_context(tmp_path: Path, monkeypatch) -> None:
     ctx = compile_memory_context("architecture")
     assert len(ctx["ARCHITECTURE"]) == 1
     assert ctx["ARCHITECTURE"][0][0].id == "mem-arch"
+
+
+def test_sqlite_provider_pagination(tmp_path: Path) -> None:
+    from rationalevault.memory.sqlite_provider import SQLiteMemoryProvider
+    db_path = tmp_path / "pagination_test.db"
+    provider = SQLiteMemoryProvider(db_path=db_path)
+    for i in range(15):
+        provider.add_record(MemoryRecord(
+            id=f"mem{i}",
+            version=1,
+            title=f"Title {i}",
+            content="Some persistence testing text",
+            memory_type=MemoryType.DECISION,
+            importance="medium",
+            lifecycle_status="active",
+            source_event_ids=["e"],
+            source_type="test",
+            project_id="test",
+        ))
+    res = provider.search_records("persistence", limit=10)
+    assert len(res) == 10
+
+
+def test_semantic_search_empty_query() -> None:
+    from rationalevault.memory.semantic_search import search_memories_rrf
+    recs = [MemoryRecord(
+        id="mem1",
+        version=1,
+        title="Title",
+        content="Content",
+        memory_type=MemoryType.DECISION,
+        importance="medium",
+        lifecycle_status="active",
+        source_event_ids=["e"],
+        source_type="test",
+        project_id="test",
+    )]
+    assert len(search_memories_rrf("", recs)) == 1
+    assert len(search_memories_rrf("   ", recs)) == 1

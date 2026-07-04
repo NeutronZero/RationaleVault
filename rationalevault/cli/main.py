@@ -11,7 +11,6 @@ from dotenv import load_dotenv
 
 load_dotenv()
 
-from rationalevault.db.connection import get_connection
 
 def _resolve_project_id() -> uuid.UUID:
     """Helper to resolve project ID from project.yaml in the current workspace."""
@@ -291,7 +290,6 @@ def cmd_memory(args: argparse.Namespace) -> None:
     from rationalevault.memory.factory import get_memory_provider
     from rationalevault.memory.models import MemoryRecord, MemoryType, generate_memory_id
     from rationalevault.memory.compiler import compile_memory_context
-    from rationalevault.memory.retrieval import retrieve_ranked_memories
     from rationalevault.memory.ranking import compute_retrieval_score
     import json
 
@@ -579,7 +577,7 @@ def cmd_knowledge(args: argparse.Namespace) -> None:
             print(f"  [{k.knowledge_type.value}] {k.title} (conf: {k.confidence.score:.2f})")
 
     elif args.knowledge_command == "evaluate":
-        from rationalevault.knowledge.evaluator import KnowledgeEvaluator, KnowledgeEvalResult, check_knowledge_gates
+        from rationalevault.knowledge.evaluator import KnowledgeEvaluator, check_knowledge_gates
         from rationalevault.knowledge.benchmark_schema import KnowledgeBenchmark
         from rationalevault.knowledge.synthesizer import synthesize_all
 
@@ -1070,7 +1068,6 @@ def cmd_project(args: argparse.Namespace) -> None:
             print("Run 'rationalevault init' to initialize a project.")
 
     elif args.project_command == "search":
-        import json
         import yaml
         from rationalevault.knowledge.project_registry import ProjectRegistry
         from rationalevault.knowledge.factory import get_knowledge_provider
@@ -1157,7 +1154,6 @@ def cmd_evaluate(args: argparse.Namespace) -> None:
 
 def cmd_organization(args: argparse.Namespace) -> None:
     """Manage organizational knowledge visibility."""
-    import json
     import yaml
     from rationalevault.knowledge.project_registry import ProjectRegistry
     from rationalevault.knowledge.factory import get_knowledge_provider
@@ -1322,7 +1318,6 @@ def cmd_organization_activity(args: argparse.Namespace) -> None:
     window_hours = getattr(args, "window_hours", 72)
 
     # Build activity from temporal signals (project-level calls)
-    from rationalevault.knowledge.store import SQLiteKnowledgeProvider
     from rationalevault.knowledge.factory import get_knowledge_provider
 
     project_ids = state.project_ids
@@ -1728,7 +1723,6 @@ def main() -> None:
     mem_subparsers.add_parser("consolidate", help="Detect duplicate clusters and emit candidates to the ledger")
 
     # knowledge
-    from rationalevault.knowledge.models import KnowledgeType, KnowledgeDomain
     parser_knowledge = subparsers.add_parser("knowledge", help="Manage RationaleVault Knowledge Synthesis")
     knowledge_subparsers = parser_knowledge.add_subparsers(dest="knowledge_command", required=True)
 

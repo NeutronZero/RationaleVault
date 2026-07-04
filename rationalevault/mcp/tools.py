@@ -1,7 +1,6 @@
 from __future__ import annotations
 
-import uuid
-from typing import Any, Optional
+from typing import Optional
 from uuid import UUID
 
 from rationalevault.mcp.server import server
@@ -219,7 +218,6 @@ def search_cross_project(
 def get_organization_state() -> dict:
     """Get the organizational knowledge visibility state across all registered projects."""
     from rationalevault.knowledge.project_registry import ProjectRegistry
-    from rationalevault.knowledge.factory import get_knowledge_provider
     from rationalevault.projections.cross_project import CrossProjectProjection
     from rationalevault.organization.projection import OrganizationProjection
 

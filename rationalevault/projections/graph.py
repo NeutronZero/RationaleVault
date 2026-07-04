@@ -25,12 +25,11 @@ from __future__ import annotations
 import heapq
 from collections import deque
 from dataclasses import dataclass, field
-from datetime import datetime, timezone
+from datetime import datetime
 from typing import Any, Optional, ClassVar
 from rationalevault.projections.base import BaseProjection, ProjectionKind, SemVer
 
-from rationalevault.knowledge.models import KnowledgeLifecycle, KnowledgeObject
-from rationalevault.projections.knowledge import ConflictRecord, KnowledgeState, KnowledgeProjection
+from rationalevault.projections.knowledge import KnowledgeState, KnowledgeProjection
 
 
 MAX_PATHS = 100

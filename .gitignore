@@ -33,6 +33,7 @@ htmlcov/
 *.swp
 *.swo
 .DS_Store
+.claude/
 
 # Docker volumes (local data)
 docker/postgres/data/

@@ -24,7 +24,6 @@ from __future__ import annotations
 from dataclasses import dataclass, field
 from typing import TYPE_CHECKING
 
-from rationalevault.compilers.compiler_output import CompilerOutput
 from rationalevault.compilers.context_compiler_base import ContextPackageCompiler
 
 if TYPE_CHECKING:

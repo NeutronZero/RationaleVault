@@ -35,8 +35,6 @@ from typing import Any, Optional
 from rationalevault.knowledge.context_types import (
     ContextCitation,
     EventContext,
-    KnowledgeContext,
-    MemoryContext,
 )
 from rationalevault.knowledge.knowledge_retrieval import (
     retrieve_ranked_knowledge_citations,

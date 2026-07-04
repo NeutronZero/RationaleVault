@@ -254,25 +254,28 @@ class OrganizationActivityProjection(BaseProjection):
         inactive: list[str] = []
 
         for pid in project_ids:
-            events = recent_events_by_project.get(pid, [])
-            knowledge = recent_knowledge_by_project.get(pid, [])
-            memories = recent_memories_by_project.get(pid, [])
+            events = recent_events_by_project.get(pid)
+            knowledge = recent_knowledge_by_project.get(pid)
+            memories = recent_memories_by_project.get(pid)
 
-            event_count = len(events)
-            knowledge_count = len(knowledge)
-            memory_count = len(memories)
+            event_count = len(events) if events else 0
+            knowledge_count = len(knowledge) if knowledge else 0
+            memory_count = len(memories) if memories else 0
 
             last_event_at = ""
             if events:
                 try:
-                    timestamps = [
-                        e.recorded_at.isoformat() if hasattr(e, "recorded_at") and e.recorded_at
-                        else str(getattr(e, "created_at", ""))
-                        for e in events
-                        if getattr(e, "recorded_at", None) or getattr(e, "created_at", None)
-                    ]
+                    timestamps = []
+                    for e in events:
+                        recorded_at = getattr(e, "recorded_at", None)
+                        if recorded_at:
+                            timestamps.append(recorded_at.isoformat())
+                        else:
+                            created_at = getattr(e, "created_at", None)
+                            if created_at:
+                                timestamps.append(str(created_at))
                     if timestamps:
-                        last_event_at = sorted(timestamps, reverse=True)[0]
+                        last_event_at = max(timestamps)
                 except Exception:
                     last_event_at = ""
 
@@ -305,11 +308,11 @@ class OrganizationActivityProjection(BaseProjection):
         transfers: list[OrgTransferEvent] = []
 
         # Pre-build lookup mapping (project_id, knowledge_id) -> knowledge object
-        recent_knowledge_map = {}
-        for pid, klist in recent_knowledge_by_project.items():
-            for k in klist:
-                k_id = str(getattr(k, "id", ""))
-                recent_knowledge_map[(pid, k_id)] = k
+        recent_knowledge_map = {
+            (pid, str(getattr(k, "id", ""))): k
+            for pid, klist in recent_knowledge_by_project.items()
+            for k in klist
+        }
 
         for kid, lineage in org_state.active_lineages.items():
             for target_pid in lineage.current_projects:

@@ -9,7 +9,7 @@ import hashlib
 import json
 from dataclasses import dataclass, field
 from datetime import datetime
-from typing import Any, Optional, cast
+from typing import Any, Optional
 import xml.etree.ElementTree as ET
 
 from rationalevault.knowledge.models import KnowledgeObject, KnowledgeRelation

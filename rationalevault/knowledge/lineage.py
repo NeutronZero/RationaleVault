@@ -5,7 +5,7 @@ This module provides the tools to build and verify those chains.
 """
 from __future__ import annotations
 
-from typing import Any, Optional
+from typing import Any
 
 from rationalevault.knowledge.models import KnowledgeConfidence, KnowledgeObject, ProvenanceChain
 from rationalevault.memory.factory import get_memory_provider

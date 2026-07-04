@@ -1,0 +1,51 @@
+{
+  "dataset_version": "1.0.0",
+  "created": "2026-06-26T14:25:00Z",
+  "cases": [
+    {
+      "query": "continue sprint 34 where I left off",
+      "expected": ["mem-continuation-s34"],
+      "why": "Requires continuation memory lookup to resume a specific sprint context.",
+      "intent": "continuation",
+      "required_signals": ["lexical", "priority"],
+      "expected_dominant_signal": "priority",
+      "difficulty": "easy"
+    },
+    {
+      "query": "what database migration rules did we agree on",
+      "expected": ["mem-db-migration-rules"],
+      "why": "Looks up explicit decision record for database migration conventions.",
+      "intent": "knowledge_query",
+      "required_signals": ["lexical"],
+      "expected_dominant_signal": "lexical",
+      "difficulty": "easy"
+    },
+    {
+      "query": "what breaks if we modify postgres connections",
+      "expected": ["mem-postgres-pool-decision", "mem-postgres-dep-knowledge"],
+      "why": "Requires understanding dependencies through both lexical matches and knowledge graph connections.",
+      "intent": "impact_analysis",
+      "required_signals": ["lexical", "graph"],
+      "expected_dominant_signal": "graph",
+      "difficulty": "hard"
+    },
+    {
+      "query": "cross-project shared modules and utility functions",
+      "expected": ["mem-cross-project-shared-utils"],
+      "why": "Looks for shared libraries/code across different project contexts.",
+      "intent": "cross_project",
+      "required_signals": ["lexical"],
+      "expected_dominant_signal": "lexical",
+      "difficulty": "medium"
+    },
+    {
+      "query": "organizational coding standards and policies",
+      "expected": ["mem-org-coding-standards"],
+      "why": "Finds policy documents at the organizational level.",
+      "intent": "organizational",
+      "required_signals": ["lexical", "priority"],
+      "expected_dominant_signal": "priority",
+      "difficulty": "medium"
+    }
+  ]
+}

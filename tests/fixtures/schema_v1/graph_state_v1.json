@@ -1,0 +1,41 @@
+{
+  "schema_version": 1,
+  "compiled_at": "2026-06-24T12:00:00Z",
+  "projection_version": "1.0",
+  "nodes": {
+    "proj-a": {
+      "project_id": "proj-a",
+      "name": "Project A",
+      "knowledge_count": 5,
+      "transferable_count": 2,
+      "shared_count": 1,
+      "conflict_count": 0,
+      "is_cluster_center": true,
+      "health_score": 1.0
+    }
+  },
+  "edges": [
+    {
+      "source": "proj-a",
+      "target": "proj-b",
+      "relation_type": "IN_CLUSTER",
+      "weight": 1.0,
+      "confidence": 0.5
+    }
+  ],
+  "clusters": [["proj-a", "proj-b"]],
+  "density": 0.5,
+  "conflicted_nodes": [],
+  "knowledge_flow_balance": {"proj-a": 1},
+  "knowledge_producers": [["proj-a", 1.0]],
+  "knowledge_consumers": [],
+  "contradiction_hotspots": [],
+  "health": {
+    "connectivity": 1.0,
+    "density": 0.5,
+    "conflict_density": 0.0,
+    "cluster_cohesion": 1.0,
+    "producer_consumer_balance": 1.0,
+    "overall": 0.9
+  }
+}

@@ -10,7 +10,6 @@ This ensures provenance consistency across all knowledge types.
 """
 from __future__ import annotations
 
-import hashlib
 import uuid
 from datetime import datetime
 from typing import Optional
@@ -27,7 +26,6 @@ from rationalevault.knowledge.models import (
     ProvenanceChain,
     generate_knowledge_id,
 )
-from rationalevault.knowledge.lineage import build_provenance_chain
 from rationalevault.memory.consolidation import jaccard_similarity
 from rationalevault.memory.models import MemoryRecord, MemoryType
 

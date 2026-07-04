@@ -350,29 +350,33 @@ class OrganizationGraphProjection(BaseProjection):
 
         # Build SHARED_BY edges (bidirectional)
         for (src, tgt), count in shared_agg.items():
-            edges.append(OrganizationEdge(
-                source=src, target=tgt,
-                relation_type=OrganizationRelationType.SHARED_BY,
-                weight=float(count), confidence=1.0,
-            ))
-            edges.append(OrganizationEdge(
-                source=tgt, target=src,
-                relation_type=OrganizationRelationType.SHARED_BY,
-                weight=float(count), confidence=1.0,
+            edges.extend((
+                OrganizationEdge(
+                    source=src, target=tgt,
+                    relation_type=OrganizationRelationType.SHARED_BY,
+                    weight=float(count), confidence=1.0,
+                ),
+                OrganizationEdge(
+                    source=tgt, target=src,
+                    relation_type=OrganizationRelationType.SHARED_BY,
+                    weight=float(count), confidence=1.0,
+                ),
             ))
 
         # Build CONFLICTS_WITH edges (bidirectional)
         for (pa, pb), data in conflict_agg.items():
             conf = data["total_confidence"] / data["count"] if data["count"] > 0 else 1.0
-            edges.append(OrganizationEdge(
-                source=pa, target=pb,
-                relation_type=OrganizationRelationType.CONFLICTS_WITH,
-                weight=data["count"], confidence=conf,
-            ))
-            edges.append(OrganizationEdge(
-                source=pb, target=pa,
-                relation_type=OrganizationRelationType.CONFLICTS_WITH,
-                weight=data["count"], confidence=conf,
+            edges.extend((
+                OrganizationEdge(
+                    source=pa, target=pb,
+                    relation_type=OrganizationRelationType.CONFLICTS_WITH,
+                    weight=data["count"], confidence=conf,
+                ),
+                OrganizationEdge(
+                    source=pb, target=pa,
+                    relation_type=OrganizationRelationType.CONFLICTS_WITH,
+                    weight=data["count"], confidence=conf,
+                ),
             ))
 
         # Pre-compute project knowledge sets
@@ -396,15 +400,17 @@ class OrganizationGraphProjection(BaseProjection):
                 union = a_size + b_size - intersection
                 jaccard = intersection / union if union > 0 else 0.0
 
-                edges.append(OrganizationEdge(
-                    source=p_a, target=p_b,
-                    relation_type=OrganizationRelationType.IN_CLUSTER,
-                    weight=float(intersection), confidence=jaccard,
-                ))
-                edges.append(OrganizationEdge(
-                    source=p_b, target=p_a,
-                    relation_type=OrganizationRelationType.IN_CLUSTER,
-                    weight=float(intersection), confidence=jaccard,
+                edges.extend((
+                    OrganizationEdge(
+                        source=p_a, target=p_b,
+                        relation_type=OrganizationRelationType.IN_CLUSTER,
+                        weight=float(intersection), confidence=jaccard,
+                    ),
+                    OrganizationEdge(
+                        source=p_b, target=p_a,
+                        relation_type=OrganizationRelationType.IN_CLUSTER,
+                        weight=float(intersection), confidence=jaccard,
+                    ),
                 ))
 
         # Filter orphaned edges (HIGH-4: source/target not in project_ids)

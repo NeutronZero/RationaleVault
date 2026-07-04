@@ -12,7 +12,6 @@ Checks:
 from __future__ import annotations
 
 from dataclasses import dataclass
-from typing import Optional
 
 from rationalevault.knowledge.models import KnowledgeLifecycle, KnowledgeType
 from rationalevault.projections.knowledge import KnowledgeState
@@ -86,8 +85,6 @@ class KnowledgeProjectionEvaluator:
 
     def _check_invariants(self, state: KnowledgeState) -> bool:
         """All PROJECT_INVARIANT knowledge must be in invariants list."""
-        from rationalevault.projections.knowledge import _derive_epistemic_status
-        from rationalevault.knowledge.models import EpistemicStatus
 
         for k in state.active_knowledge:
             if k.knowledge_type == KnowledgeType.PROJECT_INVARIANT:

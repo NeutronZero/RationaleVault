@@ -1,7 +1,6 @@
 from __future__ import annotations
 
 from dataclasses import dataclass
-from typing import Optional, Tuple, List
 from rationalevault.projections.continuation import ContinuationState
 
 @dataclass

@@ -16,12 +16,11 @@ Key metrics:
 from __future__ import annotations
 
 import hashlib
-from dataclasses import dataclass, field
+from dataclasses import dataclass
 from typing import Any
 
 from rationalevault.evaluation.context_benchmark_schema import ContextBenchmark
 from rationalevault.knowledge.context_compiler import ContextPackage, PROFILE_SOURCE_WEIGHTS
-from rationalevault.knowledge.context_types import ContextCitation
 from rationalevault.memory.query_analyzer import RetrievalProfile
 
 

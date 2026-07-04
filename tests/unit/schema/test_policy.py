@@ -276,3 +276,29 @@ def test_migration_path_multi_step_exists():
     path = MigrationPath(steps=(MigrationStep(1, 2), MigrationStep(2, 3)))
     assert path.exists() is True
     assert len(path.steps) == 2
+
+
+def test_can_resolve_already_at_target():
+    from rationalevault.schema.events import EventRecord, EventMetadata
+    from datetime import datetime
+    from uuid import uuid4
+
+    policy = SchemaPolicy(_schemas={
+        EventType.TASK_CREATED: EventSchema(
+            event_type=EventType.TASK_CREATED,
+            latest_version=2,
+            migration_path=MigrationPath(steps=(MigrationStep(1, 2), MigrationStep(2, 3))),
+        )
+    })
+    
+    # event is already at target version 2 (and latest is 2)
+    # Wait, if latest is 2 and schema_version is 2, it is already current.
+    # What if latest is 2 and we check can_resolve?
+    event = EventRecord(
+        event_sequence=1, id=uuid4(), project_id=uuid4(), stream_id="test",
+        version=1, event_type=EventType.TASK_CREATED, parent_id=None,
+        schema_version=2, payload={},
+        metadata=EventMetadata(actor="test", source="test"),
+        recorded_at=datetime.now(),
+    )
+    assert policy.can_resolve(event) is True

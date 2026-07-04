@@ -1,0 +1,9 @@
+{
+  "schema_version": 1,
+  "compiled_at": "2026-06-24T12:00:00Z",
+  "projection_version": "1.0",
+  "actor": "claude",
+  "source": "manual",
+  "correlation_id": "corr-uuid-111",
+  "session_id": "sess-uuid-222"
+}

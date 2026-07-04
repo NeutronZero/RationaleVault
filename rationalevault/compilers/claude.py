@@ -23,7 +23,6 @@ Design principles:
 from __future__ import annotations
 
 from rationalevault.cognitive_head.compiler import CognitiveHead
-from rationalevault.cognitive_head.reducers import DecisionState, QuestionState, TaskState
 from rationalevault.compilers.base import AgentCompiler
 
 _PRIORITY_ICONS = {

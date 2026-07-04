@@ -7,7 +7,6 @@ from mcp.server.fastmcp import FastMCP
 server = FastMCP("rationalevault")
 
 # Import tools so they register on the server
-import rationalevault.mcp.tools
 
 def run(transport: str = "stdio", port: int = 8080) -> None:
     """Run the MCP server using the specified transport and port."""

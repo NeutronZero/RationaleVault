@@ -79,6 +79,8 @@ class SchemaPolicy:
         current = event.schema_version
         target = self.latest_version(event.event_type)
         for step in path.steps:
+            if current == target:
+                break
             if step.from_version == current:
                 current = step.to_version
         return current == target

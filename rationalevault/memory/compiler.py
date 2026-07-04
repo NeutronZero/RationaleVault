@@ -1,6 +1,5 @@
 from __future__ import annotations
 
-from rationalevault.memory.factory import get_memory_provider
 from rationalevault.memory.models import MemoryRecord
 from rationalevault.memory.retrieval import retrieve_ranked_memories
 from rationalevault.memory.ranking import RetrievalScore

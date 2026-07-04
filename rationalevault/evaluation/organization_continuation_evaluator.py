@@ -10,15 +10,12 @@ from typing import Any
 
 from rationalevault.evaluation.thresholds import EvaluationThresholds
 from rationalevault.organization.activity import (
-    OrganizationActivityProjection,
     OrganizationActivityState,
 )
 from rationalevault.organization.continuation import (
-    OrganizationContinuationProjection,
     OrganizationContinuationState,
 )
 from rationalevault.organization.graph import (
-    OrganizationGraphProjection,
     OrganizationGraphState,
 )
 from rationalevault.organization.models import OrganizationState

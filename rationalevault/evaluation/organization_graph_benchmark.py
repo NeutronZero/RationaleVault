@@ -3,14 +3,13 @@ from __future__ import annotations
 
 from dataclasses import dataclass, field
 
-from rationalevault.organization.graph import OrganizationGraphProjection, OrganizationGraphState
+from rationalevault.organization.graph import OrganizationGraphProjection
 from rationalevault.organization.models import (
     CrossProjectConflict,
     KnowledgeLineage,
     OrganizationState,
     SharedKnowledge,
 )
-from rationalevault.organization.relation_types import OrganizationRelationType
 
 
 def _lineage(kid: str, origin: str, current: list[str]) -> KnowledgeLineage:

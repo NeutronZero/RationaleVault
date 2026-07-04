@@ -5,7 +5,7 @@ It carries both the rendered content and metadata needed for evaluation.
 """
 from __future__ import annotations
 
-from dataclasses import dataclass, field
+from dataclasses import dataclass
 from typing import Any
 
 

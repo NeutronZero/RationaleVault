@@ -1,7 +1,6 @@
 from __future__ import annotations
 
 from datetime import datetime
-import uuid
 from rationalevault.memory.factory import get_memory_provider
 from rationalevault.db.event_store import EventStore
 from rationalevault.schema.events import EventMetadata, EventType, EventRecord

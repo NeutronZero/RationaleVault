@@ -13,7 +13,7 @@ Environment variables:
     RELAY_DB_PORT     (default: 5432)
     RELAY_DB_NAME     (default: relay)
     RELAY_DB_USER     (default: relay)
-    RELAY_DB_PASSWORD (default: relay)
+    RELAY_DB_PASSWORD (default: None; required in production)
 """
 from __future__ import annotations
 

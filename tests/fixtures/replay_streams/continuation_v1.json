@@ -1,0 +1,23 @@
+{
+  "schema_version": 1,
+  "events": [
+    {
+      "stream_id": "main",
+      "event_type": "PROJECT_CREATED",
+      "payload": {"name": "Test Replay Project"},
+      "session_id": "session-123"
+    },
+    {
+      "stream_id": "main",
+      "event_type": "PROJECT_GOAL_SET",
+      "payload": {"goal": "Demonstrate Replay Stability"},
+      "session_id": "session-123"
+    },
+    {
+      "stream_id": "main",
+      "event_type": "PROJECT_FOCUS_CHANGED",
+      "payload": {"focus": "Integration Testing"},
+      "session_id": "session-123"
+    }
+  ]
+}

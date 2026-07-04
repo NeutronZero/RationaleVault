@@ -11,9 +11,6 @@ from typing import Any
 from rationalevault.evaluation.thresholds import EvaluationThresholds
 from rationalevault.recommendations.engine import RecommendationEngine
 from rationalevault.recommendations.models import (
-    CATEGORY_PRIORITY,
-    Recommendation,
-    RecommendationCategory,
     RecommendationSet,
 )
 

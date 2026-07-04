@@ -1,8 +1,8 @@
 from __future__ import annotations
 
-from dataclasses import dataclass, field
-from datetime import datetime, timezone
-from typing import Any, Optional, ClassVar
+from dataclasses import dataclass
+from datetime import datetime
+from typing import Optional, ClassVar
 from uuid import UUID
 from rationalevault.projections.base import BaseProjection, ProjectionKind, SemVer
 
@@ -16,7 +16,7 @@ from rationalevault.cognitive_head.reducers import (
     DecisionState,
     QuestionState,
 )
-from rationalevault.schema.events import EventRecord, EventType
+from rationalevault.schema.events import EventType
 from rationalevault.projections.session import SessionSummary, SessionProjection
 
 _PRIORITY_ORDER: dict[str, int] = {

@@ -12,7 +12,7 @@ from abc import ABC, abstractmethod
 from pathlib import Path
 from typing import Optional
 
-from rationalevault.knowledge.models import KnowledgeObject, KnowledgeType, KnowledgeDomain
+from rationalevault.knowledge.models import KnowledgeObject
 
 
 class BaseKnowledgeProvider(ABC):
@@ -52,6 +52,15 @@ class BaseKnowledgeProvider(ABC):
     def update_lifecycle(self, knowledge_id: str, status: str) -> None:
         """Update the lifecycle status of a knowledge object."""
         pass
+
+
+SELECT_COLUMNS = """
+    SELECT id, version, title, content, knowledge_type, knowledge_domain,
+           importance, lifecycle_status, tags, confidence, provenance,
+           supporting_memory_ids, contradicting_memory_ids, superseded_by,
+           created_at, updated_at, project_id, transferability
+    FROM RationaleVault_knowledge
+"""
 
 
 class SQLiteKnowledgeProvider(BaseKnowledgeProvider):
@@ -161,25 +170,20 @@ class SQLiteKnowledgeProvider(BaseKnowledgeProvider):
         conn = self._get_conn()
         try:
             cursor = conn.cursor()
-            conditions = []
             params: list = []
             if project_id:
-                conditions.append("project_id = ?")
                 params.append(project_id)
-            if transferable_only:
-                conditions.append("transferability IN ('REUSABLE', 'ORGANIZATIONAL')")
-            where = f"WHERE {' AND '.join(conditions)}" if conditions else ""
-            cursor.execute(
-                f"""
-                SELECT id, version, title, content, knowledge_type, knowledge_domain,
-                       importance, lifecycle_status, tags, confidence, provenance,
-                       supporting_memory_ids, contradicting_memory_ids, superseded_by,
-                       created_at, updated_at, project_id, transferability
-                FROM rationalevault_knowledge
-                {where}
-                """,
-                params,
-            )
+
+            if project_id and transferable_only:
+                sql = SELECT_COLUMNS + " WHERE project_id = ? AND transferability IN ('REUSABLE', 'ORGANIZATIONAL')"
+            elif project_id:
+                sql = SELECT_COLUMNS + " WHERE project_id = ?"
+            elif transferable_only:
+                sql = SELECT_COLUMNS + " WHERE transferability IN ('REUSABLE', 'ORGANIZATIONAL')"
+            else:
+                sql = SELECT_COLUMNS
+
+            cursor.execute(sql, params)
             for row in cursor.fetchall():
                 records.append(self._row_to_knowledge(row))
         finally:
@@ -219,26 +223,52 @@ class SQLiteKnowledgeProvider(BaseKnowledgeProvider):
         try:
             cursor = conn.cursor()
             q = f"%{query}%"
-            conditions = ["(title LIKE ? OR content LIKE ? OR tags LIKE ?)"]
             params: list = [q, q, q]
-            if project_id:
-                conditions.append("project_id = ?")
+
+            if project_id and transferable_only:
                 params.append(project_id)
-            if transferable_only:
-                conditions.append("transferability IN ('REUSABLE', 'ORGANIZATIONAL')")
-            params.append(limit)
-            cursor.execute(
-                f"""
-                SELECT id, version, title, content, knowledge_type, knowledge_domain,
-                       importance, lifecycle_status, tags, confidence, provenance,
-                       supporting_memory_ids, contradicting_memory_ids, superseded_by,
-                       created_at, updated_at, project_id, transferability
-                FROM rationalevault_knowledge
-                WHERE {' AND '.join(conditions)}
-                ORDER BY created_at DESC LIMIT ?
-                """,
-                params,
-            )
+                params.append(limit)
+                sql = (
+                    SELECT_COLUMNS
+                    + """
+                    WHERE (title LIKE ? OR content LIKE ? OR tags LIKE ?)
+                      AND project_id = ?
+                      AND transferability IN ('REUSABLE', 'ORGANIZATIONAL')
+                    ORDER BY created_at DESC LIMIT ?
+                    """
+                )
+            elif project_id:
+                params.append(project_id)
+                params.append(limit)
+                sql = (
+                    SELECT_COLUMNS
+                    + """
+                    WHERE (title LIKE ? OR content LIKE ? OR tags LIKE ?)
+                      AND project_id = ?
+                    ORDER BY created_at DESC LIMIT ?
+                    """
+                )
+            elif transferable_only:
+                params.append(limit)
+                sql = (
+                    SELECT_COLUMNS
+                    + """
+                    WHERE (title LIKE ? OR content LIKE ? OR tags LIKE ?)
+                      AND transferability IN ('REUSABLE', 'ORGANIZATIONAL')
+                    ORDER BY created_at DESC LIMIT ?
+                    """
+                )
+            else:
+                params.append(limit)
+                sql = (
+                    SELECT_COLUMNS
+                    + """
+                    WHERE (title LIKE ? OR content LIKE ? OR tags LIKE ?)
+                    ORDER BY created_at DESC LIMIT ?
+                    """
+                )
+
+            cursor.execute(sql, params)
             for row in cursor.fetchall():
                 records.append(self._row_to_knowledge(row))
         finally:
@@ -257,7 +287,6 @@ class SQLiteKnowledgeProvider(BaseKnowledgeProvider):
             conn.close()
 
     def _row_to_knowledge(self, row: tuple) -> KnowledgeObject:
-        from rationalevault.knowledge.models import KnowledgeConfidence, ProvenanceChain
         d = {
             "id": row[0],
             "version": row[1],

@@ -1,7 +1,6 @@
 from __future__ import annotations
 
 import json
-import os
 import sys
 import time
 from pathlib import Path
@@ -377,7 +376,6 @@ def run_memory_evaluation() -> dict[str, Any]:
     from rationalevault.memory.factory import get_memory_provider
     from rationalevault.memory.reference_tracker import record_memory_reference
     from rationalevault.memory.consolidation import detect_consolidation_candidates
-    from rationalevault.memory.retrieval import retrieve_ranked_memories
     from rationalevault.memory.citation_builder import MemoryCitation
     from rationalevault.memory.ranking import compute_retrieval_score
     import uuid
@@ -510,7 +508,7 @@ def run_memory_evaluation() -> dict[str, Any]:
     # Retrieval & Ranking Quality via Query Analyzer, Planner & Citations
     from rationalevault.memory.query_analyzer import analyze_query, RetrievalProfile
     from rationalevault.memory.retrieval import retrieve_ranked_citations
-    from rationalevault.memory.retrieval_audit import audit_retrieval_execution, RetrievalFailure
+    from rationalevault.memory.retrieval_audit import audit_retrieval_execution
     import math
 
     queries_to_test = [
@@ -761,7 +759,7 @@ def run_knowledge_evaluation() -> dict[str, Any]:
     import uuid
     from rationalevault.knowledge.factory import get_knowledge_provider
     from rationalevault.knowledge.synthesizer import synthesize_all
-    from rationalevault.knowledge.evaluator import KnowledgeEvaluator, KnowledgeEvalResult, check_knowledge_gates, KnowledgeEvaluationThresholds
+    from rationalevault.knowledge.evaluator import KnowledgeEvaluator, KnowledgeEvalResult
     from rationalevault.knowledge.benchmark_schema import KnowledgeBenchmark
 
     # Load knowledge benchmarks

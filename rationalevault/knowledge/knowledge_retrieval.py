@@ -19,7 +19,7 @@ from rationalevault.knowledge.knowledge_citation import (
     compute_knowledge_score,
     extract_keywords,
 )
-from rationalevault.memory.query_analyzer import QueryIntent, RetrievalProfile, analyze_query
+from rationalevault.memory.query_analyzer import QueryIntent, analyze_query
 from rationalevault.memory.retrieval_planner import get_knowledge_profile_weights
 from rationalevault.memory.timing import RetrievalTiming
 

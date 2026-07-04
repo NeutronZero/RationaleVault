@@ -27,7 +27,6 @@ class SQLiteEventStore(BaseEventStore):
         return conn
 
     def _init_db(self) -> None:
-        import os
         from pathlib import Path
         db_file = Path(self.db_path)
         db_file.parent.mkdir(parents=True, exist_ok=True)
@@ -150,7 +149,7 @@ class SQLiteEventStore(BaseEventStore):
         """
         with self._get_conn() as conn:
             cur = conn.execute(sql, (str(project_id), since_sequence))
-            return [self._row_to_record(row) for row in cur.fetchall()]
+            return [self._row_to_record(row) for row in cur]
 
     def replay_stream(
         self,

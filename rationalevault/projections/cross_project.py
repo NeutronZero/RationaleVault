@@ -9,8 +9,8 @@ directly (primary state), never KnowledgeStates (derived state).
 from __future__ import annotations
 
 from dataclasses import dataclass, field
-from datetime import datetime, timezone
-from typing import Optional, ClassVar, Any
+from datetime import datetime
+from typing import Optional, ClassVar
 from rationalevault.projections.base import BaseProjection, ProjectionKind, SemVer
 
 from rationalevault.knowledge.models import (

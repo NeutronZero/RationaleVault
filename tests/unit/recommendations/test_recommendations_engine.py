@@ -47,6 +47,7 @@ class TestRecommendationEngineEmpty:
         rs = RecommendationEngine.generate()
         assert rs.recommendation_count == 0
         assert rs.attention_load == 0.0
+        assert len(rs.recommendations) == 0
 
     def test_healthy_states_produce_empty(self) -> None:
         rs = RecommendationEngine.generate(
@@ -56,6 +57,7 @@ class TestRecommendationEngineEmpty:
         )
         assert rs.recommendation_count == 0
         assert rs.attention_load == 0.0
+        assert len(rs.recommendations) == 0
 
 
 class TestConflictResolution:

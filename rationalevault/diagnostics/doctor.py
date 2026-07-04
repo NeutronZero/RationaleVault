@@ -1,11 +1,9 @@
 """RationaleVault Diagnostics Doctor — Active and static system health verification."""
 from __future__ import annotations
 
-import sys
 import uuid
 from dataclasses import dataclass
 from datetime import datetime
-from pathlib import Path
 from typing import Any
 
 from rationalevault.evaluation.thresholds import EvaluationThresholds
@@ -126,7 +124,6 @@ def run_diagnostics() -> HealthReport:
     try:
         # Step A: Memory record
         from rationalevault.memory.models import MemoryRecord, MemoryType
-        from rationalevault.memory.citation_builder import build_citation
         mem = MemoryRecord(
             id="synth_mem_123",
             version=1,
