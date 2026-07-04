@@ -125,3 +125,23 @@ class TestSQLiteOrdering:
 
         assert seq_violations == 0
         assert ver_violations == 0
+
+
+class TestDatetimeFallback:
+    def test_invalid_datetime_falls_back_to_now(self, store: SQLiteEventStore) -> None:
+        """Events with invalid recorded_at still load via public API."""
+        import sqlite3
+        from datetime import datetime
+
+        pid = bootstrap_project(store, "DateTime Test")
+
+        with sqlite3.connect(store.db_path) as conn:
+            conn.execute(
+                "UPDATE rationalevault_events SET recorded_at = 'not-a-date' WHERE project_id = ?",
+                (str(pid),),
+            )
+
+        events = store.get_project_stream(pid)
+        assert len(events) == 3
+        for e in events:
+            assert isinstance(e.recorded_at, datetime)

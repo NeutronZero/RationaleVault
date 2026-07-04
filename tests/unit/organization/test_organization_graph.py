@@ -458,3 +458,82 @@ class TestOrganizationGraphOperations:
         assert "a" in visited
         assert "b" in visited
         assert "c" in visited
+
+
+class TestBlastRadiusEdgeCases:
+    def test_blast_radius_empty_graph(self) -> None:
+        """Empty graph returns only the starting node."""
+        state = OrganizationGraphState(
+            compiled_at="2025-01-01",
+            nodes={}, edges=[], adjacency={}, reverse_adjacency={},
+            clusters=[],
+        )
+        result = OrganizationGraphProjection.blast_radius(state, "nonexistent")
+        assert result == {"nonexistent"}
+
+    def test_blast_radius_cyclic_graph(self) -> None:
+        """Cyclic TRANSFERRED_TO edges terminate correctly (BFS visited set)."""
+        edge = OrganizationEdge(
+            source="a", target="b",
+            relation_type=OrganizationRelationType.TRANSFERRED_TO,
+            weight=1.0, confidence=1.0,
+        )
+        reverse_edge = OrganizationEdge(
+            source="b", target="a",
+            relation_type=OrganizationRelationType.TRANSFERRED_TO,
+            weight=1.0, confidence=1.0,
+        )
+        node_a = OrganizationNode(project_id="a", name="A")
+        node_b = OrganizationNode(project_id="b", name="B")
+        state = OrganizationGraphState(
+            compiled_at="2025-01-01",
+            nodes={"a": node_a, "b": node_b},
+            edges=[edge, reverse_edge],
+            adjacency={"a": [edge], "b": [reverse_edge]},
+            reverse_adjacency={"a": [reverse_edge], "b": [edge]},
+            clusters=[["a", "b"]],
+        )
+        result = OrganizationGraphProjection.blast_radius(state, "a")
+        assert result == {"a", "b"}
+
+    def test_blast_radius_ignores_non_transferred_edges(self) -> None:
+        """Only TRANSFERRED_TO edges are traversed."""
+        edge = OrganizationEdge(
+            source="a", target="b",
+            relation_type=OrganizationRelationType.IN_CLUSTER,
+            weight=1.0, confidence=1.0,
+        )
+        node_a = OrganizationNode(project_id="a", name="A")
+        node_b = OrganizationNode(project_id="b", name="B")
+        state = OrganizationGraphState(
+            compiled_at="2025-01-01",
+            nodes={"a": node_a, "b": node_b},
+            edges=[edge],
+            adjacency={"a": [edge], "b": []},
+            reverse_adjacency={"a": [], "b": [edge]},
+            clusters=[["a", "b"]],
+        )
+        result = OrganizationGraphProjection.blast_radius(state, "a")
+        assert result == {"a"}
+
+    def test_blast_radius_unrelated_nodes_not_traversed(self) -> None:
+        """Graph with unrelated nodes — only reachable via TRANSFERRED_TO."""
+        edge = OrganizationEdge(
+            source="a", target="b",
+            relation_type=OrganizationRelationType.TRANSFERRED_TO,
+            weight=1.0, confidence=1.0,
+        )
+        node_a = OrganizationNode(project_id="a", name="A")
+        node_b = OrganizationNode(project_id="b", name="B")
+        node_c = OrganizationNode(project_id="c", name="C")
+        state = OrganizationGraphState(
+            compiled_at="2025-01-01",
+            nodes={"a": node_a, "b": node_b, "c": node_c},
+            edges=[edge],
+            adjacency={"a": [edge], "b": [], "c": []},
+            reverse_adjacency={"a": [], "b": [edge], "c": []},
+            clusters=[["a", "b", "c"]],
+        )
+        result = OrganizationGraphProjection.blast_radius(state, "a")
+        assert result == {"a", "b"}
+        assert "c" not in result
