@@ -34,7 +34,7 @@ def analyze_query(query: str) -> QueryIntent:
     """
     q_clean = query.lower().strip()
     words = TOKEN_RE.findall(q_clean)
-    stopwords = {"what", "is", "a", "the", "of", "and", "in", "to", "exist", "are", "about", "for", "with", "on", "exist", "exists"}
+    stopwords = {"what", "is", "a", "the", "of", "and", "in", "to", "exist", "are", "about", "for", "with", "on", "exists"}
     keywords = [w for w in words if w and w not in stopwords]
 
     # Map words to profiles
