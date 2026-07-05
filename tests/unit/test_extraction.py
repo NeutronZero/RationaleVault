@@ -104,3 +104,109 @@ def test_validate_candidate_event():
         confidence=0.9
     )
     assert validate_candidate_event(missing_field) is False
+
+
+def test_extract_observations_invalid_json_in_block():
+    text = '```json\n{"observations": [{"text": "ok"\n```'
+    obs = extract_observations(text)
+    assert obs == []
+
+
+def test_extract_observations_empty_text():
+    assert extract_observations("") == []
+
+
+def test_extract_observations_raw_json_without_code_block():
+    text = '{"observations": [{"text": "raw", "confidence": 0.8, "source_context": "direct"}]}'
+    obs = extract_observations(text)
+    assert len(obs) == 1
+    assert obs[0].text == "raw"
+    assert obs[0].confidence == 0.8
+
+
+def test_extract_observations_json_items_missing_text_key():
+    text = '```json\n{"observations": [{"confidence": 0.9}]}\n```'
+    obs = extract_observations(text)
+    assert obs == []
+
+
+def test_extract_observations_fallback_no_bullets():
+    text = "Just plain text with no bullets or dashes."
+    obs = extract_observations(text)
+    assert obs == []
+
+
+def test_extract_observations_multiple_json_blocks():
+    text = """
+```json
+{"observations": [{"text": "first"}]}
+```
+```json
+{"observations": [{"text": "second"}]}
+```
+"""
+    obs = extract_observations(text)
+    assert len(obs) == 1
+    assert obs[0].text == "first"
+
+
+def test_validate_event_non_dict_payload():
+    event = CandidateEvent(event_type="DECISION_ACCEPTED", stream_id="s", payload="not a dict")
+    assert validate_candidate_event(event) is False
+
+
+def test_validate_project_created():
+    assert validate_candidate_event(CandidateEvent(event_type="PROJECT_CREATED", stream_id="s", payload={"name": "p"})) is True
+    assert validate_candidate_event(CandidateEvent(event_type="PROJECT_CREATED", stream_id="s", payload={})) is False
+
+
+def test_validate_project_goal_set():
+    assert validate_candidate_event(CandidateEvent(event_type="PROJECT_GOAL_SET", stream_id="s", payload={"goal": "g"})) is True
+    assert validate_candidate_event(CandidateEvent(event_type="PROJECT_GOAL_SET", stream_id="s", payload={})) is False
+
+
+def test_validate_project_focus_changed():
+    assert validate_candidate_event(CandidateEvent(event_type="PROJECT_FOCUS_CHANGED", stream_id="s", payload={"focus": "f"})) is True
+    assert validate_candidate_event(CandidateEvent(event_type="PROJECT_FOCUS_CHANGED", stream_id="s", payload={})) is False
+
+
+def test_validate_task_created():
+    assert validate_candidate_event(CandidateEvent(event_type="TASK_CREATED", stream_id="s", payload={"task_id": "t", "title": "T"})) is True
+    assert validate_candidate_event(CandidateEvent(event_type="TASK_CREATED", stream_id="s", payload={"task_id": "t"})) is False
+    assert validate_candidate_event(CandidateEvent(event_type="TASK_CREATED", stream_id="s", payload={"title": "T"})) is False
+
+
+def test_validate_task_mutated():
+    assert validate_candidate_event(CandidateEvent(event_type="TASK_MUTATED", stream_id="s", payload={"task_id": "t"})) is True
+    assert validate_candidate_event(CandidateEvent(event_type="TASK_MUTATED", stream_id="s", payload={})) is False
+
+
+def test_validate_task_completed():
+    assert validate_candidate_event(CandidateEvent(event_type="TASK_COMPLETED", stream_id="s", payload={"task_id": "t"})) is True
+    assert validate_candidate_event(CandidateEvent(event_type="TASK_COMPLETED", stream_id="s", payload={})) is False
+
+
+def test_validate_decision_proposed():
+    assert validate_candidate_event(CandidateEvent(event_type="DECISION_PROPOSED", stream_id="s", payload={"decision_id": "d", "title": "T"})) is True
+    assert validate_candidate_event(CandidateEvent(event_type="DECISION_PROPOSED", stream_id="s", payload={"decision_id": "d"})) is False
+
+
+def test_validate_decision_superseded():
+    assert validate_candidate_event(CandidateEvent(event_type="DECISION_SUPERSEDED", stream_id="s", payload={"decision_id": "d"})) is True
+    assert validate_candidate_event(CandidateEvent(event_type="DECISION_SUPERSEDED", stream_id="s", payload={})) is False
+
+
+def test_validate_open_question_raised():
+    assert validate_candidate_event(CandidateEvent(event_type="OPEN_QUESTION_RAISED", stream_id="s", payload={"question_id": "q", "title": "T"})) is True
+    assert validate_candidate_event(CandidateEvent(event_type="OPEN_QUESTION_RAISED", stream_id="s", payload={"question_id": "q"})) is False
+
+
+def test_validate_open_question_resolved():
+    assert validate_candidate_event(CandidateEvent(event_type="OPEN_QUESTION_RESOLVED", stream_id="s", payload={"question_id": "q"})) is True
+    assert validate_candidate_event(CandidateEvent(event_type="OPEN_QUESTION_RESOLVED", stream_id="s", payload={})) is False
+
+
+def test_validate_fact_recorded():
+    assert validate_candidate_event(CandidateEvent(event_type="FACT_RECORDED", stream_id="s", payload={"fact_id": "f", "content": "c"})) is True
+    assert validate_candidate_event(CandidateEvent(event_type="FACT_RECORDED", stream_id="s", payload={"fact_id": "f"})) is False
+    assert validate_candidate_event(CandidateEvent(event_type="FACT_RECORDED", stream_id="s", payload={"content": "c"})) is False
