@@ -37,14 +37,17 @@ def retrieve_ranked_citations(
 
     # 2. Candidate generation: use provider search instead of loading everything
     provider = get_memory_provider()
-    t_search_start = time.perf_counter()
+    t_provider_start = time.perf_counter()
     candidates = provider.search_records(query, limit=CANDIDATE_LIMIT)
+    total_records = provider.count()
+    t_provider_end = time.perf_counter()
     # If provider returns too few, fall back to all records
     if len(candidates) < limit:
         candidates = provider.get_all_records()
 
     # 3. Multi-keyword filtering and optional semantic reranking
     retrieval_path.append("search_memories_rrf")
+    t_search_start = time.perf_counter()
     candidates = search_memories_rrf(query, candidates, semantic_provider=semantic_provider)
     t_search_end = time.perf_counter()
 
@@ -80,6 +83,8 @@ def retrieve_ranked_citations(
     execution.rrf_used = (semantic_provider is not None)
     execution.vector_candidates = len(candidates) if semantic_provider is not None else 0
     execution.keyword_candidates = len(candidates)
+    execution.provider_latency_ms = (t_provider_end - t_provider_start) * 1000.0
+    execution.provider_total_records = total_records
 
     return citations, execution
 

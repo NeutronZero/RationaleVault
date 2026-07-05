@@ -21,6 +21,8 @@ class RetrievalExecution:
     rrf_used: bool = False
     vector_candidates: int = 0
     keyword_candidates: int = 0
+    provider_latency_ms: float = 0.0
+    provider_total_records: int = 0
 
     def to_dict(self) -> dict[str, Any]:
         return {
@@ -34,6 +36,8 @@ class RetrievalExecution:
             "rrf_used": self.rrf_used,
             "vector_candidates": self.vector_candidates,
             "keyword_candidates": self.keyword_candidates,
+            "provider_latency_ms": self.provider_latency_ms,
+            "provider_total_records": self.provider_total_records,
         }
 
 
