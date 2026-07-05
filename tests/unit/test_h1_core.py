@@ -176,6 +176,19 @@ def test_registry_locking(monkeypatch) -> None:
         lock_dir = reg_file.with_suffix(".lockdir")
         os.mkdir(lock_dir)
 
+        # Make the lock timeout pass quickly: patch time.time to advance
+        # and time.sleep to be a no-op so the 0.05s delay loop runs instantly
+        import time as _time_mod
+        _real_time_fn = _time_mod.time
+        _elapsed = [0.0]
+
+        def fast_time():
+            _elapsed[0] += 0.1
+            return _real_time_fn() + _elapsed[0]
+
+        monkeypatch.setattr(_time_mod, "time", fast_time)
+        monkeypatch.setattr(_time_mod, "sleep", lambda _: None)
+
         # registry.save() should fail with TimeoutError since lock is held
         with pytest.raises(TimeoutError, match="Could not acquire write lock"):
             registry.save()
