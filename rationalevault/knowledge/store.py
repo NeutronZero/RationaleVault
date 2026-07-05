@@ -37,6 +37,10 @@ class BaseKnowledgeProvider(ABC):
         """Retrieve a specific knowledge object by ID."""
         pass
 
+    def get_knowledge_by_ids(self, ids: list[str]) -> list[KnowledgeObject]:
+        """Batch retrieve knowledge objects by ID. Default: loop over get_knowledge_by_id."""
+        return [k for kid in ids if (k := self.get_knowledge_by_id(kid)) is not None]
+
     @abstractmethod
     def search_knowledge(
         self,

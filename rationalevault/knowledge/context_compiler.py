@@ -232,17 +232,22 @@ def _retrieve_relevant_events(
 
 # ── Citation Blending ───────────────────────────────────────────────────────
 
-def _memory_to_context_citation(mc: Any) -> ContextCitation:
+def _memory_to_context_citation(mc: Any, record_map: dict[str, Any] | None = None) -> ContextCitation:
     """Convert a MemoryCitation to a unified ContextCitation."""
     title = mc.memory_id[:12]
     content = ""
     try:
-        from rationalevault.memory.factory import get_memory_provider
-        provider = get_memory_provider()
-        records = provider.get_by_ids([mc.memory_id])
-        if records:
-            title = records[0].title
-            content = records[0].content
+        if record_map and mc.memory_id in record_map:
+            rec = record_map[mc.memory_id]
+            title = rec.title
+            content = rec.content
+        elif record_map is None:
+            from rationalevault.memory.factory import get_memory_provider
+            provider = get_memory_provider()
+            records = provider.get_by_ids([mc.memory_id])
+            if records:
+                title = records[0].title
+                content = records[0].content
     except Exception:
         pass
 
@@ -258,17 +263,22 @@ def _memory_to_context_citation(mc: Any) -> ContextCitation:
     )
 
 
-def _knowledge_to_context_citation(kc: Any) -> ContextCitation:
+def _knowledge_to_context_citation(kc: Any, knowledge_map: dict[str, Any] | None = None) -> ContextCitation:
     """Convert a KnowledgeCitation to a unified ContextCitation."""
     title = kc.knowledge_id[:12]
     content = ""
     try:
-        from rationalevault.knowledge.factory import get_knowledge_provider
-        provider = get_knowledge_provider()
-        k_obj = provider.get_knowledge_by_id(kc.knowledge_id)
-        if k_obj:
+        if knowledge_map and kc.knowledge_id in knowledge_map:
+            k_obj = knowledge_map[kc.knowledge_id]
             title = k_obj.title
             content = k_obj.content
+        elif knowledge_map is None:
+            from rationalevault.knowledge.factory import get_knowledge_provider
+            provider = get_knowledge_provider()
+            k_obj = provider.get_knowledge_by_id(kc.knowledge_id)
+            if k_obj:
+                title = k_obj.title
+                content = k_obj.content
     except Exception:
         pass
 
@@ -311,11 +321,33 @@ def _blend_citations(
 
     citations: list[ContextCitation] = []
 
+    # Batch memory lookups
+    mem_ids = [mc.memory_id for mc in memory_citations[: slots["memory"]]]
+    mem_map: dict[str, Any] = {}
+    if mem_ids:
+        try:
+            from rationalevault.memory.factory import get_memory_provider
+            mem_records = get_memory_provider().get_by_ids(mem_ids)
+            mem_map = {r.id: r for r in mem_records}
+        except Exception:
+            pass
+
     for mc in memory_citations[: slots["memory"]]:
-        citations.append(_memory_to_context_citation(mc))
+        citations.append(_memory_to_context_citation(mc, record_map=mem_map))
+
+    # Batch knowledge lookups
+    kn_ids = [kc.knowledge_id for kc in knowledge_citations[: slots["knowledge"]]]
+    kn_map: dict[str, Any] = {}
+    if kn_ids:
+        try:
+            from rationalevault.knowledge.factory import get_knowledge_provider
+            kn_objects = get_knowledge_provider().get_knowledge_by_ids(kn_ids)
+            kn_map = {k.id: k for k in kn_objects}
+        except Exception:
+            pass
 
     for kc in knowledge_citations[: slots["knowledge"]]:
-        citations.append(_knowledge_to_context_citation(kc))
+        citations.append(_knowledge_to_context_citation(kc, knowledge_map=kn_map))
 
     for ec in event_contexts[: slots["event"]]:
         citations.append(_event_to_context_citation(ec))
