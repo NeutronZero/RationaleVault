@@ -71,7 +71,7 @@ class SQLiteMemoryProvider(BaseMemoryProvider):
                 FROM rationalevault_memories
                 """
             )
-            for row in cursor.fetchall():
+            for row in cursor:
                 from rationalevault.memory.models import MemoryType
                 records.append(
                     MemoryRecord(
@@ -157,7 +157,7 @@ class SQLiteMemoryProvider(BaseMemoryProvider):
                 """,
                 (q, q, q, limit),
             )
-            for row in cursor.fetchall():
+            for row in cursor:
                 from rationalevault.memory.models import MemoryType
                 records.append(
                     MemoryRecord(

@@ -1,4 +1,3 @@
-from __future__ import annotations
 from dataclasses import dataclass
 from rationalevault.projections.base import ProjectionKind
 from rationalevault.projections.cache import ProjectionCache, CacheKey

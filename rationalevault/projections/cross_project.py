@@ -6,8 +6,6 @@ Discovers transferable knowledge from other projects while preserving
 provenance and maintaining project isolation. Consumes KnowledgeObjects
 directly (primary state), never KnowledgeStates (derived state).
 """
-from __future__ import annotations
-
 from dataclasses import dataclass, field
 from datetime import datetime
 from typing import Optional, ClassVar

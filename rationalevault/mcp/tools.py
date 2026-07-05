@@ -353,10 +353,11 @@ def get_organization_activity(window_hours: int = 72) -> dict:
 
     provider = get_knowledge_provider()
     all_knowledge = provider.get_all_knowledge()
-    recent_knowledge_by_project: dict[str, list] = {}
-    for pid in org_state.project_ids:
-        pid_knowledge = [k for k in all_knowledge if getattr(k, "project_id", "") == pid]
-        recent_knowledge_by_project[pid] = pid_knowledge[:10]
+    from collections import defaultdict
+    knowledge_by_pid: dict[str, list] = defaultdict(list)
+    for k in all_knowledge:
+        knowledge_by_pid[getattr(k, "project_id", "")].append(k)
+    recent_knowledge_by_project = {pid: knowledge_by_pid[pid][:10] for pid in org_state.project_ids}
 
     activity = OrganizationActivityProjection.project(
         project_ids=org_state.project_ids,
@@ -388,10 +389,11 @@ def get_organization_continuation(window_hours: int = 72) -> dict:
 
     provider = get_knowledge_provider()
     all_knowledge = provider.get_all_knowledge()
-    recent_knowledge_by_project: dict[str, list] = {}
-    for pid in org_state.project_ids:
-        pid_knowledge = [k for k in all_knowledge if getattr(k, "project_id", "") == pid]
-        recent_knowledge_by_project[pid] = pid_knowledge[:10]
+    from collections import defaultdict
+    knowledge_by_pid2: dict[str, list] = defaultdict(list)
+    for k in all_knowledge:
+        knowledge_by_pid2[getattr(k, "project_id", "")].append(k)
+    recent_knowledge_by_project = {pid: knowledge_by_pid2[pid][:10] for pid in org_state.project_ids}
 
     activity = OrganizationActivityProjection.project(
         project_ids=org_state.project_ids,
@@ -426,10 +428,11 @@ def get_recommendations() -> dict:
 
     provider = get_knowledge_provider()
     all_knowledge = provider.get_all_knowledge()
-    recent_knowledge_by_project: dict[str, list] = {}
-    for pid in org_state.project_ids:
-        pid_knowledge = [k for k in all_knowledge if getattr(k, "project_id", "") == pid]
-        recent_knowledge_by_project[pid] = pid_knowledge[:10]
+    from collections import defaultdict
+    knowledge_by_pid3: dict[str, list] = defaultdict(list)
+    for k in all_knowledge:
+        knowledge_by_pid3[getattr(k, "project_id", "")].append(k)
+    recent_knowledge_by_project = {pid: knowledge_by_pid3[pid][:10] for pid in org_state.project_ids}
 
     activity = OrganizationActivityProjection.project(
         project_ids=org_state.project_ids,

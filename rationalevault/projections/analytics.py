@@ -4,8 +4,6 @@ RationaleVault Skill Platform — Execution Analytics Projection.
 Computes Layer 1 aggregated statistics (skills, plugins, durations, costs, promotions)
 from raw execution events.
 """
-from __future__ import annotations
-
 import hashlib
 from datetime import datetime, timezone
 from typing import ClassVar

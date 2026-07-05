@@ -4,8 +4,6 @@ RationaleVault Skill Platform — Execution Intelligence Projection.
 Computes Layer 2 (Assessment), Layer 3 (Intelligence), Layer 4 (Report),
 and Layer 5 (Feedback) from analytics and execution state.
 """
-from __future__ import annotations
-
 from datetime import datetime, timezone
 from typing import ClassVar
 

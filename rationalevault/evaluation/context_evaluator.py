@@ -13,8 +13,6 @@ Key metrics:
 - Source Balance: Are sources proportionally represented?
 - Determinism: Same input → same ContextPackage
 """
-from __future__ import annotations
-
 import hashlib
 from dataclasses import dataclass
 from typing import Any
