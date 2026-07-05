@@ -596,7 +596,14 @@ def run_memory_evaluation() -> dict[str, Any]:
             reason_hits = sum(1 for c in citations if c.reasons and "general_relevance" not in c.reasons)
             total_reason_coverage += (reason_hits / len(citations))
             
-            source_hits = sum(1 for c in citations if c.source_event_ids and all(uuid.UUID(eid) for eid in c.source_event_ids if eid))
+            def _is_valid_uuid(s: str) -> bool:
+                try:
+                    uuid.UUID(s)
+                    return True
+                except ValueError:
+                    return False
+
+            source_hits = sum(1 for c in citations if c.source_event_ids and all(_is_valid_uuid(eid) for eid in c.source_event_ids if eid))
             total_source_coverage += (source_hits / len(citations))
             
             path_hits = sum(1 for c in citations if c.retrieval_path and len(c.retrieval_path) >= 3)

@@ -1,4 +1,3 @@
-from __future__ import annotations
 import hashlib
 from typing import Optional
 from rationalevault.projections.base import SemVer
