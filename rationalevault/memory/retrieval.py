@@ -4,10 +4,11 @@ from typing import Any
 from rationalevault.memory.factory import get_memory_provider
 from rationalevault.memory.models import MemoryRecord
 from rationalevault.memory.ranking import RetrievalScore
-from rationalevault.memory.query_analyzer import analyze_query
+from rationalevault.memory.query_analyzer import QueryIntent
 from rationalevault.memory.retrieval_planner import execute_retrieval_plan, RetrievalExecution
 from rationalevault.memory.semantic_search import search_memories_rrf
 from rationalevault.memory.citation_builder import build_citation, MemoryCitation
+from rationalevault.retrieval.orchestrator import RetrievalOrchestrator
 
 
 import time
@@ -28,11 +29,13 @@ def retrieve_ranked_citations(
     and returning explainable retrieval paths and execution metadata.
     """
     t_start = time.perf_counter()
-    retrieval_path = ["query_analyzer", "retrieval_planner"]
+    retrieval_path = ["orchestrator", "retrieval_planner"]
 
-    # 1. Analyze query intent
+    # 1. Analyze query intent via orchestrator (unified intent classification)
     t_analysis_start = time.perf_counter()
-    intent = analyze_query(query)
+    orch = RetrievalOrchestrator()
+    plan = orch.build_plan(query)
+    intent = QueryIntent(profile=plan.profile, keywords=[], intent=plan.primary_intent.value)
     t_analysis_end = time.perf_counter()
 
     # 2. Candidate generation: use provider search instead of loading everything

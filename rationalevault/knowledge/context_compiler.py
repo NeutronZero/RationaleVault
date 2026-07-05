@@ -39,8 +39,9 @@ from rationalevault.knowledge.context_types import (
 from rationalevault.knowledge.knowledge_retrieval import (
     retrieve_ranked_knowledge_citations,
 )
-from rationalevault.memory.query_analyzer import QueryIntent, RetrievalProfile, analyze_query
+from rationalevault.memory.query_analyzer import QueryIntent, RetrievalProfile
 from rationalevault.memory.retrieval import retrieve_ranked_citations
+from rationalevault.retrieval.orchestrator import RetrievalOrchestrator
 
 class ContextMode(str, Enum):
     """
@@ -546,13 +547,18 @@ def compile_context(
 
     # 1. Analyze query
     t_analysis_start = time.perf_counter()
-    intent = analyze_query(query)
+    orch = RetrievalOrchestrator()
+    orch_plan = orch.build_plan(query)
+    intent = QueryIntent(profile=orch_plan.profile, keywords=[], intent=orch_plan.primary_intent.value)
     if profile is not None:
         intent = QueryIntent(
             profile=profile,
             keywords=intent.keywords,
             intent=intent.intent,
         )
+    # Use caller-provided plan if given, otherwise use orchestrator's plan
+    if plan is None:
+        plan = orch_plan
     t_analysis_end = time.perf_counter()
 
     # 2. Retrieve memory citations

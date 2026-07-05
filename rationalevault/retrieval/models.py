@@ -11,6 +11,9 @@ from enum import Enum
 from typing import Any
 
 
+from rationalevault.memory.query_analyzer import RetrievalProfile
+
+
 class RetrievalIntent(Enum):
     """Classifies what the query is asking for."""
     CONTINUATION = "continuation"
@@ -102,6 +105,7 @@ class RetrievalPlan:
     """
     primary_intent: RetrievalIntent
     matched_intents: list[RetrievalIntent] = field(default_factory=list)
+    profile: RetrievalProfile = RetrievalProfile.GENERAL_SEARCH
     projections: dict[str, bool] = field(default_factory=dict)
     context_weights: dict[str, float] = field(default_factory=dict)
     requested_projections: dict[str, bool] = field(default_factory=dict)
@@ -120,6 +124,7 @@ class RetrievalPlan:
         return {
             "primary_intent": self.primary_intent.value,
             "matched_intents": [i.value for i in self.matched_intents],
+            "profile": self.profile.value,
             "projections": self.projections,
             "context_weights": {k: round(v, 4) for k, v in self.context_weights.items()},
             "requested_projections": self.requested_projections,

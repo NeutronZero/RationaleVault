@@ -77,7 +77,8 @@ class TestContextPackagePlanField:
 class TestCompileContextBackwardCompatible:
     def test_no_plan_works(self) -> None:
         pkg = compile_context(query="test query", project_id=None)
-        assert pkg.retrieval_plan is None
+        assert pkg.retrieval_plan is not None
+        assert pkg.retrieval_plan.primary_intent == RetrievalIntent.GENERAL
         assert pkg.cross_project_state is None
         assert pkg.organization_state is None
         assert pkg.mode == "standard"
@@ -104,7 +105,7 @@ class TestCompileContextBackwardCompatible:
             event_limit=10,
             total_slices=10,
         )
-        assert pkg.retrieval_plan is None
+        assert pkg.retrieval_plan is not None
         assert pkg.cross_project_state is None
         assert pkg.organization_state is None
         assert pkg.mode == "standard"
@@ -115,7 +116,8 @@ class TestCompileContextBackwardCompatible:
             project_id=None,
             mode=ContextMode.CONTINUATION,
         )
-        assert pkg.retrieval_plan is None
+        assert pkg.retrieval_plan is not None
+        assert pkg.retrieval_plan.primary_intent == RetrievalIntent.CONTINUATION
         assert pkg.mode == "continuation"
 
 
@@ -145,4 +147,5 @@ class TestCompileContextWithPlanAndProject:
             project_id=project_id,
             mode=ContextMode.STANDARD,
         )
-        assert pkg.retrieval_plan is None
+        assert pkg.retrieval_plan is not None
+        assert pkg.retrieval_plan.primary_intent == RetrievalIntent.GENERAL

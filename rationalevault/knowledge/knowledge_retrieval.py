@@ -19,9 +19,10 @@ from rationalevault.knowledge.knowledge_citation import (
     compute_knowledge_score,
     extract_keywords,
 )
-from rationalevault.memory.query_analyzer import QueryIntent, analyze_query
+from rationalevault.memory.query_analyzer import QueryIntent
 from rationalevault.memory.retrieval_planner import get_knowledge_profile_weights
 from rationalevault.memory.timing import RetrievalTiming
+from rationalevault.retrieval.orchestrator import RetrievalOrchestrator
 
 
 def search_knowledge_rrf(
@@ -123,7 +124,9 @@ def retrieve_ranked_knowledge_citations(
 
     t_analysis_start = time.perf_counter()
     if intent is None:
-        intent = analyze_query(query)
+        orch = RetrievalOrchestrator()
+        plan = orch.build_plan(query)
+        intent = QueryIntent(profile=plan.profile, keywords=[], intent=plan.primary_intent.value)
     t_analysis_end = time.perf_counter()
 
     provider = get_knowledge_provider()

@@ -13,6 +13,26 @@ from rationalevault.retrieval.models import (
     RetrievalIntent,
     RetrievalPlan,
 )
+from rationalevault.memory.query_analyzer import RetrievalProfile
+
+# Intent → default profile mapping
+_INTENT_PROFILE_MAP: dict[RetrievalIntent, RetrievalProfile] = {
+    RetrievalIntent.CONTINUATION: RetrievalProfile.WORKFLOW_RETRIEVAL,
+    RetrievalIntent.KNOWLEDGE_QUERY: RetrievalProfile.KNOWLEDGE_REVIEW,
+    RetrievalIntent.IMPACT_ANALYSIS: RetrievalProfile.FAILURE_ANALYSIS,
+    RetrievalIntent.CROSS_PROJECT: RetrievalProfile.PROJECT_OVERVIEW,
+    RetrievalIntent.ORGANIZATIONAL: RetrievalProfile.ARCHITECTURE_REVIEW,
+    RetrievalIntent.GENERAL: RetrievalProfile.GENERAL_SEARCH,
+}
+
+# Secondary keyword → profile refinement (overrides default mapping)
+_PROFILE_REFINEMENT_KEYWORDS: dict[RetrievalProfile, frozenset[str]] = {
+    RetrievalProfile.DECISION_LOOKUP: frozenset({"decision", "decide", "accepted", "choose", "chose", "select"}),
+    RetrievalProfile.LESSON_DISCOVERY: frozenset({"lesson", "learned", "reflect", "reflection"}),
+    RetrievalProfile.ARCHITECTURE_REVIEW: frozenset({"architecture", "goal", "design", "principle", "principles"}),
+    RetrievalProfile.FAILURE_ANALYSIS: frozenset({"fail", "failure", "error", "lost", "loss", "drift"}),
+    RetrievalProfile.CONTEXT_CONSTRUCTION: frozenset({"context", "construct", "blend", "unified", "combined"}),
+}
 
 
 class RetrievalOrchestrator:
@@ -63,9 +83,13 @@ class RetrievalOrchestrator:
         # 5. Build reasons
         reasons = self._build_reasons(matched, requested, selected, available_projections)
 
+        # 6. Derive RetrievalProfile for backward compatibility
+        profile = self._derive_profile(query, primary, matched)
+
         return RetrievalPlan(
             primary_intent=primary,
             matched_intents=matched,
+            profile=profile,
             projections=selected,
             context_weights=weights,
             requested_projections=requested,
@@ -105,6 +129,30 @@ class RetrievalOrchestrator:
                 break
 
         return primary, matched
+
+    def _derive_profile(
+        self,
+        query: str,
+        primary: RetrievalIntent,
+        matched: list[RetrievalIntent],
+    ) -> RetrievalProfile:
+        """Derive a RetrievalProfile from the classified intent and query keywords.
+
+        Uses the primary intent's default profile, then refines with secondary
+        keyword signals from query_analyzer.py's trigger sets.
+        """
+        profile = _INTENT_PROFILE_MAP.get(primary, RetrievalProfile.GENERAL_SEARCH)
+
+        # Secondary refinement: check if query keywords suggest a more specific profile
+        query_words = set(query.lower().split())
+        for refined_profile, triggers in _PROFILE_REFINEMENT_KEYWORDS.items():
+            if query_words & triggers:
+                # Only refine if the refined profile is more specific than GENERAL
+                if refined_profile != RetrievalProfile.GENERAL_SEARCH:
+                    profile = refined_profile
+                    break
+
+        return profile
 
     def _select_projections(
         self,
