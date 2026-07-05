@@ -239,11 +239,10 @@ def _memory_to_context_citation(mc: Any) -> ContextCitation:
     try:
         from rationalevault.memory.factory import get_memory_provider
         provider = get_memory_provider()
-        records = provider.get_all_records()
-        record = next((r for r in records if r.id == mc.memory_id), None)
-        if record:
-            title = record.title
-            content = record.content
+        records = provider.get_by_ids([mc.memory_id])
+        if records:
+            title = records[0].title
+            content = records[0].content
     except Exception:
         pass
 

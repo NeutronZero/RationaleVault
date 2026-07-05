@@ -80,13 +80,18 @@ def retrieve_ranked_memories(query: str, limit: int = 5) -> list[tuple[MemoryRec
     """
     Backward-compatible adapter returning tuples of MemoryRecord and RetrievalScore.
     """
-    provider = get_memory_provider()
-    records = provider.get_all_records()
-    
     citations, _ = retrieve_ranked_citations(query, limit)
+    if not citations:
+        return []
+
+    provider = get_memory_provider()
+    record_ids = [c.memory_id for c in citations]
+    records = provider.get_by_ids(record_ids)
+    record_map = {r.id: r for r in records}
+
     scored_tuples = []
     for c in citations:
-        rec = next((r for r in records if r.id == c.memory_id), None)
+        rec = record_map.get(c.memory_id)
         if rec:
             scored_tuples.append((rec, c.score))
     return scored_tuples
