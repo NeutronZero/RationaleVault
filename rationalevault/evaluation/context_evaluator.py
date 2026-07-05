@@ -115,7 +115,7 @@ class ContextEvalResult:
         }
 
     @classmethod
-    def from_dict(cls, d: dict[str, Any]) -> ContextEvalResult:
+    def from_dict(cls, d: dict[str, Any]) -> "ContextEvalResult":
         return cls(
             benchmark_id=d["benchmark_id"],
             benchmark_version=d.get("benchmark_version", 1),
