@@ -58,6 +58,27 @@ class SQLiteMemoryProvider(BaseMemoryProvider):
             pass
         return conn
 
+    def _row_to_record(self, row: tuple) -> MemoryRecord:
+        from rationalevault.memory.models import MemoryType
+        return MemoryRecord(
+            id=row[0],
+            version=row[1],
+            title=row[2],
+            content=row[3],
+            memory_type=MemoryType(row[4]),
+            importance=row[5],
+            lifecycle_status=row[6],
+            source_event_ids=json.loads(row[7]),
+            source_type=row[8],
+            tags=json.loads(row[9]),
+            confidence=row[10],
+            retrieval_priority=row[11],
+            reference_count=row[12] if row[12] is not None else 0,
+            last_referenced_at=row[13],
+            created_at=row[14],
+            project_id=row[15] if len(row) > 15 and row[15] else "",
+        )
+
     def get_all_records(self) -> list[MemoryRecord]:
         records = []
         conn = self._get_conn()
@@ -72,30 +93,43 @@ class SQLiteMemoryProvider(BaseMemoryProvider):
                 """
             )
             for row in cursor:
-                from rationalevault.memory.models import MemoryType
-                records.append(
-                    MemoryRecord(
-                        id=row[0],
-                        version=row[1],
-                        title=row[2],
-                        content=row[3],
-                        memory_type=MemoryType(row[4]),
-                        importance=row[5],
-                        lifecycle_status=row[6],
-                        source_event_ids=json.loads(row[7]),
-                        source_type=row[8],
-                        tags=json.loads(row[9]),
-                        confidence=row[10],
-                        retrieval_priority=row[11],
-                        reference_count=row[12] if row[12] is not None else 0,
-                        last_referenced_at=row[13],
-                        created_at=row[14],
-                        project_id=row[15] if len(row) > 15 and row[15] else "",
-                    )
-                )
+                records.append(self._row_to_record(row))
         finally:
             conn.close()
         return records
+
+    def get_by_ids(self, ids: list[str]) -> list[MemoryRecord]:
+        if not ids:
+            return []
+        records = []
+        conn = self._get_conn()
+        try:
+            cursor = conn.cursor()
+            placeholders = ",".join("?" for _ in ids)
+            cursor.execute(
+                f"""
+                SELECT id, version, title, content, memory_type, importance, lifecycle_status,
+                       source_event_ids, source_type, tags, confidence, retrieval_priority,
+                       reference_count, last_referenced_at, created_at, project_id
+                FROM rationalevault_memories
+                WHERE id IN ({placeholders})
+                """,
+                ids,
+            )
+            for row in cursor:
+                records.append(self._row_to_record(row))
+        finally:
+            conn.close()
+        return records
+
+    def count(self) -> int:
+        conn = self._get_conn()
+        try:
+            cursor = conn.cursor()
+            cursor.execute("SELECT COUNT(*) FROM rationalevault_memories")
+            return cursor.fetchone()[0]
+        finally:
+            conn.close()
 
     def add_record(self, record: MemoryRecord) -> None:
         conn = self._get_conn()
@@ -158,27 +192,7 @@ class SQLiteMemoryProvider(BaseMemoryProvider):
                 (q, q, q, limit),
             )
             for row in cursor:
-                from rationalevault.memory.models import MemoryType
-                records.append(
-                    MemoryRecord(
-                        id=row[0],
-                        version=row[1],
-                        title=row[2],
-                        content=row[3],
-                        memory_type=MemoryType(row[4]),
-                        importance=row[5],
-                        lifecycle_status=row[6],
-                        source_event_ids=json.loads(row[7]),
-                        source_type=row[8],
-                        tags=json.loads(row[9]),
-                        confidence=row[10],
-                        retrieval_priority=row[11],
-                        reference_count=row[12] if row[12] is not None else 0,
-                        last_referenced_at=row[13],
-                        created_at=row[14],
-                        project_id=row[15] if len(row) > 15 and row[15] else "",
-                    )
-                )
+                records.append(self._row_to_record(row))
         finally:
             conn.close()
         return records
