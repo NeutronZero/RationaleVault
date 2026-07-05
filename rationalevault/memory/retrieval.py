@@ -13,6 +13,11 @@ from rationalevault.memory.citation_builder import build_citation, MemoryCitatio
 import time
 from rationalevault.memory.timing import RetrievalTiming
 
+# Candidate generation: how many records to pull from the provider
+# before applying multi-keyword filtering and semantic reranking.
+CANDIDATE_LIMIT = 200
+
+
 def retrieve_ranked_citations(
     query: str,
     limit: int = 5,
@@ -24,28 +29,31 @@ def retrieve_ranked_citations(
     """
     t_start = time.perf_counter()
     retrieval_path = ["query_analyzer", "retrieval_planner"]
-    
+
     # 1. Analyze query intent
     t_analysis_start = time.perf_counter()
     intent = analyze_query(query)
     t_analysis_end = time.perf_counter()
-    
-    # 2. Fetch all candidates
+
+    # 2. Candidate generation: use provider search instead of loading everything
     provider = get_memory_provider()
-    all_records = provider.get_all_records()
-    
-    # 3. Filter candidates
     t_search_start = time.perf_counter()
+    candidates = provider.search_records(query, limit=CANDIDATE_LIMIT)
+    # If provider returns too few, fall back to all records
+    if len(candidates) < limit:
+        candidates = provider.get_all_records()
+
+    # 3. Multi-keyword filtering and optional semantic reranking
     retrieval_path.append("search_memories_rrf")
-    candidates = search_memories_rrf(query, all_records, semantic_provider=semantic_provider)
+    candidates = search_memories_rrf(query, candidates, semantic_provider=semantic_provider)
     t_search_end = time.perf_counter()
-    
+
     # 4. Plan and Rank candidates
     t_planning_start = time.perf_counter()
     retrieval_path.append("execute_retrieval_plan")
     scored, execution = execute_retrieval_plan(intent, candidates)
     t_planning_end = time.perf_counter()
-    
+
     # 5. Build citations
     t_citation_start = time.perf_counter()
     retrieval_path.append("citation_builder")
@@ -54,9 +62,9 @@ def retrieve_ranked_citations(
         citation = build_citation(r, query, retrieval_path=list(retrieval_path))
         citations.append(citation)
     t_citation_end = time.perf_counter()
-    
+
     t_end = time.perf_counter()
-    
+
     timing = RetrievalTiming(
         query_analysis_ms=(t_analysis_end - t_analysis_start) * 1000.0,
         planning_ms=(t_planning_end - t_planning_start) * 1000.0,
@@ -65,14 +73,14 @@ def retrieve_ranked_citations(
         citation_ms=(t_citation_end - t_citation_start) * 1000.0,
         total_ms=(t_end - t_start) * 1000.0
     )
-    
+
     execution.timing = timing
     execution.execution_ms = timing.total_ms
     execution.semantic_used = (semantic_provider is not None)
     execution.rrf_used = (semantic_provider is not None)
     execution.vector_candidates = len(candidates) if semantic_provider is not None else 0
     execution.keyword_candidates = len(candidates)
-    
+
     return citations, execution
 
 
