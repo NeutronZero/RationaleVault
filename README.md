@@ -171,7 +171,7 @@ For developers running from source:
 ```bash
 pytest
 ```
-All 2022 tests will execute (2022 pass; 25 require a live PostgreSQL database and are skipped by default).
+All 1771 tests will execute (1771 pass; 14 expected skips).
 
 ---
 
@@ -188,6 +188,7 @@ RationaleVault provides a unified command-line toolset for inspecting and managi
 - **`rationalevault graph`**: Build, serialize, and check statistics on the derived knowledge projection.
 - **`rationalevault organization`**: Multi-project graph topology, lineages, reachability, and cluster analysis.
 - **`rationalevault recommendation`**: Generate proactive merge recommendations, blockers, and drift warnings.
+- **`rationalevault retrieval-dashboard`**: Display retrieval telemetry dashboard with latency percentiles, profile distribution, and stage timings.
 - **`rationalevault mcp`**: Start the Model Context Protocol (MCP) server for native LLM agent tool integration.
 
 ---
@@ -223,9 +224,6 @@ roadmap.md (planned evolution)
 | Document | Purpose |
 |----------|---------|
 | [architecture.md](docs/architecture.md) | Data-flow pipelines and projection hierarchy |
-| [SchemaPolicy Design](docs/superpowers/specs/2026-06-29-schema-policy-design.md) | Policy-driven schema evolution architecture |
-| [F15 Spec](docs/superpowers/specs/2026-06-29-f15-production-schema-v2.md) | First production schema migration proof |
-| [F16 Spec](docs/superpowers/specs/2026-06-30-f16-multi-version-production.md) | Independent multi-event-type evolution proof |
 | [ADRs](docs/adr/) | Architecture Decision Records — why each choice was made |
 | [Skill Runtime](docs/skill_runtime_architecture.md) | Epic C design specification (Decision→Skill→Execution) |
 | [Freeze Levels](docs/freeze_levels.md) | L1/L2/L3 taxonomy and change-process requirements |
