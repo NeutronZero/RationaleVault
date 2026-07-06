@@ -473,3 +473,22 @@ def get_project_recommendations(project_id: str) -> dict:
         "recommendation_count": len(filtered),
         "attention_load": result.get("attention_load", 0.0),
     }
+
+
+def retrieval_dashboard() -> dict:
+    """Return retrieval telemetry dashboard as a dict."""
+    from rationalevault.telemetry.metrics import get_collector
+
+    snap = get_collector().snapshot()
+    return {
+        "total_requests": snap.total_requests,
+        "avg_total_ms": snap.avg_total_ms,
+        "p50_total_ms": snap.p50_total_ms,
+        "p95_total_ms": snap.p95_total_ms,
+        "p99_total_ms": snap.p99_total_ms,
+        "avg_provider_latency_ms": snap.avg_provider_latency_ms,
+        "avg_candidate_count": snap.avg_candidate_count,
+        "avg_retrieved_count": snap.avg_retrieved_count,
+        "profile_distribution": snap.profile_distribution,
+        "stage_averages": snap.stage_averages,
+    }
