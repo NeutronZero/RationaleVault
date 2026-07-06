@@ -274,10 +274,10 @@ def get_organization_graph_state() -> dict:
     Returns a project-centric graph where nodes are projects
     and edges represent transfer, shared, conflict, and cluster relationships.
     """
-    from rationalevault.cli.main import _build_org_state_from_registry
+    from rationalevault.organization.service import build_org_state_from_registry
     from rationalevault.organization.graph import OrganizationGraphProjection
 
-    org_state, _ = _build_org_state_from_registry()
+    org_state, _ = build_org_state_from_registry()
     if org_state is None:
         return {"error": "No registered projects"}
 
@@ -291,10 +291,10 @@ def query_organization_graph(project_id: str) -> dict:
 
     Returns node metadata and all incoming/outgoing edges.
     """
-    from rationalevault.cli.main import _build_org_state_from_registry
+    from rationalevault.organization.service import build_org_state_from_registry
     from rationalevault.organization.graph import OrganizationGraphProjection
 
-    org_state, _ = _build_org_state_from_registry()
+    org_state, _ = build_org_state_from_registry()
     if org_state is None:
         return {"error": "No registered projects"}
 
@@ -343,11 +343,11 @@ def get_organization_activity(window_hours: int = 72) -> dict:
     Pure temporal observation layer. Shows project activity, recent transfers,
     recent conflicts, and recently created/updated knowledge.
     """
-    from rationalevault.cli.main import _build_org_state_from_registry
+    from rationalevault.organization.service import build_org_state_from_registry
     from rationalevault.organization.activity import OrganizationActivityProjection
     from rationalevault.knowledge.factory import get_knowledge_provider
 
-    org_state, _ = _build_org_state_from_registry()
+    org_state, _ = build_org_state_from_registry()
     if org_state is None:
         return {"error": "No registered projects"}
 
@@ -377,13 +377,13 @@ def get_organization_continuation(window_hours: int = 72) -> dict:
     Interpretation of organizational activity. Shows projects needing attention,
     organizational next actions, and a continuation summary.
     """
-    from rationalevault.cli.main import _build_org_state_from_registry
+    from rationalevault.organization.service import build_org_state_from_registry
     from rationalevault.organization.activity import OrganizationActivityProjection
     from rationalevault.organization.continuation import OrganizationContinuationProjection
     from rationalevault.organization.graph import OrganizationGraphProjection
     from rationalevault.knowledge.factory import get_knowledge_provider
 
-    org_state, _ = _build_org_state_from_registry()
+    org_state, _ = build_org_state_from_registry()
     if org_state is None:
         return {"error": "No registered projects"}
 
@@ -415,14 +415,14 @@ def get_recommendations() -> dict:
     Returns a RecommendationSet with prioritized recommendations
     derived from organizational state, graph, and continuation state.
     """
-    from rationalevault.cli.main import _build_org_state_from_registry
+    from rationalevault.organization.service import build_org_state_from_registry
     from rationalevault.organization.activity import OrganizationActivityProjection
     from rationalevault.organization.continuation import OrganizationContinuationProjection
     from rationalevault.organization.graph import OrganizationGraphProjection
     from rationalevault.recommendations.engine import RecommendationEngine
     from rationalevault.knowledge.factory import get_knowledge_provider
 
-    org_state, _ = _build_org_state_from_registry()
+    org_state, _ = build_org_state_from_registry()
     if org_state is None:
         return {"error": "No registered projects", "recommendations": [], "recommendation_count": 0}
 
