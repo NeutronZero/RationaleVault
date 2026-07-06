@@ -621,6 +621,18 @@ def compile_context(
         "total_ms": (t_end - t_start) * 1000.0,
     }
 
+    try:
+        from rationalevault.telemetry.metrics import get_collector
+        get_collector().record(
+            total_ms=timing["total_ms"],
+            profile=intent.profile.value,
+            candidate_count=len(citations),
+            retrieved_count=len(citations),
+            timing_breakdown=timing,
+        )
+    except (ImportError, Exception):
+        pass  # Telemetry must never break retrieval
+
     inclusion_reasons = _build_inclusion_reasons(intent.profile, source_counts)
 
     context_id = hashlib.sha256(

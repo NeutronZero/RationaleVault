@@ -89,6 +89,19 @@ def retrieve_ranked_citations(
     execution.provider_latency_ms = (t_provider_end - t_provider_start) * 1000.0
     execution.provider_total_records = total_records
 
+    try:
+        from rationalevault.telemetry.metrics import get_collector
+        get_collector().record(
+            total_ms=execution.execution_ms,
+            profile=execution.profile.value,
+            provider_latency_ms=execution.provider_latency_ms,
+            candidate_count=execution.candidate_count,
+            retrieved_count=execution.retrieved_count,
+            timing_breakdown=execution.timing.to_dict() if execution.timing else {},
+        )
+    except (ImportError, Exception):
+        pass  # Telemetry must never break retrieval
+
     return citations, execution
 
 
