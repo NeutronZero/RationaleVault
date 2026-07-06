@@ -1623,6 +1623,42 @@ def cmd_serve(args: argparse.Namespace) -> None:
     run_mcp_server(transport=args.transport, port=args.port)
 
 
+def cmd_retrieval_dashboard(args: argparse.Namespace) -> None:
+    """Display retrieval telemetry dashboard."""
+    from rationalevault.telemetry.metrics import get_collector
+
+    snap = get_collector().snapshot()
+
+    print("Retrieval Dashboard")
+    print("=" * 40)
+
+    if snap.total_requests == 0:
+        print("No requests recorded yet.")
+        return
+
+    print(f"Total requests:        {snap.total_requests}")
+    print()
+    print("Latency (ms)")
+    print(f"  Average:             {snap.avg_total_ms:.1f}")
+    print(f"  P50:                 {snap.p50_total_ms:.1f}")
+    print(f"  P95:                 {snap.p95_total_ms:.1f}")
+    print(f"  P99:                 {snap.p99_total_ms:.1f}")
+    print()
+    print(f"Provider latency (ms): {snap.avg_provider_latency_ms:.1f}")
+    print(f"Avg candidates:        {snap.avg_candidate_count:.0f}")
+    print(f"Avg final citations:   {snap.avg_retrieved_count:.0f}")
+    print()
+    print("Profile distribution")
+    for profile, count in sorted(snap.profile_distribution.items(), key=lambda x: -x[1]):
+        print(f"  {profile:<25} {count}")
+
+    if snap.stage_averages:
+        print()
+        print("Stage averages (ms)")
+        for stage, avg in snap.stage_averages.items():
+            print(f"  {stage:<30} {avg:.1f}")
+
+
 def main() -> None:
     parser = argparse.ArgumentParser(description="RationaleVault Cognitive Continuity CLI")
     subparsers = parser.add_subparsers(dest="command", required=True)
@@ -1842,6 +1878,12 @@ def main() -> None:
     parser_serve.add_argument("--transport", choices=["stdio", "sse"], default="stdio", help="MCP server transport type (default: stdio)")
     parser_serve.add_argument("--port", type=int, default=8080, help="Port to run SSE server on (default: 8080)")
 
+    # retrieval-dashboard
+    subparsers.add_parser(
+        "retrieval-dashboard",
+        help="Display retrieval telemetry dashboard",
+    )
+
     args = parser.parse_args()
 
     if args.command == "init":
@@ -1876,6 +1918,8 @@ def main() -> None:
         cmd_recommend(args)
     elif args.command == "serve":
         cmd_serve(args)
+    elif args.command == "retrieval-dashboard":
+        cmd_retrieval_dashboard(args)
 
 
 
