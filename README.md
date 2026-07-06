@@ -7,6 +7,13 @@
 
 **Event-sourced cognitive continuity, multi-agent context compression, and shared memory infrastructure for AI workflows.**
 
+- Event-sourced cognitive memory
+- Deterministic projection architecture
+- Unified retrieval orchestration
+- Multi-agent context compilation
+- Local-first SQLite runtime
+- MCP + CLI integration
+
 RationaleVault enables autonomous LLM agents — Claude, ChatGPT, Cursor, Copilot, and custom Model Context Protocol (MCP) clients — to resume work on complex codebases with full context continuity, within seconds, eliminating manual summarization and context drift.
 
 ---
@@ -185,6 +192,7 @@ RationaleVault provides a unified command-line toolset for inspecting and managi
 - **Zero-Dependency Core**: Standard configuration runs local-first on SQLite with zero external database setup.
 - **Projection Composition**: Higher-level projections may depend only on immutable state or lower-level projections.
 - **Evaluation-Driven Evolution**: Every new projection, engine, or retrieval strategy must introduce deterministic evaluation metrics and regression gates before becoming part of the architecture.
+- **Observable Retrieval**: Retrieval behavior should be measurable through deterministic telemetry so that optimization decisions are based on evidence rather than intuition.
 - **Projection Monotonicity**: A projection may consume only immutable state or lower-level projections. Projections must never depend on runtime outputs, delivery artifacts, or other execution results.
 
 > [!IMPORTANT]
