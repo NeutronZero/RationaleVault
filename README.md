@@ -19,6 +19,15 @@ RationaleVault provides an event-sourced cognitive continuity layer. By treating
 
 Now in `v1.3.0`, RationaleVault provides unified retrieval orchestration, provider-backed candidate generation, retrieval telemetry with CLI and MCP dashboards, and a decoupled MCP boundary — all built on a stable provider capability API.
 
+## What's New in v1.3.0
+
+- **Unified retrieval orchestration** with 9 retrieval profiles flowing through the pipeline
+- **Provider capability API** (`search_records`, `get_by_ids`, `count`) with SQL-optimized implementations
+- **Provider-backed candidate generation** replacing full-corpus scans
+- **Batched citation lookups** for memory and knowledge
+- **Retrieval telemetry** with CLI and MCP dashboards (percentiles, profile distribution, stage timings)
+- **MCP boundary cleanup** through shared organization service
+
 ## What RationaleVault Is Not
 
 To understand RationaleVault, it is helpful to clarify what it is not:
@@ -53,7 +62,10 @@ Deterministic Projection Layer
   └── Composite Projections (Context, Graph, Org Projections)
       │
       ▼
-Cognitive Runtime (Retrieval Engine, Recommendation Engine, Skill Runtime)
+Cognitive Runtime
+  ├── Retrieval Orchestrator
+  ├── Recommendation Engine
+  └── Skill Runtime
       │
       ▼
 Delivery Layer (Agent Compiler, MCP Server, CLI, REST, SDK)
@@ -92,40 +104,13 @@ Canonical Event (normalized to latest version)
 
 ---
 
-## v1.1 → v1.2 Comparison
+## Release Evolution
 
-| Dimension | v1.1.0 | v1.2.0 |
-|-----------|--------|--------|
-| **Schema Evolution** | Single global `target_schema_version` | Per-event-type `SchemaPolicy` |
-| **Migration Authority** | Embedded in replay code | `SchemaPolicy` — sole authority |
-| **Event Type Independence** | Not validated | Proved with 2 independent migrations |
-| **Governance** | Theoretical | Production-validated via `GovernanceState` |
-| **Reducer Coupling** | reducers could reference schema versions | reducers consume only canonical payloads |
-| **Upcaster Registry** | Manual registration | `UpcasterRegistry.default()` pre-populated |
-| **Architectural Guards** | T14 (canonical boundary) | T14 + T15 (policy authority, immutability) |
-| **Integration Proofs** | 5 tests (F15) | 15 tests (F15 + F16) |
-| **Test Count** | ~1990 | 2022 |
-| **Frozen APIs** | None formally frozen | 9 APIs formally frozen |
-| **Production Migrations** | 1 (TASK_CREATED v1→v2) | 2 (TASK_CREATED + DECISION_PROPOSED) |
-
-### What Changed Architecturally
-
-**v1.1** introduced organizational intelligence, recommendation engines, and performance optimizations. The replay infrastructure existed but schema evolution was synthetic.
-
-**v1.2** proves the architecture works under real schema evolution:
-- Two independent production migrations (TASK_CREATED, DECISION_PROPOSED)
-- SchemaPolicy is the sole authority for canonical version selection
-- Reducers are completely isolated from historical representation
-- Adding a new migrated event type requires only registration — no engine changes
-
-### What Stayed the Same
-
-- All v1.1 features remain fully functional
-- Event ledger integrity (F11) unchanged
-- Projection layer unchanged
-- Cognitive runtime unchanged
-- Delivery layer unchanged
-- CLI interface unchanged
+| Version | Theme |
+|---------|-------|
+| **v1.1** | Organizational intelligence, recommendation engines, performance optimizations |
+| **v1.2** | SchemaPolicy — per-event-type schema evolution, production-validated governance |
+| **v1.3** | Intelligent retrieval & observability — unified orchestration, provider capabilities, telemetry |
 
 ---
 
