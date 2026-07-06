@@ -5,6 +5,16 @@ This project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.htm
 
 ---
 
+## [1.3.1] — 2026-07-06
+
+### Fixed
+- **Silent Exception Swallow**: Memory extraction failures now emit a warning to stderr instead of failing silently, while preserving successful event append semantics.
+- **Circular Import Risk**: Moved `EventStore` import inside `handle_lifecycle_transitions()` to eliminate latent circular import risk in `memory/lifecycle.py`.
+- **MarkdownMemoryProvider Thread Safety**: Added `threading.Lock` around the read-modify-write cycle in `add_record()`. Thread-safe, not multi-process safe.
+- **Reserved EventTypes Documentation**: Clarified that `FACT_RECORDED`, `RELATIONSHIP_CREATED`, and `RELATIONSHIP_SUPERSEDED` are reserved for future relation persistence.
+
+---
+
 ## [1.3.0] — 2026-07-06
 
 ### Added

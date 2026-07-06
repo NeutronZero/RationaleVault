@@ -1,9 +1,9 @@
-# RationaleVault (v1.3.0) — Event-Sourced Cognitive Memory & Context Optimization Layer for AI Agents
+# RationaleVault (v1.3.1) — Event-Sourced Cognitive Memory & Context Optimization Layer for AI Agents
 
 [![GitHub](https://img.shields.io/badge/GitHub-NeutronZero%2FRationaleVault-181717?style=flat&logo=github)](https://github.com/NeutronZero/RationaleVault)
 [![Python 3.12+](https://img.shields.io/badge/Python-3.12+-3776AB?style=flat&logo=python&logoColor=white)](https://www.python.org/)
 [![Tests](https://img.shields.io/badge/Tests-1771%20passing-brightgreen)](https://github.com/NeutronZero/RationaleVault)
-[![Version](https://img.shields.io/badge/Version-v1.3.0-blue)](https://github.com/NeutronZero/RationaleVault/releases/tag/v1.3.0)
+[![Version](https://img.shields.io/badge/Version-v1.3.1-blue)](https://github.com/NeutronZero/RationaleVault/releases/tag/v1.3.1)
 
 **Event-sourced cognitive continuity, multi-agent context compression, and shared memory infrastructure for AI workflows.**
 
@@ -24,7 +24,14 @@ LLM agents lose context. As projects evolve over weeks or months, they accumulat
 
 RationaleVault provides an event-sourced cognitive continuity layer. By treating events as the immutable source of truth and compiling memory, knowledge, and graphs as deterministic projections, RationaleVault ensures agents can reconstruct state and continue work with zero cognitive loss.
 
-Now in `v1.3.0`, RationaleVault provides unified retrieval orchestration, provider-backed candidate generation, retrieval telemetry with CLI and MCP dashboards, and a decoupled MCP boundary — all built on a stable provider capability API.
+Now in `v1.3.1`, RationaleVault adds lifecycle robustness improvements: visible memory extraction warnings, eliminated circular import risk, and thread-safe markdown provider writes — while preserving all v1.3.0 retrieval orchestration and telemetry capabilities.
+
+## What's New in v1.3.1
+
+- **Visible memory extraction warnings** — failures emit to stderr instead of failing silently
+- **Circular import elimination** — `EventStore` import moved to local scope in lifecycle handler
+- **Thread-safe `MarkdownMemoryProvider`** — `threading.Lock` protects read-modify-write cycle
+- **Reserved event type documentation** — forward-compatibility placeholders clarified
 
 ## What's New in v1.3.0
 

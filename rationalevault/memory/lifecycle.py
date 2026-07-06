@@ -2,7 +2,6 @@ from __future__ import annotations
 
 from datetime import datetime
 from rationalevault.memory.factory import get_memory_provider
-from rationalevault.db.event_store import EventStore
 from rationalevault.schema.events import EventMetadata, EventType, EventRecord
 
 
@@ -15,27 +14,28 @@ def handle_lifecycle_transitions(event: EventRecord) -> None:
     """
     if event.event_type != EventType.DECISION_ACCEPTED:
         return
-        
+
     payload = event.payload
     supersedes = payload.get("supersedes")
     if not supersedes:
         return
-        
+
     provider = get_memory_provider()
     records = provider.get_all_records()
-    
+
     # Locate the target record to supersede
     target_record = next(
         (r for r in records if r.id == supersedes or r.title.lower() == supersedes.lower() or r.content.lower() == supersedes.lower()),
         None
     )
-    
+
     if target_record and target_record.lifecycle_status != "superseded":
         target_record.lifecycle_status = "superseded"
         provider.add_record(target_record)
-        
+
         # Log MEMORY_SUPERSEDED event
         try:
+            from rationalevault.db.event_store import EventStore
             store = EventStore()
             metadata = EventMetadata(actor=event.metadata.actor, source="lifecycle_manager")
             store.append_event(

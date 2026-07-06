@@ -58,11 +58,16 @@ class EventStore(BaseEventStore):
                     provider = get_memory_provider()
                     for m in memories:
                         provider.add_record(m)
-                
+
                 # Run automatic supersession lifecycle transitions
                 handle_lifecycle_transitions(record)
-            except Exception:
-                pass
+            except Exception as exc:
+                import sys
+                print(
+                    f"[rationalevault] WARN: memory extraction failed for "
+                    f"{event_type.value}: {exc}",
+                    file=sys.stderr,
+                )
 
         return record
 

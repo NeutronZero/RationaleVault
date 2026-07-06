@@ -59,7 +59,9 @@ class EventType(str, Enum):
     OPEN_QUESTION_RAISED = "OPEN_QUESTION_RAISED"
     OPEN_QUESTION_RESOLVED = "OPEN_QUESTION_RESOLVED"
 
-    # ── Knowledge stubs (R3 hooks — recorded now, compiled in a future phase)
+    # ── Reserved for future relation persistence ───────────────────────────
+    # These event types are reserved schema values for forward compatibility.
+    # No reducer or CLI command currently emits or consumes them.
     FACT_RECORDED = "FACT_RECORDED"
     RELATIONSHIP_CREATED = "RELATIONSHIP_CREATED"
     RELATIONSHIP_SUPERSEDED = "RELATIONSHIP_SUPERSEDED"
