@@ -5,6 +5,35 @@ This project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.htm
 
 ---
 
+## [1.3.0] — 2026-07-06
+
+### Added
+- **Retrieval Telemetry Subsystem**: In-memory ring buffer collector (`RetrievalMetricsCollector`) with percentile calculations (p50, p95, p99), profile distribution tracking, and stage timing averages.
+- **CLI Retrieval Dashboard**: `rationalevault retrieval-dashboard` command displaying latency percentiles, provider metrics, profile distribution, and per-stage timing.
+- **MCP Retrieval Dashboard**: `retrieval_dashboard` tool returning structured telemetry data.
+- **Retrieval Orchestrator**: Unified intent classification via `RetrievalOrchestrator` with 9-profile mapping (`_INTENT_PROFILE_MAP`), replacing `analyze_query()` in production paths.
+- **Provider Capability API**: `search_records()`, `get_by_ids()`, `count()` methods on `BaseMemoryProvider` with SQL-optimized implementations in `SQLiteMemoryProvider`.
+- **Organization Service**: `rationalevault/organization/service.py` with `build_org_state_from_registry()` — shared domain logic for CLI and MCP.
+
+### Changed
+- **Candidate Generation**: Retrieval now uses `provider.search_records(limit=200)` instead of `get_all_records()` for better performance.
+- **Citation Lookups**: Batched memory and knowledge lookups via `get_by_ids()` and `get_knowledge_by_ids()` in `_blend_citations`.
+- **MCP Boundary**: All 5 `from rationalevault.cli.main` imports in `mcp/tools.py` replaced with `from rationalevault.organization.service`.
+- **Intent Classification**: `compile_context()` and `retrieve_ranked_citations()` now use `RetrievalOrchestrator` as single entry point. Caller-provided plan takes precedence.
+- **Query Analyzer**: Fixed duplicate "exist" stopword.
+- **Context Evaluator**: Fixed forward reference in `ContextEvalResult.from_dict`.
+- **Version**: Bumped from `1.2.1` to `1.3.0`.
+
+### Removed
+- **Dead Code**: 12 source files (6 knowledge/, 6 memory/) and 7 test files with zero external imports.
+- **Unused Imports**: ~200 unused imports removed via `ruff check --select F401 --fix`.
+
+### Fixed
+- **Benchmark Stability**: Warm-up iterations increased to 5, median of 20 runs, 50× budget. Test registry locking speedup via `time.time` patching.
+- **Flaky Test**: `test_registry_locking` reduced from 5s to 0.5s.
+
+---
+
 ## [1.2.1] — 2026-07-01
 
 ### Added
