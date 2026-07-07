@@ -50,6 +50,25 @@ class SQLiteEventStore(BaseEventStore):
             """)
             conn.execute("CREATE INDEX IF NOT EXISTS idx_relay_events_project ON rationalevault_events(project_id);")
 
+            # Snapshot cache table (V2)
+            conn.execute("""
+                CREATE TABLE IF NOT EXISTS rationalevault_snapshots (
+                    id                TEXT PRIMARY KEY DEFAULT (hex(randomblob(16))),
+                    project_id        TEXT NOT NULL,
+                    projection_name   TEXT NOT NULL,
+                    sequence          INTEGER NOT NULL,
+                    payload           TEXT NOT NULL,
+                    schema_version    INTEGER NOT NULL DEFAULT 1,
+                    projection_version INTEGER NOT NULL DEFAULT 1,
+                    snapshot_hash     TEXT NOT NULL,
+                    created_at        TEXT NOT NULL DEFAULT (datetime('now'))
+                );
+            """)
+            conn.execute("""
+                CREATE INDEX IF NOT EXISTS idx_snapshots_lookup
+                    ON rationalevault_snapshots (project_id, projection_name, sequence DESC);
+            """)
+
     # ── Write ──────────────────────────────────────────────────────────────
 
     def append_event(
@@ -233,6 +252,122 @@ class SQLiteEventStore(BaseEventStore):
             cur = conn.execute(sql, (str(project_id), limit))
             return [self._row_to_record(row) for row in cur.fetchall()]
 
+
+    # ── Snapshots (V2) ──────────────────────────────────────────────────────
+
+    def load_latest_raw(
+        self,
+        project_id: UUID,
+        projection_name: str,
+    ):
+        """
+        Return the raw payload row for the latest snapshot, or None.
+
+        Storage does NOT validate. It returns raw data; the SnapshotManager
+        handles deserialization and validation.
+        """
+        sql = """
+            SELECT payload, schema_version, projection_version,
+                   sequence, snapshot_hash
+            FROM rationalevault_snapshots
+            WHERE project_id = ? AND projection_name = ?
+            ORDER BY sequence DESC
+            LIMIT 1
+        """
+        with self._get_conn() as conn:
+            cur = conn.execute(sql, (str(project_id), projection_name))
+            row = cur.fetchone()
+            if row is None:
+                return None
+            return {
+                "payload": json.loads(row["payload"]),
+                "schema_version": row["schema_version"],
+                "projection_version": row["projection_version"],
+                "sequence": row["sequence"],
+                "snapshot_hash": row["snapshot_hash"],
+            }
+
+    def save_snapshot(
+        self,
+        project_id: UUID,
+        projection_name: str,
+        payload,
+    ) -> None:
+        """
+        Persist a snapshot to durable storage.
+
+        Old snapshots are retained for audit (not deleted on save).
+        """
+        payload_dict = payload.to_dict(exclude_hash=True)
+        sql = """
+            INSERT INTO rationalevault_snapshots
+                (id, project_id, projection_name, sequence, payload,
+                 schema_version, projection_version, snapshot_hash)
+            VALUES (?, ?, ?, ?, ?, ?, ?, ?)
+        """
+        snapshot_id = uuid.uuid4().hex
+        with self._get_conn() as conn:
+            conn.execute(
+                sql,
+                (
+                    snapshot_id,
+                    str(project_id),
+                    projection_name,
+                    payload.sequence,
+                    json.dumps(payload_dict),
+                    payload.schema_version,
+                    payload.projection_version,
+                    payload.snapshot_hash,
+                ),
+            )
+
+    def delete_snapshots_before(
+        self,
+        project_id: UUID,
+        projection_name: str,
+        sequence: int,
+    ) -> int:
+        """
+        Delete snapshots older than the given sequence number.
+
+        Returns the number of snapshots deleted.
+        """
+        sql = """
+            DELETE FROM rationalevault_snapshots
+            WHERE project_id = ?
+              AND projection_name = ?
+              AND sequence < ?
+        """
+        with self._get_conn() as conn:
+            cur = conn.execute(sql, (str(project_id), projection_name, sequence))
+            return cur.rowcount
+
+    def get_latest_snapshot_sequence(
+        self,
+        project_id: UUID,
+        projection_name: str,
+    ) -> Optional[int]:
+        """Return the sequence number of the latest snapshot, or None."""
+        sql = """
+            SELECT sequence FROM rationalevault_snapshots
+            WHERE project_id = ? AND projection_name = ?
+            ORDER BY sequence DESC
+            LIMIT 1
+        """
+        with self._get_conn() as conn:
+            cur = conn.execute(sql, (str(project_id), projection_name))
+            row = cur.fetchone()
+            return row["sequence"] if row else None
+
+    def get_latest_sequence(self, project_id: UUID) -> int:
+        """Return the maximum event_sequence for the project, or 0."""
+        sql = (
+            "SELECT COALESCE(MAX(event_sequence), 0) AS seq "
+            "FROM rationalevault_events WHERE project_id = ?"
+        )
+        with self._get_conn() as conn:
+            cur = conn.execute(sql, (str(project_id),))
+            return cur.fetchone()["seq"]
 
     # ── Internal ───────────────────────────────────────────────────────────
 

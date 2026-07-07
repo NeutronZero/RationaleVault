@@ -105,3 +105,47 @@ class EventStore(BaseEventStore):
     def get_recent_events(self, project_id: UUID, limit: int = 20) -> list[EventRecord]:
         return self._store.get_recent_events(project_id, limit)
 
+    # ── Snapshots (V2) ──────────────────────────────────────────────────────
+
+    def load_latest_raw(
+        self,
+        project_id: UUID,
+        projection_name: str,
+    ):
+        """Delegate snapshot load to the active backend."""
+        return self._store.load_latest_raw(project_id, projection_name)
+
+    def save_snapshot(
+        self,
+        project_id: UUID,
+        projection_name: str,
+        payload,
+    ) -> None:
+        """Delegate snapshot save to the active backend."""
+        self._store.save_snapshot(project_id, projection_name, payload)
+
+    def delete_snapshots_before(
+        self,
+        project_id: UUID,
+        projection_name: str,
+        sequence: int,
+    ) -> int:
+        """Delegate snapshot cleanup to the active backend."""
+        return self._store.delete_snapshots_before(
+            project_id, projection_name, sequence
+        )
+
+    def get_latest_snapshot_sequence(
+        self,
+        project_id: UUID,
+        projection_name: str,
+    ):
+        """Delegate to the active backend."""
+        return self._store.get_latest_snapshot_sequence(
+            project_id, projection_name
+        )
+
+    def get_latest_sequence(self, project_id: UUID) -> int:
+        """Return the maximum event_sequence for the project, or 0."""
+        return self._store.get_latest_sequence(project_id)
+

@@ -1,14 +1,15 @@
-# RationaleVault (v1.3.1) — Event-Sourced Cognitive Memory & Context Optimization Layer for AI Agents
+# RationaleVault (v1.4.0) — Event-Sourced Cognitive Memory & Context Optimization Layer for AI Agents
 
 [![GitHub](https://img.shields.io/badge/GitHub-NeutronZero%2FRationaleVault-181717?style=flat&logo=github)](https://github.com/NeutronZero/RationaleVault)
 [![Python 3.12+](https://img.shields.io/badge/Python-3.12+-3776AB?style=flat&logo=python&logoColor=white)](https://www.python.org/)
-[![Tests](https://img.shields.io/badge/Tests-1771%20passing-brightgreen)](https://github.com/NeutronZero/RationaleVault)
-[![Version](https://img.shields.io/badge/Version-v1.3.1-blue)](https://github.com/NeutronZero/RationaleVault/releases/tag/v1.3.1)
+[![Tests](https://img.shields.io/badge/Tests-1870%20passing-brightgreen)](https://github.com/NeutronZero/RationaleVault)
+[![Version](https://img.shields.io/badge/Version-v1.4.0-blue)](https://github.com/NeutronZero/RationaleVault/releases/tag/v1.4.0)
 
 **Event-sourced cognitive continuity, multi-agent context compression, and shared memory infrastructure for AI workflows.**
 
 - Event-sourced cognitive memory
 - Deterministic projection architecture
+- Snapshot-assisted O(delta) replay
 - Unified retrieval orchestration
 - Multi-agent context compilation
 - Local-first SQLite runtime
@@ -24,7 +25,26 @@ LLM agents lose context. As projects evolve over weeks or months, they accumulat
 
 RationaleVault provides an event-sourced cognitive continuity layer. By treating events as the immutable source of truth and compiling memory, knowledge, and graphs as deterministic projections, RationaleVault ensures agents can reconstruct state and continue work with zero cognitive loss.
 
-Now in `v1.3.1`, RationaleVault adds lifecycle robustness improvements: visible memory extraction warnings, eliminated circular import risk, and thread-safe markdown provider writes — while preserving all v1.3.0 retrieval orchestration and telemetry capabilities.
+Now in `v1.4.0`, RationaleVault adds SnapshotStore V2 — deterministic snapshot-assisted replay that reduces compilation time by 43–95% depending on snapshot coverage. The replay subsystem is fully verified with 44 equivalence tests proving reducer invariants hold across all split points and random streams.
+
+## What's New in v1.4.0
+
+- **SnapshotStore V2** — deterministic snapshot-assisted replay (ADR-026)
+  - `ReplayEngine` abstraction owns all replay strategy (full, delta, fast path)
+  - `SnapshotManager` lifecycle — load, validate, save, refresh, delete
+  - `EventCountPolicy` — configurable snapshot threshold (default: 100 events)
+  - `ReplayReport` telemetry — mode, event counts, snapshot status
+- **O(delta) replay** — after first snapshot, only new events are replayed
+  - 43–95% improvement depending on snapshot coverage
+  - Near-linear scaling: 99% snapshot → <1ms delta replay regardless of stream size
+- **Replay equivalence verification** — 44 tests proving:
+  - `reduce(A+B) == reduce(B, initial_state=reduce(A))` for all reducers
+  - 20 random streams with random split points
+  - 500-event cumulative drift test
+  - Snapshot determinism (same events → identical bytes)
+- **PostgreSQL CI** — full test suite validates backend parity
+- **Replay equivalence CI** — required status check on every PR
+- **Nightly benchmarks** — daily performance tracking with history
 
 ## What's New in v1.3.1
 
@@ -68,6 +88,12 @@ Replay Pipeline (Policy-Driven Resolver + Upcaster Registry)
       │
       ▼
 Canonical Events (Schema-Normalized, Version-Agnostic)
+      │
+      ▼
+SnapshotStore V2 (Deterministic Snapshot Cache)
+      │
+      ▼
+ReplayEngine (Full / Delta / Fast-Path Strategy)
       │
       ▼
 Deterministic Projection Layer
@@ -125,6 +151,7 @@ Canonical Event (normalized to latest version)
 | **v1.1** | Organizational intelligence, recommendation engines, performance optimizations |
 | **v1.2** | SchemaPolicy — per-event-type schema evolution, production-validated governance |
 | **v1.3** | Intelligent retrieval & observability — unified orchestration, provider capabilities, telemetry |
+| **v1.4** | SnapshotStore V2 — deterministic snapshot-assisted replay, O(delta) compilation, replay equivalence verification |
 
 ---
 
@@ -170,7 +197,7 @@ For developers running from source:
 ```bash
 pytest
 ```
-All 1771 tests will execute (1771 pass; 14 expected skips).
+All 1870 tests will execute (1870 pass; 18 expected skips).
 
 ---
 
@@ -195,6 +222,7 @@ RationaleVault provides a unified command-line toolset for inspecting and managi
 ## Design Principles
 - **Ledger Invariance**: The immutable event sequence is the only authoritative source of truth.
 - **Determinism**: Identical event streams project to identical memory, knowledge, and graph states.
+- **Snapshot Replay Invariant**: Snapshot-assisted replay is observationally equivalent to full replay. `reduce(A+B) == reduce(B, initial_state=reduce(A))` for all reducers.
 - **Provenance Traceability**: Every context citation carries strict lineage back to the originating event IDs.
 - **Zero-Dependency Core**: Standard configuration runs local-first on SQLite with zero external database setup.
 - **Projection Composition**: Higher-level projections may depend only on immutable state or lower-level projections.

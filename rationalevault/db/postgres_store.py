@@ -197,6 +197,131 @@ class PostgresEventStore(BaseEventStore):
                 return [self._row_to_record(row) for row in cur.fetchall()]
 
 
+    # ── Snapshots (V2) ──────────────────────────────────────────────────────
+
+    def load_latest_raw(
+        self,
+        project_id: UUID,
+        projection_name: str,
+    ):
+        """
+        Return the raw payload row for the latest snapshot, or None.
+
+        Storage does NOT validate. It returns raw data; the SnapshotManager
+        handles deserialization and validation.
+        """
+        sql = """
+            SELECT payload, schema_version, projection_version,
+                   sequence, snapshot_hash
+            FROM relay_snapshots
+            WHERE project_id = %s AND projection_name = %s
+            ORDER BY sequence DESC
+            LIMIT 1
+        """
+        with get_connection() as conn:
+            with conn.cursor() as cur:
+                cur.execute(sql, (str(project_id), projection_name))
+                row = cur.fetchone()
+                if row is None:
+                    return None
+                payload = row["payload"]
+                if isinstance(payload, str):
+                    import json as _json
+                    payload = _json.loads(payload)
+                return {
+                    "payload": payload,
+                    "schema_version": row["schema_version"],
+                    "projection_version": row["projection_version"],
+                    "sequence": row["sequence"],
+                    "snapshot_hash": row["snapshot_hash"],
+                }
+
+    def save_snapshot(
+        self,
+        project_id: UUID,
+        projection_name: str,
+        payload,
+    ) -> None:
+        """
+        Persist a snapshot to durable storage.
+
+        Old snapshots are retained for audit (not deleted on save).
+        """
+        payload_dict = payload.to_dict(exclude_hash=True)
+        sql = """
+            INSERT INTO relay_snapshots
+                (id, project_id, projection_name, sequence, payload,
+                 schema_version, projection_version, snapshot_hash)
+            VALUES (%s, %s, %s, %s, %s::jsonb, %s, %s, %s)
+        """
+        snapshot_id = uuid.uuid4().hex
+        with get_connection() as conn:
+            with conn.cursor() as cur:
+                cur.execute(
+                    sql,
+                    (
+                        snapshot_id,
+                        str(project_id),
+                        projection_name,
+                        payload.sequence,
+                        json.dumps(payload_dict),
+                        payload.schema_version,
+                        payload.projection_version,
+                        payload.snapshot_hash,
+                    ),
+                )
+
+    def delete_snapshots_before(
+        self,
+        project_id: UUID,
+        projection_name: str,
+        sequence: int,
+    ) -> int:
+        """
+        Delete snapshots older than the given sequence number.
+
+        Returns the number of snapshots deleted.
+        """
+        sql = """
+            DELETE FROM relay_snapshots
+            WHERE project_id = %s
+              AND projection_name = %s
+              AND sequence < %s
+        """
+        with get_connection() as conn:
+            with conn.cursor() as cur:
+                cur.execute(sql, (str(project_id), projection_name, sequence))
+                return cur.rowcount
+
+    def get_latest_snapshot_sequence(
+        self,
+        project_id: UUID,
+        projection_name: str,
+    ) -> Optional[int]:
+        """Return the sequence number of the latest snapshot, or None."""
+        sql = """
+            SELECT sequence FROM relay_snapshots
+            WHERE project_id = %s AND projection_name = %s
+            ORDER BY sequence DESC
+            LIMIT 1
+        """
+        with get_connection() as conn:
+            with conn.cursor() as cur:
+                cur.execute(sql, (str(project_id), projection_name))
+                row = cur.fetchone()
+                return row["sequence"] if row else None
+
+    def get_latest_sequence(self, project_id: UUID) -> int:
+        """Return the maximum event_sequence for the project, or 0."""
+        sql = (
+            "SELECT COALESCE(MAX(event_sequence), 0) AS seq "
+            "FROM rationalevault_events WHERE project_id = %s"
+        )
+        with get_connection() as conn:
+            with conn.cursor() as cur:
+                cur.execute(sql, (str(project_id),))
+                return cur.fetchone()["seq"]
+
     # ── Internal ───────────────────────────────────────────────────────────
 
     @staticmethod

@@ -1,0 +1,57 @@
+name: Nightly Benchmarks
+
+on:
+  schedule:
+    - cron: '0 6 * * *'  # Daily at 06:00 UTC
+  workflow_dispatch:      # Manual trigger
+
+permissions:
+  contents: write
+
+jobs:
+  benchmark:
+    runs-on: ubuntu-latest
+    steps:
+    - uses: actions/checkout@v4
+    - name: Set up Python
+      uses: actions/setup-python@v5
+      with:
+        python-version: '3.12'
+    - name: Install dependencies
+      run: |
+        python -m pip install --upgrade pip
+        pip install -e ".[dev]"
+    - name: Run snapshot benchmarks
+      run: python benchmarks/snapshot_benchmark.py > benchmark_summary.txt 2>&1
+    - name: Generate benchmark JSON
+      run: |
+        python -c "
+        import json, sys
+        from datetime import datetime, timezone
+        from pathlib import Path
+
+        summary = Path('benchmark_summary.txt').read_text()
+        data = {
+            'timestamp': datetime.now(timezone.utc).isoformat(),
+            'git_sha': '${{ github.sha }}',
+            'summary': summary,
+        }
+        Path('benchmark_results.json').write_text(json.dumps(data, indent=2))
+        "
+    - name: Upload benchmark summary
+      uses: actions/upload-artifact@v4
+      with:
+        name: benchmark-results-${{ github.run_id }}
+        path: |
+          benchmark_summary.txt
+          benchmark_results.json
+        retention-days: 90
+    - name: Commit benchmark history
+      run: |
+        git config user.name "github-actions[bot]"
+        git config user.email "github-actions[bot]@users.noreply.github.com"
+        DATE=$(date -u +%Y-%m-%d)
+        mkdir -p benchmarks/history
+        cp benchmark_results.json "benchmarks/history/${DATE}.json"
+        git add "benchmarks/history/${DATE}.json"
+        git diff --staged --quiet || git commit -m "bench: ${DATE}" && git push

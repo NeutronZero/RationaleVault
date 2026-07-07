@@ -7,6 +7,7 @@ on:
     branches: [ main, master ]
 
 jobs:
+  # ── SQLite (existing) ────────────────────────────────────────────────────────
   verify:
     runs-on: ubuntu-latest
     steps:
@@ -43,3 +44,101 @@ jobs:
     - name: Verify release manifest version
       run: |
         python -c "import json, rationalevault; manifest = json.load(open('.rationalevault/reports/release_manifest.json')); assert manifest['rationalevault_version'] == rationalevault.__version__, f'Invalid version: {manifest[\"rationalevault_version\"]}'; assert manifest['schema_version'] == '1.0', f'Invalid schema: {manifest[\"schema_version\"]}'"
+
+  # ── Replay Equivalence (required status check) ───────────────────────────────
+  replay_equivalence:
+    runs-on: ubuntu-latest
+    steps:
+    - uses: actions/checkout@v4
+    - name: Set up Python
+      uses: actions/setup-python@v5
+      with:
+        python-version: '3.12'
+    - name: Install dependencies
+      run: |
+        python -m pip install --upgrade pip
+        pip install -e ".[dev]"
+    - name: Run replay equivalence tests
+      run: pytest -m replay_equivalence -v -o addopts=""
+    - name: Produce JUnit XML report
+      if: always()
+      run: |
+        pytest -m replay_equivalence \
+          --junitxml=replay_equivalence.xml \
+          -o addopts="" || true
+    - name: Upload JUnit report
+      if: always()
+      uses: actions/upload-artifact@v4
+      with:
+        name: replay-equivalence-report
+        path: replay_equivalence.xml
+        retention-days: 30
+
+  # ── PostgreSQL Full Suite (backend parity) ───────────────────────────────────
+  postgres:
+    runs-on: ubuntu-latest
+    services:
+      postgres:
+        image: postgres:16
+        env:
+          POSTGRES_USER: postgres
+          POSTGRES_PASSWORD: postgres
+          POSTGRES_DB: rationalevault
+        ports:
+          - 5432:5432
+        options: >-
+          --health-cmd pg_isready
+          --health-interval 10s
+          --health-timeout 5s
+          --health-retries 5
+    env:
+      RELAY_DB_TEST_ENABLED: 1
+      RELAY_DB_URL: postgresql://postgres:postgres@localhost:5432/rationalevault
+    steps:
+    - uses: actions/checkout@v4
+    - name: Set up Python
+      uses: actions/setup-python@v5
+      with:
+        python-version: '3.12'
+    - name: Install dependencies
+      run: |
+        python -m pip install --upgrade pip
+        pip install -e ".[dev]"
+    - name: Run full test suite against PostgreSQL
+      run: pytest -o addopts="" -v
+
+  # ── Backend Parity (snapshot matrix) ─────────────────────────────────────────
+  backend_parity:
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        backend: [sqlite, postgres]
+    services:
+      postgres:
+        image: postgres:16
+        env:
+          POSTGRES_USER: postgres
+          POSTGRES_PASSWORD: postgres
+          POSTGRES_DB: rationalevault
+        ports:
+          - 5432:5432
+        options: >-
+          --health-cmd pg_isready
+          --health-interval 10s
+          --health-timeout 5s
+          --health-retries 5
+    env:
+      RELAY_DB_TEST_ENABLED: ${{ matrix.backend == 'postgres' && '1' || '0' }}
+      RELAY_DB_URL: ${{ matrix.backend == 'postgres' && 'postgresql://postgres:postgres@localhost:5432/rationalevault' || '' }}
+    steps:
+    - uses: actions/checkout@v4
+    - name: Set up Python
+      uses: actions/setup-python@v5
+      with:
+        python-version: '3.12'
+    - name: Install dependencies
+      run: |
+        python -m pip install --upgrade pip
+        pip install -e ".[dev]"
+    - name: Run snapshot tests (${{ matrix.backend }})
+      run: pytest -m snapshot -v -o addopts=""

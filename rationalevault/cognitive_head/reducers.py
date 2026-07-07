@@ -11,8 +11,14 @@ Design rules:
   - Reducers do not call EventStore. They operate on lists of EventRecord.
 
 Reducer contract:
-    reduce(events: list[EventRecord]) -> State
+    reduce(events, initial_state=None) -> State
     reduce([]) -> empty/default state
+
+    If initial_state is provided, it must be a state previously produced
+    by the same reducer from a prefix of the event stream. The reducer
+    applies only the given events on top of that state.
+
+    Only ReplayEngine is permitted to supply initial_state.
 
 State dataclasses use Python @dataclass for simplicity and inspectability.
 They are intentionally not frozen — reducers mutate fields in-place during folding.
@@ -130,8 +136,11 @@ class ProjectReducer:
     """
 
     @staticmethod
-    def reduce(events: list[EventRecord]) -> ProjectState:
-        state = ProjectState()
+    def reduce(
+        events: list[EventRecord],
+        initial_state: Optional[ProjectState] = None,
+    ) -> ProjectState:
+        state = initial_state if initial_state is not None else ProjectState()
         for event in events:
             et = event.event_type
             p = event.payload
@@ -169,8 +178,13 @@ class TaskReducer:
     """
 
     @staticmethod
-    def reduce(events: list[EventRecord]) -> dict[str, TaskState]:
-        tasks: dict[str, TaskState] = {}
+    def reduce(
+        events: list[EventRecord],
+        initial_state: Optional[dict[str, TaskState]] = None,
+    ) -> dict[str, TaskState]:
+        tasks: dict[str, TaskState] = (
+            initial_state if initial_state is not None else {}
+        )
 
         for event in events:
             et = event.event_type
@@ -228,7 +242,10 @@ class TaskReducer:
                     continue
                 tasks[task_id].progress_notes.append({
                     "note": p.get("note", ""),
-                    "timestamp": event.recorded_at.isoformat() if event.recorded_at else None,
+                    "timestamp": (
+                        event.recorded_at.isoformat()
+                        if event.recorded_at else None
+                    ),
                     "actor": event.metadata.actor,
                     "source_event_seq": event.event_sequence,
                 })
@@ -253,8 +270,13 @@ class DecisionReducer:
     """
 
     @staticmethod
-    def reduce(events: list[EventRecord]) -> dict[str, DecisionState]:
-        decisions: dict[str, DecisionState] = {}
+    def reduce(
+        events: list[EventRecord],
+        initial_state: Optional[dict[str, DecisionState]] = None,
+    ) -> dict[str, DecisionState]:
+        decisions: dict[str, DecisionState] = (
+            initial_state if initial_state is not None else {}
+        )
 
         for event in events:
             et = event.event_type
@@ -313,8 +335,13 @@ class QuestionReducer:
     """
 
     @staticmethod
-    def reduce(events: list[EventRecord]) -> dict[str, QuestionState]:
-        questions: dict[str, QuestionState] = {}
+    def reduce(
+        events: list[EventRecord],
+        initial_state: Optional[dict[str, QuestionState]] = None,
+    ) -> dict[str, QuestionState]:
+        questions: dict[str, QuestionState] = (
+            initial_state if initial_state is not None else {}
+        )
 
         for event in events:
             et = event.event_type

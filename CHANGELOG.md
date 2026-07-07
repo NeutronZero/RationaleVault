@@ -5,6 +5,57 @@ This project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.htm
 
 ---
 
+## [1.4.0] — 2026-07-07
+
+### Added
+- **SnapshotStore V2**: Deterministic snapshot-assisted replay (ADR-026).
+  - `SnapshotManager` lifecycle — load, validate, save, refresh, delete.
+  - `ReplayEngine` abstraction — owns all replay strategy (full, delta, fast path).
+  - `ReplayReport` telemetry — replay mode, event counts, timing, snapshot status.
+  - `EventCountPolicy` — configurable threshold (default: 100 new events).
+  - `NullSnapshotManager` — Null Object pattern; compiler always has a SnapshotManager.
+  - `with_hash()` returns immutable payload (value objects).
+  - `CognitiveHeadSnapshotPayload.from_cognitive_head()` accepts full reducer state for delta replay.
+- **Replay Equivalence Tests**: 44 tests proving reducer invariants and replay correctness.
+  - `TestReducerIncrementalInvariant` — `reduce(A+B) == reduce(B, initial_state=reduce(A))`.
+  - `TestReplayEquivalence` — 20 random streams + hand-crafted + exhaustive split.
+  - `TestCumulativeDrift` — 500-event stream replayed in chunks of 50.
+  - `TestSnapshotDeterminism` — same events produce identical snapshot bytes.
+- **PostgreSQL CI**: Full test suite validates backend parity.
+- **Replay Equivalence CI**: Required status check on every PR.
+- **Backend Parity CI**: Snapshot tests run on both SQLite and PostgreSQL.
+- **Nightly Benchmarks**: Scheduled workflow with history tracking.
+- **Benchmark History**: `benchmarks/history/` with daily JSON snapshots.
+- **Pytest Markers**: `snapshot` and `replay_equivalence` for targeted test selection.
+
+### Changed
+- **Compiler**: Delegates replay to `ReplayEngine.build_projection()`.
+- **Reducers**: Support optional `initial_state` for incremental replay.
+- **Snapshot Payload**: `from_cognitive_head()` stores full reducer state (tasks, decisions, questions) for delta replay.
+- **Benchmarks**: Prove 43–95% replay improvement depending on snapshot ratio.
+
+### Performance
+
+| Events | Snapshot % | Full (ms) | Delta (ms) | Improvement |
+|--------|-----------|-----------|------------|-------------|
+| 1,000  | 50%       | 1.61      | 0.84       | 48.1%       |
+| 5,000  | 50%       | 8.57      | 4.85       | 43.4%       |
+| 10,000 | 50%       | 22.12     | 8.94       | 59.6%       |
+| 5,000  | 90%       | 9.05      | 1.07       | 88.1%       |
+| 5,000  | 99%       | 8.56      | 0.37       | 95.7%       |
+| 10,000 | 99%       | 17.53     | 0.84       | 95.2%       |
+
+### Compatibility
+- No public API breaking changes.
+- Existing projects require no migration beyond applying database schema version 0003.
+
+### Verification
+- Full snapshot lifecycle tested on both SQLite and PostgreSQL.
+- Replay equivalence verified via 44 invariant tests.
+- 1,870 tests pass. Ruff clean.
+
+---
+
 ## [1.3.1] — 2026-07-06
 
 ### Fixed

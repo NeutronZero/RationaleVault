@@ -1,93 +1,319 @@
 """
-RationaleVault Cognitive Head — SnapshotStore interface (V1 placeholder).
+RationaleVault Snapshot Manager — Load, validate, save, and manage projection snapshots.
 
-Snapshots are point-in-time captures of a compiled CognitiveHead.
-They allow compile_cognitive_head() to avoid replaying the entire event
-ledger by loading a recent snapshot and applying only new events.
+V2 IMPLEMENTATION:
+  - SnapshotManager: orchestrates load, validate, save, policy, warnings.
+  - NullSnapshotManager: no-op implementation for when snapshots are disabled.
+  - SnapshotStore: raw storage interface.
+  - SnapshotValidationResult: typed result with reason enum.
+  - Storage does not validate; validation is the manager's responsibility.
 
-V1 STATUS: Interface defined. Not implemented.
-  - load_latest_snapshot() always returns None (triggers full replay).
-  - save_snapshot() is a no-op.
-
-This placeholder exists so:
-  1. The compiler can call snapshot_store.load_latest_snapshot() today.
-  2. A future V2 implementation can be dropped in without changing the
-     compile_cognitive_head() API.
-  3. The interface documents the expected contract clearly.
-
-When to implement:
-  Implement when compile_cognitive_head() takes more than ~500ms.
-  At V1 scale (local DB, hundreds of events), full replay is fast enough.
-
-V2 implementation sketch:
-  - Add relay_snapshots table (project_id, sequence, head_json, created_at)
-  - save_snapshot() after every N events or on explicit call
-  - load_latest_snapshot() returns most recent entry
-  - compile_cognitive_head() calls apply_events_after_snapshot(snapshot, new_events)
+Thread safety: Implementations must be safe for concurrent reads.
+Writes are serialized by the database (SQLite WAL / PostgreSQL advisory locks).
 """
 from __future__ import annotations
 
+import sys
+from abc import ABC, abstractmethod
 from dataclasses import dataclass
-from typing import Optional
+from enum import Enum
+from typing import Any, Optional
 from uuid import UUID
 
-from rationalevault.cognitive_head.compiler import CognitiveHead
+from rationalevault.cognitive_head.snapshot_payload import (
+    CognitiveHeadSnapshotPayload,
+    ProjectionSnapshotPayload,
+)
+from rationalevault.cognitive_head.snapshot_policy import (
+    SnapshotPolicy,
+)
+
+
+# ── Validation Types ─────────────────────────────────────────────────────────
+
+
+class SnapshotValidationReason(Enum):
+    """Why a snapshot was rejected during validation."""
+
+    NOT_FOUND = "not_found"
+    HASH_MISMATCH = "hash_mismatch"
+    SCHEMA_VERSION = "schema_version_mismatch"
+    PROJECTION_VERSION = "projection_version_mismatch"
+    FUTURE_SEQUENCE = "sequence_ahead_of_events"
+    DESERIALIZATION = "deserialization_failed"
 
 
 @dataclass
-class Snapshot:
+class SnapshotValidationResult:
     """
-    A point-in-time capture of a compiled CognitiveHead.
+    Typed result from snapshot validation.
 
     Attributes:
-        project_id: The project this snapshot belongs to.
-
-        sequence:   The event_sequence of the last event included in this snapshot.
-                    To bring the snapshot up to date, load events with
-                    event_sequence > snapshot.sequence and apply them.
-
-        head:       The compiled CognitiveHead at the time of snapshot.
+        valid:  Whether the snapshot passed all checks.
+        payload: The deserialized payload (only set when valid=True).
+        reason: Why validation failed (only set when valid=False).
     """
-    project_id: UUID
-    sequence: int
-    head: CognitiveHead
+    valid: bool
+    payload: Optional[ProjectionSnapshotPayload] = None
+    reason: Optional[SnapshotValidationReason] = None
 
 
-class SnapshotStore:
+# ── Serializer Registry ──────────────────────────────────────────────────────
+
+# Maps projection_name → payload class.
+# To add a new projection (knowledge, organization), add one entry here.
+SNAPSHOT_SERIALIZERS: dict[str, type[ProjectionSnapshotPayload]] = {
+    "cognitive_head": CognitiveHeadSnapshotPayload,
+}
+
+
+# ── Storage Interface ────────────────────────────────────────────────────────
+
+
+class SnapshotStore(ABC):
     """
-    Interface for the RationaleVault snapshot system.
+    Raw storage interface for projection snapshots.
 
-    V1: All operations are no-ops. load_latest_snapshot() returns None,
-    which causes compile_cognitive_head() to perform a full replay.
-
-    Thread safety: V1 implementation is trivially thread-safe (no state).
-    Future implementations must consider concurrent snapshot writes.
+    Storage does NOT validate. It returns raw data; the SnapshotManager
+    handles deserialization and validation.
     """
 
-    def load_latest_snapshot(self, project_id: UUID) -> Optional[Snapshot]:
+    @abstractmethod
+    def load_latest_raw(
+        self,
+        project_id: UUID,
+        projection_name: str,
+    ) -> Optional[dict[str, Any]]:
         """
-        Load the most recent snapshot for a project.
+        Return the raw payload row for the latest snapshot, or None.
 
-        Returns None if no snapshot exists. The caller must then perform
-        a full event replay via EventStore.get_project_stream().
-
-        V1: Always returns None.
-        """
-        return None
-
-    def save_snapshot(self, snapshot: Snapshot) -> None:
-        """
-        Persist a snapshot to durable storage.
-
-        V1: No-op. Snapshots are not stored in V1.
+        Returns a dict with keys: payload, schema_version,
+        projection_version, sequence, snapshot_hash.
         """
         pass
 
-    def delete_snapshots_before(self, project_id: UUID, sequence: int) -> int:
+    @abstractmethod
+    def save_snapshot(
+        self,
+        project_id: UUID,
+        projection_name: str,
+        payload: ProjectionSnapshotPayload,
+    ) -> None:
+        """
+        Persist a snapshot to durable storage.
+
+        Old snapshots are retained for audit (not deleted on save).
+        """
+        pass
+
+    @abstractmethod
+    def delete_snapshots_before(
+        self,
+        project_id: UUID,
+        projection_name: str,
+        sequence: int,
+    ) -> int:
         """
         Delete snapshots older than the given sequence number.
         Returns the number of snapshots deleted.
-
-        V1: No-op. Returns 0.
         """
-        return 0
+        pass
+
+    @abstractmethod
+    def get_latest_snapshot_sequence(
+        self,
+        project_id: UUID,
+        projection_name: str,
+    ) -> Optional[int]:
+        """
+        Return the sequence number of the latest snapshot, or None.
+        """
+        pass
+
+
+# ── Snapshot Manager ─────────────────────────────────────────────────────────
+
+
+class SnapshotManager:
+    """
+    Orchestrates snapshot loading, validation, policy evaluation, and saving.
+
+    The compiler calls load_valid_snapshot() for the fast path, and
+    refresh_snapshot() after compilation to let the manager decide whether
+    to persist a new snapshot.
+
+    The compiler never touches hashes, schema versions, policy, or serialization.
+    """
+
+    def __init__(
+        self,
+        snapshot_store: SnapshotStore,
+        get_latest_sequence_fn,
+        policy: Optional[SnapshotPolicy] = None,
+    ) -> None:
+        """
+        Args:
+            snapshot_store: The raw storage backend.
+            get_latest_sequence_fn: Callable(project_id) → int
+                Returns the max event_sequence for a project.
+            policy: Trigger policy for snapshot saves. Uses DEFAULT_POLICY if None.
+        """
+        self._store = snapshot_store
+        self._get_latest_sequence = get_latest_sequence_fn
+        # Import here to avoid circular imports at module level
+        from rationalevault.cognitive_head.snapshot_policy import DEFAULT_POLICY
+        self._policy = policy if policy is not None else DEFAULT_POLICY
+
+    def load_valid_snapshot(
+        self,
+        project_id: UUID,
+        projection_name: str = "cognitive_head",
+    ) -> SnapshotValidationResult:
+        """
+        Load, deserialize, and validate the latest snapshot.
+
+        Returns SnapshotValidationResult with:
+          - valid=True, payload=... (caller should use the payload)
+          - valid=False, reason=... (caller should fall back to full replay)
+        """
+        # 1. Load raw
+        raw = self._store.load_latest_raw(project_id, projection_name)
+        if raw is None:
+            return SnapshotValidationResult(
+                valid=False,
+                reason=SnapshotValidationReason.NOT_FOUND,
+            )
+
+        # 2. Resolve serializer
+        serializer = SNAPSHOT_SERIALIZERS.get(projection_name)
+        if serializer is None:
+            return SnapshotValidationResult(
+                valid=False,
+                reason=SnapshotValidationReason.DESERIALIZATION,
+            )
+
+        # 3. Deserialize
+        try:
+            payload = serializer.from_dict(raw["payload"])
+        except (KeyError, TypeError, ValueError, AttributeError):
+            return SnapshotValidationResult(
+                valid=False,
+                reason=SnapshotValidationReason.DESERIALIZATION,
+            )
+
+        # 4. Validate hash
+        if not payload.validate_hash():
+            return SnapshotValidationResult(
+                valid=False,
+                reason=SnapshotValidationReason.HASH_MISMATCH,
+            )
+
+        # 5. Check schema_version
+        if payload.schema_version != serializer.SCHEMA_VERSION:
+            return SnapshotValidationResult(
+                valid=False,
+                reason=SnapshotValidationReason.SCHEMA_VERSION,
+            )
+
+        # 6. Check projection_version
+        if payload.projection_version != serializer.PROJECTION_VERSION:
+            return SnapshotValidationResult(
+                valid=False,
+                reason=SnapshotValidationReason.PROJECTION_VERSION,
+            )
+
+        # 7. Check sequence ≤ latest event
+        latest_seq = self._get_latest_sequence(project_id)
+        if payload.sequence > latest_seq:
+            return SnapshotValidationResult(
+                valid=False,
+                reason=SnapshotValidationReason.FUTURE_SEQUENCE,
+            )
+
+        # All checks passed
+        return SnapshotValidationResult(valid=True, payload=payload)
+
+    def warn_invalid(
+        self,
+        project_id: UUID,
+        result: SnapshotValidationResult,
+    ) -> None:
+        """Emit a warning to stderr for an invalid snapshot."""
+        if result.valid or result.reason is None:
+            return
+        print(
+            f"[rationalevault] WARN: Ignoring invalid snapshot for "
+            f"project {project_id} "
+            f"(reason={result.reason.value}); "
+            f"falling back to full replay.",
+            file=sys.stderr,
+        )
+
+    def refresh_snapshot(
+        self,
+        project_id: UUID,
+        projection_name: str,
+        head: CognitiveHeadSnapshotPayload,
+        current_sequence: int,
+    ) -> None:
+        """
+        Evaluate policy and save a snapshot if needed.
+
+        This is the only public method called by the compiler after compilation.
+        Never raises an exception that would affect the caller.
+        """
+        try:
+            last_seq = self._store.get_latest_snapshot_sequence(
+                project_id, projection_name,
+            )
+            if not self._policy.should_snapshot(current_sequence, last_seq):
+                return
+
+            # Build immutable payload with hash
+            hashed = head.with_hash()
+            self._store.save_snapshot(project_id, projection_name, hashed)
+
+        except Exception as e:
+            # Snapshots are caches; never fail compilation.
+            print(
+                f"[rationalevault] WARN: Snapshot save failed for "
+                f"{project_id}/{projection_name}: {e}",
+                file=sys.stderr,
+            )
+
+
+# ── Null Object ──────────────────────────────────────────────────────────────
+
+
+class NullSnapshotManager(SnapshotManager):
+    """No-op snapshot manager. All operations are silent no-ops."""
+
+    def __init__(self) -> None:
+        # Do not require a real store; this is a null object.
+        pass
+
+    def load_valid_snapshot(
+        self,
+        project_id: UUID,
+        projection_name: str = "cognitive_head",
+    ) -> SnapshotValidationResult:
+        return SnapshotValidationResult(
+            valid=False,
+            reason=SnapshotValidationReason.NOT_FOUND,
+        )
+
+    def warn_invalid(
+        self,
+        project_id: UUID,
+        result: SnapshotValidationResult,
+    ) -> None:
+        pass
+
+    def refresh_snapshot(
+        self,
+        project_id: UUID,
+        projection_name: str,
+        head: CognitiveHeadSnapshotPayload,
+        current_sequence: int,
+    ) -> None:
+        pass

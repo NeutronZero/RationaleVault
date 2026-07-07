@@ -4,7 +4,7 @@ build-backend = "hatchling.build"
 
 [project]
 name = "rationalevault"
-version = "1.3.1"
+version = "1.4.0"
 description = "RationaleVault — Event-sourced cognitive continuity and memory layer for multi-agent AI workflows"
 readme = "README.md"
 requires-python = ">=3.12"
@@ -34,6 +34,8 @@ python_functions = ["test_*"]
 addopts = "-n auto"
 markers = [
     "db: marks tests that require a live PostgreSQL database",
+    "snapshot: marks tests for SnapshotStore V2 (load, save, validation, policy)",
+    "replay_equivalence: marks tests that verify reducer invariants and replay correctness",
 ]
 
 [tool.hatch.build.targets.wheel]
