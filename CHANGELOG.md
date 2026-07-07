@@ -3,6 +3,98 @@
 All notable changes to RationaleVault will be documented in this file.
 This project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [1.8.0] — 2026-07-07
+
+### Added
+- **GovernanceProjection** (Phase E): Fifth archetype validation — Evaluation projection.
+  - `GovernanceSeverity` and `GovernanceAction` enums.
+  - `GovernanceCondition` and `GovernanceRule` domain models.
+  - `RuleEvaluation` and `GovernanceWarning` evaluation outcomes.
+  - `GovernanceState` — stored policy rules list.
+  - `GovernanceEvidenceProvider` protocol and `DefaultEvidenceProvider` implementing composition over recommendation facts.
+  - `GovernanceProjection` — pure reducer processing governance rule events.
+  - `GovernanceRuntime` — evaluates policies using collected evidence (never mutates).
+  - CLI: `rv governance show --limit 50 --severity critical --action block`.
+  - MCP tool: `get_warnings(limit, severity, action)`.
+  - Conformance Suite: all 7 Projection Laws verified without platform changes.
+  - Benchmarks: rule evaluation performance, average evidence size, warning counts.
+
+### Changed
+- ADR-027 Validation: GovernanceProjection verified — fifth projection on the platform.
+  - Five archetypes validated: Aggregation, Materialization, Normalization, Derivation, Evaluation.
+- `CHANGELOG.md`: Phase E entry.
+
+---
+
+## [1.7.0] — 2026-07-07
+
+### Added
+- **RecommendationProjection** (Phase D): Fourth archetype validation — analytical/derived projection.
+  - `RecommendationCategory` — enum for five recommendation categories.
+  - `Recommendation` — deterministic analytical fact with rule_id and rationale.
+  - `RecommendationState` — sorted list of recommendations with sequence tracking.
+  - `RecommendationRule` — abstract base for deterministic rule generation.
+  - `RecommendationRuleRegistry` — deterministic rule ordering by rule_id.
+  - 5 concrete rules: KnowledgeGap, TaskFollowUp, DecisionReview, QuestionResolution, KnowledgeDeletionRisk.
+  - `RecommendationProjection` — pure reducer, serialize/deserialize, health lifecycle.
+  - `RecommendationRuntime` — query/filter/rank layer (never mutates state).
+  - CLI: `rv recommendation show --limit 10 --for "task_id" --category risk`.
+  - MCP tool: `get_recommendations(limit, entity, category)`.
+  - Conformance Suite: all 7 Projection Laws verified without platform changes.
+  - Benchmarks: generation time, search latency, scalability, density, rule hit rate.
+
+### Changed
+- ADR-027 Validation: RecommendationProjection verified — fourth projection on the platform.
+  - Four archetypes validated: state-reducing, searchable, narrative, analytical.
+- `CHANGELOG.md`: Phase D entry.
+
+---
+
+## [1.6.0] — 2026-07-07
+
+### Added
+- **TimelineProjection** (Phase C): Third archetype validation — narrative projection.
+  - `TimelineCategory` — enum for seven narrative categories.
+  - `TimelineEntry` — normalized historical record (stable domain model).
+  - `TimelineState` — append-only list of entries with sequence tracking.
+  - `normalize_event()` — declarative mapping from events to entries.
+  - `render_summary()` — separate presentation layer (swappable).
+  - `TimelineProjection` — pure reducer, serialize/deserialize, health lifecycle.
+  - CLI: `rv timeline show --limit 50 --category decision --format table`.
+  - MCP tool: `get_timeline(limit, category)`.
+  - Conformance Suite: all 7 Projection Laws verified without platform changes.
+  - Benchmarks: snapshot growth, append throughput, replay amplification, entry density.
+
+### Changed
+- ADR-027 Validation: TimelineProjection verified — third projection on the platform.
+  - Three archetypes validated: state-reducing (CognitiveHead), searchable (Embedding), narrative (Timeline).
+- `CHANGELOG.md`: Phase C entry.
+
+---
+
+## [1.5.0] — 2026-07-07
+
+### Added
+- **EmbeddingProjection** (Phase B): First new projection on the ADR-027 Projection Platform.
+  - `EmbeddingState` — canonical text and provenance metadata for knowledge nodes.
+  - `CanonicalKnowledgeRenderer` — deterministic, order-stable rendering.
+  - `EmbeddingProjection` — pure reducer consuming knowledge lifecycle events.
+  - `EmbeddingProvider` protocol + `SentenceTransformerProvider`.
+  - `EmbeddingBuilder` — incremental vector generation with content_hash caching.
+  - `FAISSAdapter` — FAISS-backed RuntimeAdapter for semantic search.
+  - CLI: `rv embedding search "query" --k 5`.
+  - MCP tool: `search_embeddings(query, k)`.
+  - Conformance Suite: all 7 Projection Laws verified without platform changes.
+- **Knowledge Lifecycle Events**: `KNOWLEDGE_CREATED`, `KNOWLEDGE_UPDATED`, `KNOWLEDGE_DELETED`.
+  - First-class knowledge lifecycle events (not embedding-specific).
+  - Backward compatible with existing `KNOWLEDGE_SYNTHESIZED` and `KNOWLEDGE_SUPERSEDED`.
+  - Applied in ledger order; last applicable event determines final state.
+- **Embedding Benchmarks**: cold build, delta rebuild, snapshot roundtrip, search latency.
+
+### Changed
+- ADR-027 Validation: EmbeddingProjection verified — second projection on the platform.
+- `pyproject.toml`: optional `[embed]` dependencies (sentence-transformers, faiss-cpu).
+
 ---
 
 ## [1.4.0] — 2026-07-07

@@ -25,6 +25,10 @@ dev = [
     "mcp>=1.0",
 ]
 mcp = ["mcp>=1.0"]
+embed = [
+    "sentence-transformers>=3.0",
+    "faiss-cpu>=1.8",
+]
 
 [tool.pytest.ini_options]
 testpaths = ["tests"]
@@ -36,6 +40,7 @@ markers = [
     "db: marks tests that require a live PostgreSQL database",
     "snapshot: marks tests for SnapshotStore V2 (load, save, validation, policy)",
     "replay_equivalence: marks tests that verify reducer invariants and replay correctness",
+    "embedding: marks tests for the EmbeddingProjection and embedding infrastructure",
 ]
 
 [tool.hatch.build.targets.wheel]

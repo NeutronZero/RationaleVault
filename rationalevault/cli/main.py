@@ -1873,6 +1873,39 @@ def main() -> None:
     parser_retrieval_plan.add_argument("--query", required=True, help="Query string")
     retrieval_subparsers.add_parser("evaluate", help="Evaluate retrieval orchestrator quality")
 
+    # embedding
+    parser_embedding = subparsers.add_parser("embedding", help="Embedding search over knowledge")
+    embedding_subparsers = parser_embedding.add_subparsers(dest="embedding_command", required=True)
+    parser_embedding_search = embedding_subparsers.add_parser("search", help="Semantic search over knowledge embeddings")
+    parser_embedding_search.add_argument("--query", required=True, help="Query string")
+    parser_embedding_search.add_argument("--k", type=int, default=5, help="Number of results (default: 5)")
+
+    # timeline
+    parser_timeline = subparsers.add_parser("timeline", help="Chronological narrative of system evolution")
+    timeline_subparsers = parser_timeline.add_subparsers(dest="timeline_command", required=True)
+    parser_timeline_show = timeline_subparsers.add_parser("show", help="Show timeline entries")
+    parser_timeline_show.add_argument("--limit", type=int, default=50, help="Max entries to show (default: 50)")
+    parser_timeline_show.add_argument("--category", choices=["decision", "knowledge", "task", "question", "memory", "milestone", "system"], help="Filter by category")
+    parser_timeline_show.add_argument("--format", choices=["table", "json"], default="table", help="Output format (default: table)")
+
+    # recommendation
+    parser_recommendation = subparsers.add_parser("recommendation", help="Derived recommendations from event history")
+    recommendation_subparsers = parser_recommendation.add_subparsers(dest="recommendation_command", required=True)
+    parser_recommendation_show = recommendation_subparsers.add_parser("show", help="Show recommendations")
+    parser_recommendation_show.add_argument("--limit", type=int, default=10, help="Max recommendations to show (default: 10)")
+    parser_recommendation_show.add_argument("--for", dest="for", help="Filter by target entity (task_id, knowledge_id, etc.)")
+    parser_recommendation_show.add_argument("--category", choices=["next_action", "knowledge_gap", "risk", "optimization", "follow_up"], help="Filter by category")
+    parser_recommendation_show.add_argument("--format", choices=["table", "json"], default="table", help="Output format (default: table)")
+
+    # governance
+    parser_governance = subparsers.add_parser("governance", help="Policy evaluation warnings and decisions")
+    governance_subparsers = parser_governance.add_subparsers(dest="governance_command", required=True)
+    parser_governance_show = governance_subparsers.add_parser("show", help="Show governance warnings")
+    parser_governance_show.add_argument("--limit", type=int, default=50, help="Max warnings to show (default: 50)")
+    parser_governance_show.add_argument("--severity", choices=["info", "warning", "critical"], help="Filter by severity")
+    parser_governance_show.add_argument("--action", choices=["notify", "block", "suggest", "log"], help="Filter by action")
+    parser_governance_show.add_argument("--format", choices=["table", "json"], default="table", help="Output format (default: table)")
+
     # serve
     parser_serve = subparsers.add_parser("serve", help="Run the RationaleVault MCP server")
     parser_serve.add_argument("--transport", choices=["stdio", "sse"], default="stdio", help="MCP server transport type (default: stdio)")
@@ -1920,6 +1953,20 @@ def main() -> None:
         cmd_serve(args)
     elif args.command == "retrieval-dashboard":
         cmd_retrieval_dashboard(args)
+    elif args.command == "embedding":
+        from rationalevault.embedding.cli import cmd_embedding
+        cmd_embedding(args)
+    elif args.command == "timeline":
+        from rationalevault.timeline.cli import cmd_timeline
+        cmd_timeline(args)
+    elif args.command == "recommendation":
+        from rationalevault.recommendation.cli import (
+            cmd_recommendation,
+        )
+        cmd_recommendation(args)
+    elif args.command == "governance":
+        from rationalevault.governance.cli import cmd_governance
+        cmd_governance(args)
 
 
 

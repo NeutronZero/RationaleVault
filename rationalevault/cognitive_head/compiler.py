@@ -228,3 +228,45 @@ def compile_cognitive_head(
         )
 
     return result.head
+
+
+def compile_cognitive_head_v2(
+    project_id: UUID,
+    store: Any = None,
+    snapshot_manager: Any = None,
+) -> CognitiveHead:
+    """Compile CognitiveHead using the Projection Platform (ADR-027).
+
+    Phase A migration: zero-behavior change. Produces identical output
+    to compile_cognitive_head() but routes through ProjectionCompiler
+    and CognitiveHeadProjection.
+
+    This function validates that the Projection Platform produces
+    identical results to the legacy path before the switchover.
+    """
+    from rationalevault.cognitive_head.cognitive_head_projection import (
+        CognitiveHeadProjection,
+    )
+    from rationalevault.cognitive_head.snapshot import NullSnapshotManager
+    from rationalevault.db.event_store import EventStore
+    from rationalevault.projection_platform.compiler import ProjectionCompiler
+    from rationalevault.projection_platform.registry import ProjectionRegistry
+
+    if store is None:
+        store = EventStore()
+
+    if snapshot_manager is None:
+        snapshot_manager = NullSnapshotManager()
+
+    registry = ProjectionRegistry()
+    projection = CognitiveHeadProjection()
+    registry.register(projection)
+    registry.freeze()
+
+    compiler = ProjectionCompiler(
+        event_store=store,
+        snapshot_manager=snapshot_manager,
+        registry=registry,
+    )
+
+    return compiler.compile(project_id, "cognitive_head")

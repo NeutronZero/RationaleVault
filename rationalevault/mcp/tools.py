@@ -81,6 +81,390 @@ def search_knowledge(query: str, limit: int = 10, project_id: Optional[str] = No
 
 
 @server.tool()
+def search_embeddings(query: str, k: int = 10) -> list[dict]:
+    """Semantic search over knowledge embeddings using FAISS.
+
+    Requires 'rationalevault[embed]' to be installed.
+    Returns a list of search results with node_id, score, and metadata.
+    """
+    from rationalevault.embedding.provider import SentenceTransformerProvider
+    from rationalevault.embedding.builder import EmbeddingBuilder
+    from rationalevault.embedding.faiss_adapter import FAISSAdapter
+    from rationalevault.embedding.state import EmbeddingState
+    from rationalevault.embedding.canonicalizer import CanonicalKnowledgeRenderer
+    from rationalevault.knowledge.factory import get_knowledge_provider
+
+    provider = SentenceTransformerProvider()
+    builder = EmbeddingBuilder(provider)
+    adapter = FAISSAdapter(builder)
+
+    knowledge_provider = get_knowledge_provider()
+    knowledge = knowledge_provider.get_all_knowledge()
+
+    state = EmbeddingState(
+        provider=provider.provider_name,
+        model=provider.model_name,
+        dimension=provider.dimension,
+    )
+
+    for kn in knowledge:
+        canonical_text = CanonicalKnowledgeRenderer.render(
+            node_id=kn.id,
+            title=kn.title,
+            content=kn.content,
+            knowledge_type=kn.knowledge_type.value,
+            tags=kn.tags,
+            importance=kn.importance,
+            domain=kn.knowledge_domain.value,
+        )
+        content_hash = CanonicalKnowledgeRenderer.content_hash(canonical_text)
+        state.nodes[kn.id] = {
+            "canonical_text": canonical_text,
+            "content_hash": content_hash,
+        }
+
+    adapter.build(state)
+    results = adapter.search(query, k=k)
+
+    return [
+        {
+            "id": r.id,
+            "score": r.score,
+            "metadata": r.payload,
+        }
+        for r in results
+    ]
+
+
+@server.tool()
+def get_timeline(
+    limit: int = 50,
+    category: str | None = None,
+) -> list[dict]:
+    """Retrieve chronological narrative entries.
+
+    Returns timeline entries showing the system's evolution over time.
+    Each entry normalizes heterogeneous events into a uniform format
+    with sequence, event_type, category, actor, and summary.
+    """
+    from rationalevault.timeline.projection import TimelineProjection
+    from rationalevault.timeline.state import TimelineState, TimelineCategory
+
+    proj = TimelineProjection()
+
+    try:
+        from rationalevault.knowledge.factory import get_knowledge_provider
+        knowledge_provider = get_knowledge_provider()
+        knowledge = knowledge_provider.get_all_knowledge()
+
+        events = []
+        for k in knowledge:
+            from rationalevault.schema.events import EventRecord, EventType, EventMetadata
+            from uuid import uuid4
+
+            events.append(EventRecord(
+                event_sequence=len(events) + 1,
+                id=uuid4(),
+                project_id=uuid4(),
+                stream_id="knowledge",
+                version=1,
+                event_type=EventType.KNOWLEDGE_CREATED,
+                metadata=EventMetadata(actor="mcp", source="timeline"),
+                payload={
+                    "knowledge_id": k.id,
+                    "title": k.title,
+                    "content": k.content,
+                    "knowledge_type": k.knowledge_type.value,
+                    "tags": k.tags,
+                    "importance": k.importance,
+                    "knowledge_domain": k.knowledge_domain.value,
+                },
+                parent_id=None,
+                recorded_at=None,
+            ))
+
+        state = proj.reduce(events) if events else TimelineState()
+    except Exception:
+        state = TimelineState()
+
+    entries = state.entries
+
+    if category:
+        try:
+            cat = TimelineCategory(category)
+            entries = [e for e in entries if e.category == cat]
+        except ValueError:
+            return [{"error": f"Unknown category: {category}"}]
+
+    entries = entries[-limit:]
+
+    return [
+        {
+            "sequence": e.sequence,
+            "event_type": e.event_type.value,
+            "category": e.category.value,
+            "actor": e.actor,
+            "subject_entity": e.subject_entity,
+            "summary": e.summary,
+        }
+        for e in entries
+    ]
+
+
+@server.tool()
+def get_warnings(
+    limit: int = 50,
+    severity: str | None = None,
+    action: str | None = None,
+    project_id: str | None = None,
+) -> list[dict]:
+    """Retrieve governance warnings representing policy matches.
+
+    Checks derived facts and recommendations against registered policy conditions.
+    Supports filtering by severity (info, warning, critical) and action (notify, block, suggest, log).
+    """
+    from datetime import datetime
+    from rationalevault.governance.projection import GovernanceProjection
+    from rationalevault.governance.runtime import GovernanceRuntime, DefaultEvidenceProvider
+    from rationalevault.governance.state import (
+        GovernanceState,
+        GovernanceSeverity,
+        GovernanceAction,
+    )
+    from rationalevault.projection_platform.context import DependencyReader
+    from rationalevault.recommendation.projection import RecommendationProjection
+    from rationalevault.projection_platform.manager import ProjectionManager
+    from rationalevault.projection_platform.registry import ProjectionRegistry
+    from rationalevault.projection_platform.compiler import ProjectionCompiler
+
+    runtime = GovernanceRuntime()
+    state = None
+    rec_state = None
+
+    if project_id:
+        from uuid import UUID
+        pid = UUID(project_id)
+        # Setup compiler & registry with default deps
+        registry = ProjectionRegistry()
+        registry.register(GovernanceProjection())
+        registry.register(RecommendationProjection())
+        
+        # TODO: Remove DummyProjection adapter once KnowledgeProjection and EmbeddingProjection
+        # are first-class ProjectionPlatform projections. This is a temporary bridge to satisfy
+        # ProjectionCompiler dependency resolution until they are fully migrated.
+        from rationalevault.projection_platform.protocols import Projection
+        from rationalevault.projection_platform.models import ProjectionMetadata, ProjectionHealth, ProjectionCapabilities, EventSelector
+        
+        class DummyProjection(Projection):
+            def __init__(self, id: str):
+                self._id = id
+            @property
+            def metadata(self) -> ProjectionMetadata:
+                return ProjectionMetadata(id=self._id, version=1, description="Dummy", schema_version=1, consumed_events=EventSelector(types=frozenset()), capabilities=ProjectionCapabilities())
+            def initialize(self, ctx) -> None: pass
+            def reduce(self, events, initial_state=None): return None
+            def serialize(self, state): return {}
+            def deserialize(self, payload): return None
+            def health(self) -> ProjectionHealth: return ProjectionHealth.READY
+            def shutdown(self) -> None: pass
+
+        registry.register(DummyProjection("knowledge"))
+        registry.register(DummyProjection("embedding"))
+        
+        # ProjectionManager
+        compiler = ProjectionCompiler(registry=registry)
+        manager = ProjectionManager(registry, compiler)
+        
+        try:
+            state = manager.get_projection_state(pid, "governance")
+            rec_state = manager.get_projection_state(pid, "recommendation")
+        except Exception:
+            pass
+
+    if state is None:
+        state = GovernanceState()
+
+    if rec_state is None:
+        from rationalevault.recommendation.state import RecommendationState
+        rec_state = RecommendationState()
+
+
+    # Register default rule if empty and in ephemeral mode (no project_id)
+    if not project_id and not state.rules:
+        from rationalevault.governance.state import (
+            GovernanceRule,
+            GovernanceRuleMetadata,
+            GovernanceCondition,
+        )
+        from rationalevault.recommendation.state import RecommendationCategory
+        default_rule = GovernanceRule(
+            metadata=GovernanceRuleMetadata(
+                id="default_risk_notify",
+                version=1,
+                description="Default policy to notify about risks",
+                severity=GovernanceSeverity.WARNING,
+                action=GovernanceAction.NOTIFY,
+            ),
+            condition=GovernanceCondition(
+                categories={RecommendationCategory.RISK},
+                minimum_priority=0.4,
+            ),
+        )
+        state.rules.append(default_rule)
+    elif project_id and not state.rules:
+        # Empty policy mode
+        pass
+
+
+    reader = DependencyReader()
+    reader.set("recommendation", rec_state)
+    provider = DefaultEvidenceProvider(reader)
+
+    evals = runtime.evaluate_rules(state, provider)
+    warnings = runtime.generate_warnings(state, evals, query_time=datetime.now())
+
+    sev = None
+    if severity:
+        try:
+            sev = GovernanceSeverity(severity)
+        except ValueError:
+            pass
+
+    act = None
+    if action:
+        try:
+            act = GovernanceAction(action)
+        except ValueError:
+            pass
+
+    results = runtime.search(warnings, severity=sev, action=act, limit=limit)
+    return [
+        {
+            "id": w.id,
+            "rule_id": w.rule_id,
+            "rule_version": w.rule_version,
+            "target_entity": w.target_entity,
+            "severity": w.severity.value,
+            "action": w.action.value,
+            "message": w.message,
+            "evidence": w.evidence,
+            "created_at": w.created_at.isoformat(),
+        }
+        for w in results
+    ]
+
+
+@server.tool()
+def get_recommendations(
+    limit: int = 10,
+    entity: str | None = None,
+    category: str | None = None,
+) -> list[dict]:
+    """Retrieve derived recommendations from event history.
+
+    Returns recommendations ranked by intrinsic priority.
+    Recommendations are deterministic facts derived from events,
+    not query-dependent suggestions.
+    """
+    from rationalevault.recommendation.projection import (
+        RecommendationProjection,
+    )
+    from rationalevault.recommendation.runtime import (
+        RecommendationRuntime,
+    )
+    from rationalevault.recommendation.state import (
+        RecommendationState, RecommendationCategory,
+    )
+
+    proj = RecommendationProjection()
+    runtime = RecommendationRuntime()
+
+    try:
+        from rationalevault.knowledge.factory import (
+            get_knowledge_provider,
+        )
+        knowledge_provider = get_knowledge_provider()
+        knowledge = knowledge_provider.get_all_knowledge()
+
+        events = []
+        for k in knowledge:
+            from rationalevault.schema.events import (
+                EventRecord, EventType, EventMetadata,
+            )
+            from uuid import uuid4
+
+            events.append(EventRecord(
+                event_sequence=len(events) + 1,
+                id=uuid4(),
+                project_id=uuid4(),
+                stream_id="knowledge",
+                version=1,
+                event_type=EventType.KNOWLEDGE_CREATED,
+                metadata=EventMetadata(
+                    actor="mcp", source="recommendation",
+                ),
+                payload={
+                    "knowledge_id": k.id,
+                    "title": k.title,
+                    "content": k.content,
+                    "knowledge_type": k.knowledge_type.value,
+                    "tags": k.tags,
+                    "importance": k.importance,
+                    "knowledge_domain": k.knowledge_domain.value,
+                },
+                parent_id=None,
+                recorded_at=None,
+            ))
+
+        state = (
+            proj.reduce(events)
+            if events
+            else RecommendationState()
+        )
+    except Exception:
+        state = RecommendationState()
+
+    cat = None
+    if category:
+        try:
+            cat = RecommendationCategory(category)
+        except ValueError:
+            return [{"error": f"Unknown category: {category}"}]
+
+    from datetime import datetime
+    from rationalevault.recommendation.state import (
+        RecommendationQueryContext,
+    )
+    ctx = RecommendationQueryContext(query_time=datetime.now())
+
+    results = runtime.search(
+        state,
+        entity=entity,
+        category=cat,
+        k=limit,
+        context=ctx,
+    )
+
+    return [
+        {
+            "id": r.recommendation.id,
+            "rule_id": r.recommendation.rule_id,
+            "rule_version": r.recommendation.rule_version,
+            "target_entity": r.recommendation.target_entity,
+            "category": r.recommendation.category.value,
+            "priority": r.recommendation.priority,
+            "final_score": r.final_score,
+            "rationale": r.recommendation.rationale,
+            "evidence": [
+                e.sequence
+                for e in r.recommendation.evidence
+            ],
+        }
+        for r in results
+    ]
+
+
+@server.tool()
 def get_project_events(project_id: str, limit: int = 20) -> list[dict]:
     """Get the most recent event records from the ledger for a project."""
     pid = UUID(project_id)

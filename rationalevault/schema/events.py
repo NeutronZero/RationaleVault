@@ -91,12 +91,23 @@ class EventType(str, Enum):
     KNOWLEDGE_SUPERSEDED = "KNOWLEDGE_SUPERSEDED"
     KNOWLEDGE_CONTRADICTION = "KNOWLEDGE_CONTRADICTION"
 
+    # ── Knowledge Lifecycle ───────────────────────────────────────────────
+    # First-class knowledge lifecycle events. Applied in ledger order.
+    # Precedence: when multiple events exist for the same node, the last
+    # applicable event in the event stream determines final state.
+    KNOWLEDGE_CREATED = "KNOWLEDGE_CREATED"
+    KNOWLEDGE_UPDATED = "KNOWLEDGE_UPDATED"
+    KNOWLEDGE_DELETED = "KNOWLEDGE_DELETED"
+
     # ── Work-in-progress tracking ────────────────────────────────────────────────
     TASK_PROGRESS_NOTED        = "TASK_PROGRESS_NOTED"
     CONTEXT_SNAPSHOT_RECORDED  = "CONTEXT_SNAPSHOT_RECORDED"
 
     # ── Governance ─────────────────────────────────────────────────────────
     GOVERNANCE_DECISION_RECORDED = "GOVERNANCE_DECISION_RECORDED"
+    GOVERNANCE_RULE_CREATED = "GOVERNANCE_RULE_CREATED"
+    GOVERNANCE_RULE_UPDATED = "GOVERNANCE_RULE_UPDATED"
+    GOVERNANCE_RULE_DELETED = "GOVERNANCE_RULE_DELETED"
 
     # ── Skills ─────────────────────────────────────────────────────────────
     SKILL_EXECUTED = "SKILL_EXECUTED"
