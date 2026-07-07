@@ -7,13 +7,13 @@ from rationalevault.organization.graph import (
     OrganizationGraphState,
 )
 from rationalevault.organization.models import OrganizationState
-from rationalevault.recommendations.engine import (
+from rationalevault.organization.recommendations.engine import (
     FLOW_IMBALANCE_THRESHOLD,
     MIN_CLUSTER_COHESION_FOR_REVIEW,
     MIN_INVARIANT_COUNT_FOR_REVIEW,
     RecommendationEngine,
 )
-from rationalevault.recommendations.models import RecommendationCategory
+from rationalevault.organization.recommendations.models import RecommendationCategory
 
 
 def _empty_activity() -> OrganizationActivityState:

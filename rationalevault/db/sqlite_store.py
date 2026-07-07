@@ -383,7 +383,9 @@ class SQLiteEventStore(BaseEventStore):
             if recorded_at_str.endswith("Z"):
                 recorded_at_str = recorded_at_str[:-1] + "+00:00"
             recorded_at = datetime.fromisoformat(recorded_at_str)
-        except Exception:
+        except (ValueError, TypeError) as e:
+            import sys
+            sys.stderr.write(f"Warning: Failed to parse recorded_at datetime '{recorded_at_str}': {e}\n")
             recorded_at = datetime.now(timezone.utc)
 
         schema_version = 1

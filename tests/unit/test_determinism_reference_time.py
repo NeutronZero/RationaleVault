@@ -12,7 +12,7 @@ from rationalevault.organization.graph import (
     OrganizationRelationType,
 )
 from rationalevault.organization.models import OrganizationState
-from rationalevault.recommendations.engine import RecommendationEngine
+from rationalevault.organization.recommendations.engine import RecommendationEngine
 
 
 def test_reference_time_determinism() -> None:

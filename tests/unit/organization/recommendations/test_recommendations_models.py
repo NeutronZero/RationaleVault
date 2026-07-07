@@ -5,7 +5,7 @@ import hashlib
 
 import pytest
 
-from rationalevault.recommendations.models import (
+from rationalevault.organization.recommendations.models import (
     CATEGORY_PRIORITY,
     EvidenceType,
     Recommendation,

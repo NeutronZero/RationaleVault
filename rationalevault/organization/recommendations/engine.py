@@ -14,7 +14,7 @@ from rationalevault.organization.activity import OrganizationActivityState
 from rationalevault.organization.graph import OrganizationGraphState
 from rationalevault.organization.models import OrganizationState
 from rationalevault.organization.utils import resolve_compiled_at
-from rationalevault.recommendations.models import (
+from rationalevault.organization.recommendations.models import (
     EvidenceType,
     Recommendation,
     RecommendationCategory,

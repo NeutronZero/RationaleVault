@@ -9,8 +9,8 @@ from dataclasses import dataclass, field
 from typing import Any
 
 from rationalevault.evaluation.thresholds import EvaluationThresholds
-from rationalevault.recommendations.engine import RecommendationEngine
-from rationalevault.recommendations.models import (
+from rationalevault.organization.recommendations.engine import RecommendationEngine
+from rationalevault.organization.recommendations.models import (
     RecommendationSet,
 )
 

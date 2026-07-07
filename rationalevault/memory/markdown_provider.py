@@ -3,9 +3,15 @@ from __future__ import annotations
 import json
 import re
 import threading
+import sys
 from pathlib import Path
+from filelock import FileLock, Timeout
 from rationalevault.memory.base import BaseMemoryProvider
 from rationalevault.memory.models import MemoryRecord
+
+
+_provider_locks = {}
+_provider_locks_lock = threading.Lock()
 
 
 class MarkdownMemoryProvider(BaseMemoryProvider):
@@ -13,9 +19,16 @@ class MarkdownMemoryProvider(BaseMemoryProvider):
         if file_path is None:
             self.file_path = Path.cwd() / ".rationalevault" / "memory.md"
         else:
-            self.file_path = Path(file_path)
-        # Thread-safe, not multi-process safe.
-        self._lock = threading.Lock()
+            self.file_path = Path(file_path).resolve()
+        
+        # Layered locks: thread-safe (across instances) and multi-process safe
+        with _provider_locks_lock:
+            key = str(self.file_path)
+            if key not in _provider_locks:
+                _provider_locks[key] = threading.RLock()
+            self._thread_lock = _provider_locks[key]
+            
+        self._file_lock = FileLock(str(self.file_path) + ".lock", timeout=10)
 
     def _ensure_file(self) -> None:
         self.file_path.parent.mkdir(parents=True, exist_ok=True)
@@ -27,8 +40,10 @@ class MarkdownMemoryProvider(BaseMemoryProvider):
         self._ensure_file()
         records = []
         try:
-            with open(self.file_path, "r", encoding="utf-8") as f:
-                content = f.read()
+            with self._thread_lock:
+                with self._file_lock:
+                    with open(self.file_path, "r", encoding="utf-8") as f:
+                        content = f.read()
 
             # Find all JSON metadata blocks embedded in HTML comments
             matches = re.finditer(r"<!--\s*memory_record\s*(\{.*?\})\s*-->", content, re.DOTALL)
@@ -36,15 +51,20 @@ class MarkdownMemoryProvider(BaseMemoryProvider):
                 try:
                     data = json.loads(m.group(1))
                     records.append(MemoryRecord.from_dict(data))
-                except Exception:
-                    pass
-        except Exception:
+                except (json.JSONDecodeError, KeyError, TypeError, ValueError) as e:
+                    sys.stderr.write(f"Warning: Failed to parse memory record JSON block: {e}\n")
+        except FileNotFoundError:
             pass
+        except Timeout:
+            sys.stderr.write(f"Warning: Failed to acquire lock for {self.file_path}\n")
+        except Exception as e:
+            sys.stderr.write(f"Warning: Unexpected error reading memory records: {e}\n")
         return records
 
     def add_record(self, record: MemoryRecord) -> None:
-        with self._lock:
-            records = self.get_all_records()
+        with self._thread_lock:
+            with self._file_lock:
+                records = self.get_all_records()
             # Find if duplicate ID exists, if so we update it (supersede/overwrite)
             updated = False
             for idx, r in enumerate(records):

@@ -18,8 +18,8 @@ def test_cli_respects_ledger_rules(temp_project, capsys, monkeypatch):
     project_id, store = temp_project
     
     # Mock _resolve_project_id to return our temp project
-    import rationalevault.cli.main
-    monkeypatch.setattr(rationalevault.cli.main, "_resolve_project_id", lambda: project_id)
+    import rationalevault.cli.utils.project
+    monkeypatch.setattr(rationalevault.cli.utils.project, "_resolve_project_id", lambda: project_id)
     
     # Mock EventStore instantiation to return our temp store
     from rationalevault.db.event_store import EventStore

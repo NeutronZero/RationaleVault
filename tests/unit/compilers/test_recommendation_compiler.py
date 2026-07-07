@@ -3,7 +3,7 @@ from __future__ import annotations
 
 from rationalevault.compilers.claude_context import ClaudeContextCompiler
 from rationalevault.knowledge.context_compiler import ContextPackage
-from rationalevault.recommendations.models import (
+from rationalevault.organization.recommendations.models import (
     RecommendationSet,
     make_recommendation,
     RecommendationCategory,

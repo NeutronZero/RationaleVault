@@ -29,12 +29,23 @@ def _record_to_dict(rec: EventRecord) -> dict:
     }
 
 
+def _parse_project_uuid(project_id: str | None) -> UUID | None:
+    if not project_id:
+        return None
+    try:
+        return UUID(project_id)
+    except ValueError:
+        raise ValueError(json.dumps({"error": f"Invalid project_id format, expected UUID: '{project_id}'"}))
+
+
 # ── READ TOOLS ───────────────────────────────────────────────────────────────
 
 @server.tool()
 def get_cognitive_head(project_id: str) -> dict:
     """Compile and return the current project state (active tasks, decisions, open questions)."""
-    pid = UUID(project_id)
+    pid = _parse_project_uuid(project_id)
+    if not pid:
+        raise ValueError(json.dumps({"error": "project_id is required"}))
     head = compile_cognitive_head(pid)
     return head.to_dict()
 
@@ -47,7 +58,7 @@ def get_context(
     mode: str = "standard"
 ) -> dict:
     """Compile a unified context package blending events, memories, and knowledge."""
-    pid = UUID(project_id) if project_id else None
+    pid = _parse_project_uuid(project_id)
     prof = RetrievalProfile(profile) if profile else None
     ctx_mode = ContextMode(mode)
     package = compile_context(query, project_id=pid, profile=prof, mode=ctx_mode)
@@ -57,7 +68,9 @@ def get_context(
 @server.tool()
 def continue_project(project_id: str, agent: str = "claude") -> str:
     """Retrieve continuation context and render the Where I Left Off block for the given agent."""
-    pid = UUID(project_id)
+    pid = _parse_project_uuid(project_id)
+    if not pid:
+        raise ValueError(json.dumps({"error": "project_id is required"}))
     package = compile_context("continue", project_id=pid, mode=ContextMode.CONTINUATION)
     compiler = get_context_compiler(agent)
     output = compiler.compile(package)
@@ -243,7 +256,7 @@ def get_warnings(
 
     if project_id:
         from uuid import UUID
-        pid = UUID(project_id)
+        pid = _parse_project_uuid(project_id)
         # Setup compiler & registry with default deps
         registry = ProjectionRegistry()
         registry.register(GovernanceProjection())
@@ -467,7 +480,9 @@ def get_recommendations(
 @server.tool()
 def get_project_events(project_id: str, limit: int = 20) -> list[dict]:
     """Get the most recent event records from the ledger for a project."""
-    pid = UUID(project_id)
+    pid = _parse_project_uuid(project_id)
+    if not pid:
+        raise ValueError(json.dumps({"error": "project_id is required"}))
     store = EventStore()
     events = store.get_recent_events(pid, limit=limit)
     return [_record_to_dict(e) for e in events]
@@ -497,7 +512,9 @@ def record_event(
             f"Invalid event_type '{event_type}'. Must be one of: {', '.join(valid_types)}"
         )
 
-    pid = UUID(project_id)
+    pid = _parse_project_uuid(project_id)
+    if not pid:
+        raise ValueError(json.dumps({"error": "project_id is required"}))
     par_id = UUID(parent_id) if parent_id else None
 
     # Construct metadata
@@ -532,7 +549,9 @@ def record_task_progress(
     session_id: Optional[str] = None,
 ) -> dict:
     """Emit a TASK_PROGRESS_NOTED event for a task, appending a progress note."""
-    pid = UUID(project_id)
+    pid = _parse_project_uuid(project_id)
+    if not pid:
+        raise ValueError(json.dumps({"error": "project_id is required"}))
     meta = EventMetadata(
         actor=actor,
         source=source,
@@ -803,7 +822,7 @@ def get_recommendations() -> dict:
     from rationalevault.organization.activity import OrganizationActivityProjection
     from rationalevault.organization.continuation import OrganizationContinuationProjection
     from rationalevault.organization.graph import OrganizationGraphProjection
-    from rationalevault.recommendations.engine import RecommendationEngine
+    from rationalevault.organization.recommendations.engine import RecommendationEngine
     from rationalevault.knowledge.factory import get_knowledge_provider
 
     org_state, _ = build_org_state_from_registry()

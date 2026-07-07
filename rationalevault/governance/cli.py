@@ -42,7 +42,7 @@ def _cmd_governance_show(args: argparse.Namespace) -> None:
     state = None
     rec_state = None
 
-    from rationalevault.cli.main import _resolve_project_id
+    from rationalevault.cli.utils.project import _resolve_project_id
     project_id = _resolve_project_id()
 
     # If project_id is not the zero UUID (which means no project)

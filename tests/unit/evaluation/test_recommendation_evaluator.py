@@ -82,7 +82,7 @@ class TestRecommendationEvaluator:
         all_expected = set()
         for tc in RECOMMENDATION_BENCHMARK_CORPUS:
             all_expected.update(tc.expected_categories)
-        from rationalevault.recommendations.models import RecommendationCategory
+        from rationalevault.organization.recommendations.models import RecommendationCategory
         for cat in RecommendationCategory:
             assert cat.value in all_expected or any(
                 tc.name in ("empty_state",) for tc in RECOMMENDATION_BENCHMARK_CORPUS

@@ -3,8 +3,8 @@ from __future__ import annotations
 
 import pytest
 
-from rationalevault.recommendations import RecommendationEngine
-from rationalevault.recommendations.models import (
+from rationalevault.organization.recommendations import RecommendationEngine
+from rationalevault.organization.recommendations.models import (
     RecommendationCategory,
     make_recommendation,
 )

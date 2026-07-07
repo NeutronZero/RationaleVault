@@ -414,7 +414,7 @@ class ClaudeContextCompiler(ContextPackageCompiler):
 
     def _recommended_actions(self, recommendations: Any) -> str:
         """Render recommended actions from the recommendation engine."""
-        from rationalevault.recommendations.models import RecommendationSet
+        from rationalevault.organization.recommendations.models import RecommendationSet
 
         if not isinstance(recommendations, RecommendationSet):
             return ""
