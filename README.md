@@ -258,3 +258,5 @@ roadmap.md (planned evolution)
 | [Roadmap](docs/roadmap.md) | Engineering commitments and research vision |
 | [Philosophy](docs/philosophy.md) | Core design principles |
 
+
+- [JMT x402 Agent Tools](https://jmt-x402-proxy.jmthomasofficial.workers.dev) — 25 paid x402 endpoints on Base mainnet: web search, AI analysis, crypto/stock data, SEC filings, company intel, news, sentiment, macro dashboard. $0.001-$0.15/call USDC. Local LLM-powered.
