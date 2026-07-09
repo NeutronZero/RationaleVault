@@ -13,6 +13,10 @@ Design rules:
 """
 from __future__ import annotations
 
+from rationalevault.logging import get_logger
+logger = get_logger(__name__)
+
+
 import time
 from dataclasses import dataclass
 from typing import Any, Callable
@@ -304,8 +308,8 @@ class SkillExecutor:
                                 metadata=item.get("metadata", {}),
                             )
                         )
-                    except Exception:
-                        pass
+                    except Exception as e:
+                        logger.debug(f"Swallowed exception: {e}")
 
         promotion = ExecutionPromoter.promote(gate_result, candidates, policy.version)
 

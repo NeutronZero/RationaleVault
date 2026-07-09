@@ -1,6 +1,11 @@
 """CLI handler for `rv governance` subcommands."""
 
 from __future__ import annotations
+from rationalevault.logging import get_logger
+
+logger = get_logger(__name__)
+
+
 
 import argparse
 import sys
@@ -11,7 +16,7 @@ def cmd_governance(args: argparse.Namespace) -> None:
     if args.governance_command == "show":
         _cmd_governance_show(args)
     else:
-        print(f"Error: Unknown governance command '{args.governance_command}'")
+        logger.error(f"Unknown governance command '{args.governance_command}'")
         sys.exit(1)
 
 
@@ -137,7 +142,7 @@ def _cmd_governance_show(args: argparse.Namespace) -> None:
         try:
             sev = GovernanceSeverity(sev_filter)
         except ValueError:
-            print(f"Error: Unknown severity '{sev_filter}'")
+            logger.error(f"Unknown severity '{sev_filter}'")
             sys.exit(1)
 
     act = None
@@ -145,7 +150,7 @@ def _cmd_governance_show(args: argparse.Namespace) -> None:
         try:
             act = GovernanceAction(act_filter)
         except ValueError:
-            print(f"Error: Unknown action '{act_filter}'")
+            logger.error(f"Unknown action '{act_filter}'")
             sys.exit(1)
 
     limit = getattr(args, "limit", 50)

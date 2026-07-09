@@ -1,3 +1,7 @@
+from rationalevault.logging import get_logger
+
+logger = get_logger(__name__)
+
 import uuid
 from pathlib import Path
 
@@ -13,5 +17,5 @@ def _resolve_project_id() -> uuid.UUID:
             project_id = uuid.UUID(config.get("project_id", str(project_id)))
         except Exception as e:
             import sys
-            sys.stderr.write(f"Warning: Failed to parse project.yaml at {project_yaml}: {e}\n")
+            logger.warning(f"Failed to parse project.yaml at {project_yaml}: {e}")
     return project_id

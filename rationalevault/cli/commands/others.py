@@ -2,6 +2,11 @@
 RationaleVault Command Line Interface (CLI) Entry Point.
 """
 from __future__ import annotations
+from rationalevault.logging import get_logger
+
+logger = get_logger(__name__)
+
+
 
 import argparse
 import sys
@@ -20,7 +25,7 @@ def cmd_install(args: argparse.Namespace) -> None:
     relay_dir = project_root / ".rationalevault"
     
     if not relay_dir.exists():
-        print("Error: Relay has not been initialized. Run 'rationalevault init' first.")
+        logger.error("Relay has not been initialized. Run 'rationalevault init' first.")
         sys.exit(1)
 
     platform = args.platform.lower()
@@ -46,7 +51,7 @@ def cmd_install(args: argparse.Namespace) -> None:
         target.write_text(f"# Copilot Instructions\n\n{skill_text}", encoding="utf-8")
         print(f"[SUCCESS] Installed Copilot adapter in: {target.relative_to(project_root)}")
     else:
-        print(f"Error: Unknown platform '{args.platform}'. Supported: claude, cursor, opencode, copilot.")
+        logger.error(f"Unknown platform '{args.platform}'. Supported: claude, cursor, opencode, copilot.")
         sys.exit(1)
 
 
@@ -81,7 +86,7 @@ def cmd_generate_adapters(args: argparse.Namespace) -> None:
     relay_dir = project_root / ".rationalevault"
     
     if not relay_dir.exists():
-        print("Error: Relay has not been initialized. Run 'rationalevault init' first.")
+        logger.error("Relay has not been initialized. Run 'rationalevault init' first.")
         sys.exit(1)
 
     skill_file = relay_dir / "RELAY_SKILL.md"
@@ -110,7 +115,7 @@ def cmd_migrate_storage(args: argparse.Namespace) -> None:
     project_root = Path.cwd()
     project_yaml_path = project_root / ".rationalevault" / "project.yaml"
     if not project_yaml_path.exists():
-        print("Error: project.yaml not found. Run 'rationalevault init' first.")
+        logger.error("project.yaml not found. Run 'rationalevault init' first.")
         sys.exit(1)
 
     try:
@@ -122,7 +127,7 @@ def cmd_migrate_storage(args: argparse.Namespace) -> None:
 
     pid_str = config.get("project_id")
     if not pid_str:
-        print("Error: project_id not found in project.yaml")
+        logger.error("project_id not found in project.yaml")
         sys.exit(1)
     
     pid = uuid.UUID(pid_str)
@@ -131,7 +136,7 @@ def cmd_migrate_storage(args: argparse.Namespace) -> None:
     tgt_type = args.to.lower()
 
     if src_type == tgt_type:
-        print("Error: Source and target backends must be different.")
+        logger.error("Source and target backends must be different.")
         sys.exit(1)
 
     # Resolve source store
@@ -142,7 +147,7 @@ def cmd_migrate_storage(args: argparse.Namespace) -> None:
     elif src_type == "postgres":
         src_store = PostgresEventStore()
     else:
-        print(f"Error: Unknown source backend '{src_type}'")
+        logger.error(f"Unknown source backend '{src_type}'")
         sys.exit(1)
 
     # Resolve target store
@@ -151,7 +156,7 @@ def cmd_migrate_storage(args: argparse.Namespace) -> None:
     elif tgt_type == "postgres":
         tgt_store = PostgresEventStore()
     else:
-        print(f"Error: Unknown target backend '{tgt_type}'")
+        logger.error(f"Unknown target backend '{tgt_type}'")
         sys.exit(1)
 
     print(f"Migrating events for project {pid} from {src_type} to {tgt_type}...")
@@ -350,7 +355,7 @@ def cmd_graph(args: argparse.Namespace) -> None:
 
     elif args.graph_command == "stats":
         if not graph_file.exists():
-            print("Error: Graph has not been built yet. Run 'rationalevault graph build' first.")
+            logger.error("Graph has not been built yet. Run 'rationalevault graph build' first.")
             sys.exit(1)
             
         with open(graph_file, "r", encoding="utf-8") as f:
@@ -382,7 +387,7 @@ def cmd_graph(args: argparse.Namespace) -> None:
 
     elif args.graph_command == "query":
         if not graph_file.exists():
-            print("Error: Graph has not been built yet. Run 'rationalevault graph build' first.")
+            logger.error("Graph has not been built yet. Run 'rationalevault graph build' first.")
             sys.exit(1)
             
         with open(graph_file, "r", encoding="utf-8") as f:
@@ -390,7 +395,7 @@ def cmd_graph(args: argparse.Namespace) -> None:
             
         node = projection.query_node(args.node_id)
         if not node:
-            print(f"Error: Node with ID/Prefix '{args.node_id}' not found.")
+            logger.error(f"Node with ID/Prefix '{args.node_id}' not found.")
             sys.exit(1)
             
         print(f"Knowledge Node {node.id}")
@@ -420,7 +425,7 @@ def cmd_graph(args: argparse.Namespace) -> None:
 
     elif args.graph_command == "query-path":
         if not graph_file.exists():
-            print("Error: Graph has not been built yet. Run 'rationalevault graph build' first.")
+            logger.error("Graph has not been built yet. Run 'rationalevault graph build' first.")
             sys.exit(1)
             
         with open(graph_file, "r", encoding="utf-8") as f:
@@ -464,7 +469,7 @@ def cmd_graph(args: argparse.Namespace) -> None:
         elif fmt == "networkx":
             output = json.dumps(projection.export_networkx(), indent=2)
         else:
-            print(f"Error: Unknown format '{args.format}'")
+            logger.error(f"Unknown format '{args.format}'")
             sys.exit(1)
             
         if args.output:
@@ -485,7 +490,7 @@ def cmd_graph(args: argparse.Namespace) -> None:
         provider = get_knowledge_provider()
         knowledge = provider.get_all_knowledge()
         if not knowledge:
-            print("Error: No knowledge found. Run 'rationalevault knowledge synthesize' first.")
+            logger.error("No knowledge found. Run 'rationalevault knowledge synthesize' first.")
             sys.exit(1)
 
         ks = KnowledgeProjection.project(knowledge)
@@ -593,14 +598,14 @@ def cmd_project(args: argparse.Namespace) -> None:
             print(f"  Name: {entry.name}")
             print(f"  Path: {entry.path}")
         except ValueError as e:
-            print(f"Error: {e}")
+            logger.error(f"{e}")
             sys.exit(1)
 
     elif args.project_command == "unregister":
         if registry.unregister(args.project_id):
             print(f"[SUCCESS] Unregistered project '{args.project_id}'")
         else:
-            print(f"Error: Project '{args.project_id}' not found.")
+            logger.error(f"Project '{args.project_id}' not found.")
             sys.exit(1)
 
     elif args.project_command == "info":
@@ -1166,7 +1171,7 @@ def cmd_serve(args: argparse.Namespace) -> None:
     try:
         import mcp
     except ImportError:
-        print("Error: The 'mcp' package is not installed.")
+        logger.error("The 'mcp' package is not installed.")
         print("Please install it with: pip install RationaleVault[mcp]")
         sys.exit(1)
 

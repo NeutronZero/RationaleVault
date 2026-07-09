@@ -12,6 +12,11 @@ Thread safety: Implementations must be safe for concurrent reads.
 Writes are serialized by the database (SQLite WAL / PostgreSQL advisory locks).
 """
 from __future__ import annotations
+from rationalevault.logging import get_logger
+
+logger = get_logger(__name__)
+
+
 
 import sys
 from abc import ABC, abstractmethod

@@ -22,6 +22,10 @@ Design constraints:
 """
 from __future__ import annotations
 
+from rationalevault.logging import get_logger
+logger = get_logger(__name__)
+
+
 from enum import Enum
 import hashlib
 import time
@@ -249,8 +253,8 @@ def _memory_to_context_citation(mc: Any, record_map: dict[str, Any] | None = Non
             if records:
                 title = records[0].title
                 content = records[0].content
-    except Exception:
-        pass
+    except Exception as e:
+        logger.debug(f"Swallowed exception: {e}")
 
     return ContextCitation(
         source_type="memory",
@@ -280,8 +284,8 @@ def _knowledge_to_context_citation(kc: Any, knowledge_map: dict[str, Any] | None
             if k_obj:
                 title = k_obj.title
                 content = k_obj.content
-    except Exception:
-        pass
+    except Exception as e:
+        logger.debug(f"Swallowed exception: {e}")
 
     return ContextCitation(
         source_type="knowledge",
@@ -330,8 +334,8 @@ def _blend_citations(
             from rationalevault.memory.factory import get_memory_provider
             mem_records = get_memory_provider().get_by_ids(mem_ids)
             mem_map = {r.id: r for r in mem_records}
-        except Exception:
-            pass
+        except Exception as e:
+            logger.debug(f"Swallowed exception: {e}")
 
     for mc in memory_citations[: slots["memory"]]:
         citations.append(_memory_to_context_citation(mc, record_map=mem_map))
@@ -344,8 +348,8 @@ def _blend_citations(
             from rationalevault.knowledge.factory import get_knowledge_provider
             kn_objects = get_knowledge_provider().get_knowledge_by_ids(kn_ids)
             kn_map = {k.id: k for k in kn_objects}
-        except Exception:
-            pass
+        except Exception as e:
+            logger.debug(f"Swallowed exception: {e}")
 
     for kc in knowledge_citations[: slots["knowledge"]]:
         citations.append(_knowledge_to_context_citation(kc, knowledge_map=kn_map))

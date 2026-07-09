@@ -1,5 +1,10 @@
 """RationaleVault Installation Validation — Runs sanity import checks to verify the package is installed correctly."""
 from __future__ import annotations
+from rationalevault.logging import get_logger
+
+logger = get_logger(__name__)
+
+
 
 import sys
 

@@ -6,6 +6,10 @@ contracts, and the Scanner/Validator/Loader/Registry pipeline.
 """
 from __future__ import annotations
 
+from rationalevault.logging import get_logger
+logger = get_logger(__name__)
+
+
 from abc import ABC, abstractmethod
 from dataclasses import dataclass
 from enum import Enum
@@ -184,8 +188,8 @@ class PluginScanner:
                             signature=data.get("signature"),
                         )
                         descriptors.append(descriptor)
-                    except Exception:
-                        pass
+                    except Exception as e:
+                        logger.debug(f"Swallowed exception: {e}")
         return descriptors
 
 

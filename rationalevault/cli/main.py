@@ -1,8 +1,10 @@
 import argparse
 import sys
 from rationalevault.cli.registry import register_all
+from rationalevault.logging import configure
 
 def main() -> None:
+    configure()
     parser = argparse.ArgumentParser(description="RationaleVault Cognitive Continuity CLI")
     subparsers = parser.add_subparsers(dest="command", required=True)
 
