@@ -1,0 +1,14 @@
+[build-system]
+requires = ["hatchling"]
+build-backend = "hatchling.build"
+
+[project]
+name = "timeline_extension"
+version = "0.1.0"
+description = "Example extension for RationaleVault"
+dependencies = [
+    "rationalevault>=1.4.0",
+]
+
+[project.entry-points."rationalevault.plugins"]
+timeline = "timeline_extension.projection:TimelineProjection"

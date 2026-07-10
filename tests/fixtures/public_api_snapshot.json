@@ -1,0 +1,170 @@
+{
+    "rationalevault.projection_platform": {
+        "Projection": {
+            "kind": "class",
+            "module": "rationalevault.projection_platform",
+            "tier": "stable",
+            "introduced": "2.0",
+            "deprecated": null,
+            "replacement": null
+        },
+        "ProjectionContext": {
+            "kind": "class",
+            "module": "rationalevault.projection_platform",
+            "tier": "stable",
+            "introduced": "2.0",
+            "deprecated": null,
+            "replacement": null
+        },
+        "ProjectionManager": {
+            "kind": "class",
+            "module": "rationalevault.projection_platform",
+            "tier": "stable",
+            "introduced": "2.0",
+            "deprecated": null,
+            "replacement": null
+        },
+        "DependencyReader": {
+            "kind": "class",
+            "module": "rationalevault.projection_platform",
+            "tier": "stable",
+            "introduced": "2.0",
+            "deprecated": null,
+            "replacement": null
+        },
+        "MetricsCollector": {
+            "kind": "class",
+            "module": "rationalevault.projection_platform",
+            "tier": "stable",
+            "introduced": "2.0",
+            "deprecated": null,
+            "replacement": null
+        },
+        "ProjectionCapabilities": {
+            "kind": "class",
+            "module": "rationalevault.projection_platform",
+            "tier": "stable",
+            "introduced": "2.0",
+            "deprecated": null,
+            "replacement": null
+        },
+        "ProjectionHealth": {
+            "kind": "class",
+            "module": "rationalevault.projection_platform",
+            "tier": "stable",
+            "introduced": "2.0",
+            "deprecated": null,
+            "replacement": null
+        },
+        "ProjectionMetadata": {
+            "kind": "class",
+            "module": "rationalevault.projection_platform",
+            "tier": "stable",
+            "introduced": "2.0",
+            "deprecated": null,
+            "replacement": null
+        },
+        "EventSelector": {
+            "kind": "class",
+            "module": "rationalevault.projection_platform",
+            "tier": "stable",
+            "introduced": "2.0",
+            "deprecated": null,
+            "replacement": null
+        },
+        "ConformanceSuite": {
+            "kind": "class",
+            "module": "rationalevault.projection_platform",
+            "tier": "stable",
+            "introduced": "2.0",
+            "deprecated": null,
+            "replacement": null
+        },
+        "ProjectionConformanceProvider": {
+            "kind": "class",
+            "module": "rationalevault.projection_platform",
+            "tier": "stable",
+            "introduced": "2.0",
+            "deprecated": null,
+            "replacement": null
+        }
+    },
+    "rationalevault.skills": {
+        "BaseSkill": {
+            "kind": "class",
+            "module": "rationalevault.skills",
+            "tier": "stable",
+            "introduced": "2.0",
+            "deprecated": null,
+            "replacement": null
+        },
+        "SkillManifest": {
+            "kind": "class",
+            "module": "rationalevault.skills",
+            "tier": "stable",
+            "introduced": "2.0",
+            "deprecated": null,
+            "replacement": null
+        },
+        "SkillInput": {
+            "kind": "class",
+            "module": "rationalevault.skills",
+            "tier": "stable",
+            "introduced": "2.0",
+            "deprecated": null,
+            "replacement": null
+        },
+        "SkillOutput": {
+            "kind": "class",
+            "module": "rationalevault.skills",
+            "tier": "stable",
+            "introduced": "2.0",
+            "deprecated": null,
+            "replacement": null
+        }
+    },
+    "rationalevault.schema": {
+        "EventRecord": {
+            "kind": "class",
+            "module": "rationalevault.schema",
+            "tier": "stable",
+            "introduced": "2.0",
+            "deprecated": null,
+            "replacement": null
+        },
+        "EventType": {
+            "kind": "class",
+            "module": "rationalevault.schema",
+            "tier": "stable",
+            "introduced": "2.0",
+            "deprecated": null,
+            "replacement": null
+        },
+        "EventMetadata": {
+            "kind": "class",
+            "module": "rationalevault.schema",
+            "tier": "stable",
+            "introduced": "2.0",
+            "deprecated": null,
+            "replacement": null
+        },
+        "SchemaPolicy": {
+            "kind": "class",
+            "module": "rationalevault.schema",
+            "tier": "stable",
+            "introduced": "2.0",
+            "deprecated": null,
+            "replacement": null
+        }
+    },
+    "rationalevault.memory": {
+        "BaseMemoryProvider": {
+            "kind": "class",
+            "module": "rationalevault.memory",
+            "tier": "stable",
+            "introduced": "2.0",
+            "deprecated": null,
+            "replacement": null
+        }
+    }
+}

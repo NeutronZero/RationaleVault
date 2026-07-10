@@ -1,0 +1,44 @@
+"""Example state for the Task Tracker projection."""
+from __future__ import annotations
+
+from dataclasses import dataclass, field
+
+
+# Decision:
+# State classes must be comprised purely of standard Python datatypes
+# (primitives, dicts, lists, sets, and dataclasses).
+#
+# Why:
+# The snapshot store will serialize this object to JSON or Protobuf.
+# If you include a live database connection, a threading.Lock, or a network
+# socket, serialization will fail, and snapshot recovery will break.
+
+@dataclass
+class TaskItem:
+    """A single task."""
+    id: str
+    description: str
+    owner: str
+    completed: bool = False
+
+    def __eq__(self, other: object) -> bool:
+        if not isinstance(other, TaskItem):
+            return False
+        return (
+            self.id == other.id
+            and self.description == other.description
+            and self.owner == other.owner
+            and self.completed == other.completed
+        )
+
+
+@dataclass
+class TaskTrackerState:
+    """The materialized view of all tasks."""
+    tasks: dict[str, TaskItem] = field(default_factory=dict)
+    
+    # We explicitly implement __eq__ so the framework knows when the state has changed
+    def __eq__(self, other: object) -> bool:
+        if not isinstance(other, TaskTrackerState):
+            return False
+        return self.tasks == other.tasks

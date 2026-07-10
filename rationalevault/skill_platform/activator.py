@@ -18,7 +18,6 @@ import sys
 from typing import Any, Callable
 
 from rationalevault.skill_platform.resolver import SkillDescriptor
-from rationalevault.skills.base import BaseSkill
 
 
 class SkillActivationError(Exception):
@@ -96,6 +95,7 @@ class SkillActivator:
                 f"Skill '{descriptor.name}' instance is not callable"
             )
 
+        from rationalevault.skills.base import BaseSkill
         if isinstance(instance, BaseSkill):
             # Wrap BaseSkill to map dict inputs/outputs to SkillInput/SkillOutput
             from rationalevault.skill_platform.skill_input import SkillInput, ProjectionSnapshot

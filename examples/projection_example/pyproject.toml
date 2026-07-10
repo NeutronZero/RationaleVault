@@ -1,0 +1,14 @@
+[build-system]
+requires = ["hatchling"]
+build-backend = "hatchling.build"
+
+[project]
+name = "projection_example"
+version = "0.1.0"
+description = "Example projection for RationaleVault"
+dependencies = [
+    "rationalevault>=1.4.0",
+]
+
+[project.entry-points."rationalevault.plugins"]
+example = "projection_example.projection:CounterProjection"

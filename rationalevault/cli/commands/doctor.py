@@ -4,10 +4,19 @@ import sys
 
 def register(subparsers: argparse._SubParsersAction) -> None:
     parser = subparsers.add_parser("doctor", help="Check diagnostics and system status")
+    
+    doctor_subparsers = parser.add_subparsers(dest="doctor_target", required=False)
+    proj_parser = doctor_subparsers.add_parser("projection", help="Validate a projection directory")
+    proj_parser.add_argument("path", help="Path to the projection directory")
+    
     parser.set_defaults(func=handler)
 
 
 def handler(args: argparse.Namespace) -> None:
+    if getattr(args, "doctor_target", None) == "projection":
+        from rationalevault.cli.scaffolders.validator import validate_projection
+        sys.exit(0 if validate_projection(args.path) else 1)
+
     from rationalevault.diagnostics.doctor import run_diagnostics
     report = run_diagnostics()
     
