@@ -1,0 +1,8 @@
+{
+  "name": "array_ordering",
+  "description": "Arrays preserve insertion order, never sorted",
+  "input": {"items": [3, 1, 2]},
+  "expected_canonical": "{\"items\":[3,1,2]}",
+  "expected_hash": null,
+  "expected_deserialized": {"items": [3, 1, 2]}
+}

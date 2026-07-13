@@ -1,0 +1,8 @@
+{
+  "name": "unicode_normalization",
+  "description": "Strings must be NFC normalized",
+  "input": {"key": "caf\u0065\u0301"},
+  "expected_canonical": "{\"key\":\"caf\u00e9\"}",
+  "expected_hash": null,
+  "expected_deserialized": {"key": "caf\u00e9"}
+}

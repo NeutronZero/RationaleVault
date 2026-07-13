@@ -1,0 +1,8 @@
+{
+  "name": "deep_nesting",
+  "description": "Deeply nested objects are recursively canonicalized",
+  "input": {"a": {"b": {"c": {"z": 1, "a": 2}}}},
+  "expected_canonical": "{\"a\":{\"b\":{\"c\":{\"a\":2,\"z\":1}}}}",
+  "expected_hash": null,
+  "expected_deserialized": {"a": {"b": {"c": {"a": 2, "z": 1}}}}
+}

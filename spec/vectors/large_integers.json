@@ -1,0 +1,8 @@
+{
+  "name": "large_integers",
+  "description": "Large integers are preserved exactly",
+  "input": {"big": 9007199254740993},
+  "expected_canonical": "{\"big\":9007199254740993}",
+  "expected_hash": null,
+  "expected_deserialized": {"big": 9007199254740993}
+}

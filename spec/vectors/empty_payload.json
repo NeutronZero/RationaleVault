@@ -1,0 +1,8 @@
+{
+  "name": "empty_payload",
+  "description": "Empty objects are valid",
+  "input": {},
+  "expected_canonical": "{}",
+  "expected_hash": null,
+  "expected_deserialized": {}
+}

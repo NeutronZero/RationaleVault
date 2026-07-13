@@ -1,0 +1,8 @@
+{
+  "name": "binary_encoding",
+  "description": "Binary data must be base64 encoded",
+  "input": {"data": "AAE="},
+  "expected_canonical": "{\"data\":\"AAE=\"}",
+  "expected_hash": null,
+  "expected_deserialized": {"data": "AAE="}
+}

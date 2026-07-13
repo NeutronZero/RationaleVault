@@ -1,0 +1,8 @@
+{
+  "name": "null_semantics",
+  "description": "Missing, null, and default are distinct states",
+  "input": {"present": "value", "explicit_null": null},
+  "expected_canonical": "{\"explicit_null\":null,\"present\":\"value\"}",
+  "expected_hash": null,
+  "expected_deserialized": {"explicit_null": null, "present": "value"}
+}

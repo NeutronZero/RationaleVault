@@ -1,0 +1,8 @@
+{
+  "name": "decimal_normalization",
+  "description": "Decimals must be canonicalized (no trailing zeros)",
+  "input": {"a": 0.5, "b": 0.50, "c": 1.0, "d": 0.001},
+  "expected_canonical": "{\"a\":0.5,\"b\":0.5,\"c\":1.0,\"d\":0.001}",
+  "expected_hash": null,
+  "expected_deserialized": {"a": 0.5, "b": 0.5, "c": 1.0, "d": 0.001}
+}

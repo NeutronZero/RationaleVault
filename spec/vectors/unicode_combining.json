@@ -1,0 +1,8 @@
+{
+  "name": "unicode_combining",
+  "description": "Combining characters are normalized to NFC",
+  "input": {"text": "e\u0301"},
+  "expected_canonical": "{\"text\":\"\u00e9\"}",
+  "expected_hash": null,
+  "expected_deserialized": {"text": "\u00e9"}
+}

@@ -1,0 +1,8 @@
+{
+  "name": "mixed_normalization",
+  "description": "Mixed NFC/NFD strings are normalized to NFC",
+  "input": {"text": "cafe\u0301"},
+  "expected_canonical": "{\"text\":\"caf\u00e9\"}",
+  "expected_hash": null,
+  "expected_deserialized": {"text": "caf\u00e9"}
+}
