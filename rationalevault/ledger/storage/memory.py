@@ -29,18 +29,20 @@ class MemoryLedger(Ledger):
         stream_id = commit.stream_id
         current_seq = self._stream_sequences.get(stream_id, 0)
 
-        # Check sequence gap by looking at first event's sequence
+        # Validate sequence contiguity
         first_seq = commit.events[0].sequence
-        if first_seq != current_seq + 1:
-            raise ValueError(
-                f"Sequence gap in stream {stream_id}: "
-                f"expected seq {current_seq + 1}, got {first_seq}"
-            )
+        for i, event in enumerate(commit.events):
+            expected = current_seq + 1 + i
+            if event.sequence != expected:
+                raise ValueError(
+                    f"Sequence gap in stream {stream_id}: "
+                    f"expected seq {expected}, got {event.sequence}"
+                )
 
         global_order = self._next_global_order
         self._next_global_order += 1
 
-        sequence_start = first_seq
+        sequence_start = commit.events[0].sequence
         sequence_end = first_seq + len(commit.events) - 1
 
         for i, event in enumerate(commit.events):
