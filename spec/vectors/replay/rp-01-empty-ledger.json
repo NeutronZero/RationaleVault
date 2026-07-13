@@ -1,0 +1,8 @@
+{
+  "name": "rp-01-empty-ledger",
+  "description": "Replay of empty Ledger produces empty Understanding",
+  "ledger": {},
+  "replay": {"scope": "global"},
+  "expected": {"projections": {}},
+  "invariants": ["I-01", "I-01a"]
+}

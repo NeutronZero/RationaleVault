@@ -1,0 +1,38 @@
+{
+  "name": "rp-04-multi-event-commit",
+  "description": "Multi-Event Commit preserves Event order through Replay",
+  "ledger": {
+    "streams": {
+      "test-stream": [
+        {
+          "event_id": "EVT-a1b2c3d4e5f6",
+          "sequence": 1,
+          "global_order": 1,
+          "event_type": "core/TestEvent",
+          "payload": {"step": 1}
+        },
+        {
+          "event_id": "EVT-b2c3d4e5f6a7",
+          "sequence": 2,
+          "global_order": 1,
+          "event_type": "core/TestEvent",
+          "payload": {"step": 2}
+        },
+        {
+          "event_id": "EVT-c3d4e5f6a7b8",
+          "sequence": 3,
+          "global_order": 1,
+          "event_type": "core/TestEvent",
+          "payload": {"step": 3}
+        }
+      ]
+    }
+  },
+  "replay": {"scope": "global"},
+  "expected": {
+    "projections": {
+      "counter": {"events_processed": 3}
+    }
+  },
+  "invariants": ["I-01", "I-12"]
+}

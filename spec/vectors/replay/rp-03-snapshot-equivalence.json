@@ -1,0 +1,39 @@
+{
+  "name": "rp-03-snapshot-equivalence",
+  "description": "Delta replay from a Snapshot produces Understanding identical to Full replay",
+  "ledger": {
+    "streams": {
+      "test-stream": [
+        {
+          "event_id": "EVT-a1b2c3d4e5f6",
+          "sequence": 1,
+          "global_order": 1,
+          "event_type": "core/TestEvent",
+          "payload": {"key": "value"}
+        },
+        {
+          "event_id": "EVT-b2c3d4e5f6a7",
+          "sequence": 2,
+          "global_order": 2,
+          "event_type": "core/TestEvent",
+          "payload": {"key": "value2"}
+        }
+      ]
+    }
+  },
+  "replay": {
+    "scope": "global",
+    "mode": "delta",
+    "snapshot": {
+      "projection_id": "counter",
+      "replay_position": 1,
+      "state": {"events_processed": 1}
+    }
+  },
+  "expected": {
+    "projections": {
+      "counter": {"events_processed": 2}
+    }
+  },
+  "invariants": ["I-07"]
+}
