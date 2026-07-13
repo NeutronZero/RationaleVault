@@ -43,6 +43,19 @@ Phase 1A validates the following invariants:
 | **I-00** | Canonical Representation | Semantically equivalent objects produce identical canonical representations. |
 | **I-08** | Referential Transparency | All identifiers are deterministically generated via hash of their content and context. |
 
+## 3.1 Constitutional Principle
+
+The following principle has **constitutional status** and must not be violated:
+
+> **Replay consumes canonical events only.**
+
+This protects the replay engine from every future compatibility concern:
+- Legacy formats → Canonicalization Adapters → Replay
+- External connectors → Canonicalization Adapters → Replay
+- Future RVCJ versions → Canonicalization Adapters → Replay
+
+Replay remains permanently simple. This principle must be preserved in all future versions.
+
 **Depends on:** None (foundational layer).
 
 **Enables:** I-01 (Replay Determinism), I-10 (Schema Evolution Compatibility).
@@ -56,10 +69,12 @@ rationalevault/
 └── canonical/
     ├── __init__.py
     ├── specification.py      # RVCJ v1 rules as constants (no logic)
+    ├── types.py              # Shared types (EventType enum, etc.)
+    ├── timestamp.py          # CanonicalTimestamp value object
+    ├── payload.py            # CanonicalPayload value object
     ├── envelope.py           # CanonicalEnvelope dataclass
     ├── serializer.py         # CanonicalSerializer implementation
     ├── stable_id.py          # StableIdGenerator
-    ├── types.py              # Shared types (EventType enum, etc.)
     ├── compliance/
     │   ├── __init__.py
     │   ├── vectors.py        # Loads vectors from spec/vectors/
@@ -67,6 +82,8 @@ rationalevault/
     └── tests/
         ├── __init__.py
         ├── test_specification.py
+        ├── test_timestamp.py
+        ├── test_payload.py
         ├── test_envelope.py
         ├── test_serializer.py
         ├── test_stable_id.py
@@ -120,6 +137,18 @@ RESERVED_PAYLOAD_NAMESPACES = ["meta"]
 ```
 
 ## 5.2 Canonicalization Rules
+
+### 5.2.0 Reserved Extension Points
+
+The following namespaces are reserved for future extensions:
+
+| Namespace | Purpose | Status |
+|-----------|---------|--------|
+| `meta/` | System-level metadata | Reserved, unused |
+| `internal/` | Internal implementation details | Reserved, unused |
+| `experimental/` | Experimental features | Reserved, unused |
+
+Payloads must not use these as keys. Future versions may use these for system-level metadata without breaking existing payloads.
 
 ### 5.2.1 Object Ordering
 
@@ -311,10 +340,10 @@ Everything domain-specific.
 ### `timestamp`
 
 - **Required:** Yes
-- **Type:** str
+- **Type:** CanonicalTimestamp (value object)
 - **Description:** UTC timestamp for auditing and provenance. Never used for replay ordering.
-- **Format:** `YYYY-MM-DDTHH:MM:SS.ffffffZ`
-- **Constraint:** Always UTC. Always microsecond precision.
+- **Format:** RFC 3339 / ISO-8601, microsecond precision, UTC only
+- **Constraint:** Always UTC. Always microsecond precision. Enforced by value object.
 
 ### `actor`
 
@@ -351,11 +380,23 @@ class CanonicalPayload:
     data: dict[str, Any]
     
     def validate(self) -> None:
-        """Validate payload against schema constraints."""
+        """Validate payload against schema constraints.
+        
+        Answers: Is this payload legal?
+        - Required fields present
+        - Types correct
+        - No extra fields (strict mode)
+        """
         ...
     
     def canonicalize(self) -> 'CanonicalPayload':
-        """Return canonical form of payload."""
+        """Return canonical form of payload.
+        
+        Answers: What is its unique canonical form?
+        - Keys sorted lexicographic
+        - Values normalized (NFC, decimal, timestamps)
+        - Recursively applied to nested objects
+        """
         ...
     
     def content_digest(self) -> str:
@@ -368,9 +409,57 @@ class CanonicalPayload:
     def from_dict(cls, data: dict[str, Any]) -> 'CanonicalPayload': ...
 ```
 
-**Purpose:** Encapsulates payload-level canonicalization rules, validation, and schema evolution constraints.
+**Processing Pipeline:**
+```
+Raw Payload
+    ↓
+validate()        ← Is this payload legal?
+    ↓
+canonicalize()    ← What is its unique canonical form?
+    ↓
+Canonical Payload
+    ↓
+content_digest()  ← What is its deterministic hash?
+```
 
-**Reserved Namespace:** `meta` — reserved for future extensions. Payloads should not use `meta` as a key.
+**Reserved Namespaces:** `meta/`, `internal/`, `experimental/` — reserved for future extensions. Payloads must not use these as keys.
+
+## 6.5 CanonicalTimestamp
+
+An immutable value object that enforces UTC timestamps with RFC 3339 formatting.
+
+```python
+@dataclass(frozen=True)
+class CanonicalTimestamp:
+    value: datetime
+    
+    def __post_init__(self) -> None:
+        """Enforce UTC and microsecond precision."""
+        if self.value.tzinfo is None:
+            raise ValueError("Timestamp must be timezone-aware")
+        if self.value.tzinfo != UTC:
+            self.value = self.value.astimezone(UTC)
+    
+    def to_iso8601(self) -> str:
+        """Return RFC 3339 formatted string: YYYY-MM-DDTHH:MM:SS.ffffffZ"""
+        ...
+    
+    def to_dict(self) -> str:
+        """Return canonical string representation."""
+        return self.to_iso8601()
+    
+    @classmethod
+    def from_datetime(cls, dt: datetime) -> 'CanonicalTimestamp': ...
+    
+    @classmethod
+    def from_iso8601(cls, s: str) -> 'CanonicalTimestamp': ...
+```
+
+**Constraints:**
+- Always UTC (enforced on construction)
+- Always microsecond precision
+- Always RFC 3339 format with `Z` suffix
+- Immutable after creation
 
 ## 6.6 Semantic Content Definition
 
@@ -416,7 +505,7 @@ class CanonicalEnvelope:
     event_type: EventType
     stream_id: str
     sequence: int
-    timestamp: str
+    timestamp: CanonicalTimestamp
     actor: str
     payload: CanonicalPayload
     correlation_id: Optional[str] = None
@@ -451,6 +540,36 @@ The Canonical Object is an intermediate representation that:
 4. Is ready for serialization
 
 This layer ensures that serialization is a pure function of the canonical object, not dependent on how the envelope was constructed.
+
+## 6.9 Canonical Processing Pipeline
+
+The full processing pipeline distinguishes validation from canonicalization:
+
+```
+Raw Input
+    ↓
+Validation          ← Is this input legal?
+    ↓
+Canonicalization    ← What is its unique canonical form?
+    ↓
+Canonical Object
+    ↓
+Serialization       ← What are its canonical bytes?
+    ↓
+Canonical Bytes
+```
+
+**Validation** answers: "Is this input legal?"
+- Required fields present
+- Types correct
+- Constraints satisfied
+
+**Canonicalization** answers: "What is its unique canonical form?"
+- Keys sorted
+- Values normalized
+- Recursively applied
+
+Keeping these responsibilities distinct makes schema evolution cleaner.
 
 ---
 
@@ -760,7 +879,11 @@ specification.py (no dependencies)
     ↓
 types.py (depends on specification)
     ↓
-envelope.py (depends on types, specification)
+timestamp.py (depends on specification)
+    ↓
+payload.py (depends on specification, types)
+    ↓
+envelope.py (depends on timestamp, payload, types)
     ↓
 serializer.py (depends on envelope, specification)
     ↓
@@ -773,12 +896,14 @@ compliance/ (depends on all above)
 
 1. `specification.py` — Define rules as constants
 2. `types.py` — Shared type definitions (EventType enum)
-3. `spec/vectors/` — Write compliance vectors BEFORE serializer (TDD at spec level)
-4. `envelope.py` — CanonicalEnvelope and CanonicalPayload
-5. `serializer.py` — CanonicalSerializer
-6. `stable_id.py` — StableIdGenerator
-7. `compliance/validator.py` — Validation runner
-8. Tests — All test files
+3. `timestamp.py` — CanonicalTimestamp value object
+4. `spec/vectors/` — Write compliance vectors BEFORE serializer (TDD at spec level)
+5. `payload.py` — CanonicalPayload value object
+6. `envelope.py` — CanonicalEnvelope dataclass
+7. `serializer.py` — CanonicalSerializer
+8. `stable_id.py` — StableIdGenerator
+9. `compliance/validator.py` — Validation runner
+10. Tests — All test files
 
 ---
 
@@ -799,6 +924,10 @@ Phase 1A is complete when:
 | ✅ Semantic content | Experience ID generation follows formal definition |
 | ✅ Canonical object | Serializer operates on canonical object graph |
 | ✅ Compliance vectors | Language-independent spec artifacts in spec/vectors/ |
+| ✅ CanonicalTimestamp | Value object enforces UTC, validation, canonical formatting |
+| ✅ Processing pipeline | Validation and canonicalization are distinct |
+| ✅ Reserved namespaces | meta/, internal/, experimental/ reserved |
+| ✅ Constitutional principle | "Replay consumes canonical events only" documented |
 
 ---
 
@@ -825,12 +954,15 @@ Phase 1A is complete when:
 | Decimal precision | Canonical normalization | No trailing zeros, no fixed precision, deterministic |
 | Identity separation | Experience ID ≠ Event ID | Semantic content vs recording metadata |
 | Schema evolution | Never migrate history | Canonicalization adapters transform legacy events |
-| Replay input | Canonical events only | Architectural principle: replay is unaware of legacy |
+| Replay input | Canonical events only | Constitutional principle: replay is unaware of legacy |
 | Version axes | rvcj_version + event_schema_version | Independent evolution of envelope format and payload schema |
 | Compliance vectors | Language-independent spec artifacts | Vectors define compliance; validator merely executes |
 | Serializer method | content_digest() | Avoids Python builtin hash() conflict |
 | Canonical object | Intermediate layer | Serializer operates on normalized, validated object graph |
-| Payload namespace | meta reserved | Future extensions without breaking changes |
+| Payload namespaces | meta/, internal/, experimental/ | Reserved for future extensions |
+| Timestamp | CanonicalTimestamp value object | UTC enforcement, validation, canonical formatting |
+| Processing pipeline | Validation → Canonicalization | Distinct responsibilities for schema evolution |
+| Replay isolation | Constitutional principle | Protects replay from all future compatibility concerns |
 
 ---
 
@@ -856,6 +988,18 @@ All implementations must use `CanonicalSerializer.serialize()` to produce canoni
 - `event_schema_version`: Payload schema version. Changes when payload structure changes.
 
 These evolve independently. A payload schema change does not require an envelope format change, and vice versa.
+
+## 16.5 Reserved Namespaces
+
+The following namespaces are reserved in all payloads:
+
+| Namespace | Purpose | Status |
+|-----------|---------|--------|
+| `meta/` | System-level metadata | Reserved, unused |
+| `internal/` | Internal implementation details | Reserved, unused |
+| `experimental/` | Experimental features | Reserved, unused |
+
+Implementations must not use these as payload keys. Future versions may use these for system-level metadata without breaking existing payloads.
 
 ---
 
