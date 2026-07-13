@@ -59,10 +59,10 @@ rationalevault/
     ├── envelope.py           # CanonicalEnvelope dataclass
     ├── serializer.py         # CanonicalSerializer implementation
     ├── stable_id.py          # StableIdGenerator
-    ├── types.py              # Shared types (EventTypes, etc.)
+    ├── types.py              # Shared types (EventType enum, etc.)
     ├── compliance/
     │   ├── __init__.py
-    │   ├── vectors.py        # Compliance test vectors
+    │   ├── vectors.py        # Loads vectors from spec/vectors/
     │   └── validator.py      # Cross-implementation validator
     └── tests/
         ├── __init__.py
@@ -73,6 +73,21 @@ rationalevault/
         ├── test_roundtrip.py
         ├── test_compliance.py
         └── test_invariants.py
+
+spec/
+└── vectors/                  # Language-independent compliance vectors
+    ├── key_ordering.json
+    ├── unicode_normalization.json
+    ├── decimal_normalization.json
+    ├── timestamp_format.json
+    ├── null_semantics.json
+    ├── binary_encoding.json
+    ├── array_ordering.json
+    ├── deep_nesting.json
+    ├── empty_payload.json
+    ├── large_integers.json
+    ├── unicode_combining.json
+    └── mixed_normalization.json
 ```
 
 ---
@@ -87,6 +102,7 @@ The specification defines canonicalization rules as Python constants. It contain
 # rationalevault/canonical/specification.py
 
 RVCJ_VERSION = 1
+EVENT_SCHEMA_VERSION = 1
 
 KEY_ORDERING = "lexicographic"
 UNICODE_NORMALIZATION = "NFC"
@@ -95,6 +111,12 @@ TIMESTAMP_PRECISION = "microsecond"
 DECIMAL_POLICY = "canonical_normalization"
 BINARY_ENCODING = "base64"
 NULL_SEMANTICS = "explicit"
+
+HASH_ALGORITHM = "sha-256"
+HASH_DISPLAY_LENGTH = 12
+HASH_INTERNAL_LENGTH = 32  # bytes
+
+RESERVED_PAYLOAD_NAMESPACES = ["meta"]
 ```
 
 ## 5.2 Canonicalization Rules
@@ -226,9 +248,10 @@ Everything domain-specific.
 
 | Field | Layer | Required | Type | Description |
 |-------|-------|----------|------|-------------|
-| `schema_version` | 1 | Yes | int | Envelope version (starts at 1) |
+| `rvcj_version` | 1 | Yes | int | RVCJ envelope format version (starts at 1) |
+| `event_schema_version` | 1 | Yes | int | Event payload schema version (starts at 1) |
 | `experience_id` | 1 | Yes | str | Groups events into one experience |
-| `event_type` | 1 | Yes | str | Replay dispatch key |
+| `event_type` | 1 | Yes | EventType | Replay dispatch key (enum/registry) |
 | `stream_id` | 1 | Yes | str | Ordering boundary identifier |
 | `sequence` | 1 | Yes | int | Deterministic order within stream |
 | `timestamp` | 2 | Yes | str | UTC ISO-8601, microsecond precision |
@@ -239,12 +262,21 @@ Everything domain-specific.
 
 ## 6.3 Field Definitions
 
-### `schema_version`
+### `rvcj_version`
 
 - **Required:** Yes
 - **Type:** int
-- **Description:** Version of the envelope schema. Drives schema evolution.
-- **Constraint:** Must be a positive integer.
+- **Description:** Version of the RVCJ envelope format. Drives envelope-level schema evolution.
+- **Constraint:** Must be a positive integer. Starts at 1.
+- **Independence:** Evolves independently of event payload schema.
+
+### `event_schema_version`
+
+- **Required:** Yes
+- **Type:** int
+- **Description:** Version of the event payload schema. Drives payload-level schema evolution.
+- **Constraint:** Must be a positive integer. Starts at 1.
+- **Independence:** Evolves independently of envelope format.
 
 ### `experience_id`
 
@@ -252,14 +284,14 @@ Everything domain-specific.
 - **Type:** str
 - **Description:** Groups events belonging to a single Experience. One Experience may generate multiple events.
 - **Format:** `EXP-{hash_prefix}` (12 hex characters)
-- **Generation:** Hash of semantic content (excluding recording metadata).
+- **Generation:** Hash of semantic content (see Section 6.6).
 
 ### `event_type`
 
 - **Required:** Yes
-- **Type:** str
-- **Description:** Determines replay dispatch. Must be a known event type.
-- **Constraint:** Non-empty string.
+- **Type:** EventType (enum/registry)
+- **Description:** Determines replay dispatch. Must be a registered event type.
+- **Constraint:** Must be a known EventType. Schema evolution safer with enum than arbitrary strings.
 
 ### `stream_id`
 
@@ -311,21 +343,24 @@ Everything domain-specific.
 
 ## 6.4 CanonicalPayload
 
-A wrapper around domain data that enforces canonical rules.
+An immutable value object that enforces canonical rules on domain data.
 
 ```python
 @dataclass(frozen=True)
 class CanonicalPayload:
     data: dict[str, Any]
-```
-
-**Purpose:** Encapsulates payload-level canonicalization rules, validation, and schema evolution constraints.
-
-**Interface:**
-```python
-@dataclass(frozen=True)
-class CanonicalPayload:
-    data: dict[str, Any]
+    
+    def validate(self) -> None:
+        """Validate payload against schema constraints."""
+        ...
+    
+    def canonicalize(self) -> 'CanonicalPayload':
+        """Return canonical form of payload."""
+        ...
+    
+    def content_digest(self) -> str:
+        """Produce deterministic hash of canonical payload."""
+        ...
     
     def to_dict(self) -> dict[str, Any]: ...
     
@@ -333,14 +368,52 @@ class CanonicalPayload:
     def from_dict(cls, data: dict[str, Any]) -> 'CanonicalPayload': ...
 ```
 
-## 6.5 CanonicalEnvelope
+**Purpose:** Encapsulates payload-level canonicalization rules, validation, and schema evolution constraints.
+
+**Reserved Namespace:** `meta` — reserved for future extensions. Payloads should not use `meta` as a key.
+
+## 6.6 Semantic Content Definition
+
+The `experience_id` is generated from **semantic content** — the meaning of the experience, not its recording.
+
+### Included in Semantic Content
+
+| Field | Rationale |
+|-------|-----------|
+| `event_type` | Defines what kind of experience occurred |
+| `payload` | Contains the domain-specific meaning |
+
+### Excluded from Semantic Content
+
+| Field | Rationale |
+|-------|-----------|
+| `timestamp` | Recording metadata, not meaning |
+| `sequence` | Recording metadata, not meaning |
+| `stream_id` | Ordering boundary, not identity |
+| `actor` | Origin, not semantic content (unless semantically significant) |
+| `correlation_id` | Tracing metadata, not meaning |
+| `causation_id` | Lineage metadata, not meaning |
+
+### Formal Definition
+
+```
+SemanticContent = {
+    event_type: EventType,
+    payload: CanonicalPayload
+}
+```
+
+**Invariant:** Two recordings of the same experience produce the same `experience_id`.
+
+## 6.7 CanonicalEnvelope
 
 ```python
 @dataclass(frozen=True)
 class CanonicalEnvelope:
-    schema_version: int
+    rvcj_version: int
+    event_schema_version: int
     experience_id: str
-    event_type: str
+    event_type: EventType
     stream_id: str
     sequence: int
     timestamp: str
@@ -354,6 +427,30 @@ class CanonicalEnvelope:
     @classmethod
     def from_dict(cls, data: dict[str, Any]) -> 'CanonicalEnvelope': ...
 ```
+
+## 6.8 Canonical Object
+
+The serializer operates on a **canonical object graph**, not arbitrary Python objects. This keeps serialization independent of the envelope implementation.
+
+```
+CanonicalEnvelope
+    ↓
+canonicalize()
+    ↓
+Canonical Object (normalized, validated)
+    ↓
+CanonicalSerializer.serialize()
+    ↓
+canonical bytes
+```
+
+The Canonical Object is an intermediate representation that:
+1. Has all required fields populated
+2. Has all values in canonical form
+3. Is validated against schema constraints
+4. Is ready for serialization
+
+This layer ensures that serialization is a pure function of the canonical object, not dependent on how the envelope was constructed.
 
 ---
 
@@ -376,7 +473,7 @@ class CanonicalSerializer:
         ...
     
     @staticmethod
-    def hash(envelope: CanonicalEnvelope) -> str:
+    def content_digest(envelope: CanonicalEnvelope) -> str:
         """Produce deterministic SHA-256 hash of canonical bytes.
         
         Returns full 64-character hex hash.
@@ -385,8 +482,18 @@ class CanonicalSerializer:
         ...
     
     @staticmethod
+    def version() -> int:
+        """Return RVCJ version of this serializer."""
+        ...
+    
+    @staticmethod
     def schema_fingerprint() -> str:
         """Return the schema fingerprint for this serializer version."""
+        ...
+    
+    @staticmethod
+    def algorithm() -> str:
+        """Return the hash algorithm used (e.g., 'sha-256')."""
         ...
 ```
 
@@ -398,6 +505,8 @@ CanonicalEnvelope
 to_dict()
     ↓
 RVCJ canonicalization
+    ↓
+Canonical Object (normalized, validated)
     ↓
 JSON serialization (no whitespace)
     ↓
@@ -412,6 +521,7 @@ canonical bytes
 - **Deterministic:** Same envelope → same bytes, always.
 - **Roundtrip stable:** `deserialize(serialize(env)) == env`.
 - **Schema fingerprint verifiable:** `schema_fingerprint()` matches specification hash.
+- **Canonical Object layer:** Serializer operates on canonical object, not raw envelope.
 
 ---
 
@@ -468,7 +578,11 @@ class StableIdGenerator:
     
     @staticmethod
     def experience_id(content: dict[str, Any]) -> str:
-        """Generate stable experience ID from semantic content."""
+        """Generate stable experience ID from semantic content.
+        
+        Semantic content = event_type + payload.
+        Excludes: timestamp, sequence, stream_id, actor, correlation_id, causation_id.
+        """
         ...
     
     @staticmethod
@@ -486,40 +600,49 @@ class StableIdGenerator:
 
 # 9. Component 5: Canonical Compliance Suite
 
-Cross-implementation validation vectors.
+Cross-implementation validation vectors. **The vectors are the specification.** The validator merely executes them.
 
 ## 9.1 Purpose
 
-Validate independent implementations (Python, Rust, Go, Java) against the same specification.
+Validate independent implementations (Python, Rust, Go, Java) against the same specification. The compliance vectors are **language-independent specification artifacts** — not Python fixtures.
 
 ## 9.2 Structure
 
 ```
-canonical/
-└── compliance/
-    ├── __init__.py
-    ├── vectors.py        # Test vectors (input → expected output)
-    └── validator.py      # Validation runner
+spec/
+└── vectors/
+    ├── key_ordering.json
+    ├── unicode_normalization.json
+    ├── decimal_normalization.json
+    ├── timestamp_format.json
+    ├── null_semantics.json
+    ├── binary_encoding.json
+    ├── array_ordering.json
+    ├── deep_nesting.json
+    ├── empty_payload.json
+    ├── large_integers.json
+    ├── unicode_combining.json
+    └── mixed_normalization.json
+
+rationalevault/
+└── canonical/
+    └── compliance/
+        ├── __init__.py
+        ├── vectors.py        # Loads vectors from spec/
+        └── validator.py      # Executes compliance tests
 ```
 
 ## 9.3 Test Vector Format
 
-```python
-COMPLIANCE_VECTORS = [
-    {
-        "name": "key_ordering",
-        "input": {"z": 1, "a": 2},
-        "expected_canonical": '{"a":2,"z":1}',
-        "expected_hash": "sha256_of_canonical_bytes"
-    },
-    {
-        "name": "unicode_nfc",
-        "input": {"key": "café"},  # with combining accent
-        "expected_canonical": '{"key":"café"}',  # NFC normalized
-        "expected_hash": "..."
-    },
-    # ... more vectors
-]
+```json
+{
+  "name": "key_ordering",
+  "description": "Object keys must be sorted lexicographically",
+  "input": {"z": 1, "a": 2},
+  "expected_canonical": "{\"a\":2,\"z\":1}",
+  "expected_hash": "sha256_of_canonical_bytes",
+  "expected_deserialized": {"a": 2, "z": 1}
+}
 ```
 
 ## 9.4 Compliance Requirements
@@ -527,8 +650,20 @@ COMPLIANCE_VECTORS = [
 An implementation is compliant if:
 1. All test vectors produce identical canonical bytes
 2. All test vectors produce identical hashes
-3. Roundtrip serialize → deserialize → serialize is stable
-4. Schema fingerprint matches specification hash
+3. All test vectors produce identical deserialized objects
+4. Roundtrip serialize → deserialize → serialize is stable
+5. Schema fingerprint matches specification hash
+
+## 9.5 Pathological Test Vectors
+
+| Vector | Description |
+|--------|-------------|
+| `unicode_combining` | Combining characters vs precomposed |
+| `mixed_normalization` | Mixed NFC/NFD in same string |
+| `large_integers` | integers > 2^53 |
+| `deep_nesting` | 100+ levels of nested objects |
+| `empty_payload` | Empty payload object |
+| `all_nulls` | All fields explicitly null |
 
 ---
 
@@ -560,7 +695,7 @@ An implementation is compliant if:
 | Test | Description |
 |------|-------------|
 | `test_serialize_deserialize_roundtrip` | serialize → deserialize → serialize identical |
-| `test_hash_stability` | Hash is identical across calls |
+| `test_content_digest_stability` | content_digest is identical across calls |
 
 ## 10.4 Invariant Tests
 
@@ -577,6 +712,10 @@ An implementation is compliant if:
 | `test_cross_version_stability` | v1 serializer → deserialize → v2 serializer produces same semantic object |
 | `test_envelope_validation` | Rejects missing required fields, duplicate fields, invalid timestamps, invalid IDs |
 | `test_schema_fingerprint` | All serializers report same fingerprint |
+| `test_pathological_unicode` | Combining characters, mixed normalization |
+| `test_pathological_integers` | Large integers > 2^53 |
+| `test_pathological_nesting` | Deep nesting 100+ levels |
+| `test_pathological_empty` | Empty payloads, all-null fields |
 
 ---
 
@@ -619,11 +758,13 @@ I-01 Replay Determinism
 ```
 specification.py (no dependencies)
     ↓
-envelope.py (depends on specification)
+types.py (depends on specification)
+    ↓
+envelope.py (depends on types, specification)
     ↓
 serializer.py (depends on envelope, specification)
     ↓
-stable_id.py (depends on serializer)
+stable_id.py (depends on serializer, envelope)
     ↓
 compliance/ (depends on all above)
 ```
@@ -631,11 +772,11 @@ compliance/ (depends on all above)
 ## 12.2 Implementation Sequence
 
 1. `specification.py` — Define rules as constants
-2. `types.py` — Shared type definitions
-3. `envelope.py` — CanonicalEnvelope and CanonicalPayload
-4. `serializer.py` — CanonicalSerializer
-5. `stable_id.py` — StableIdGenerator
-6. `compliance/vectors.py` — Test vectors
+2. `types.py` — Shared type definitions (EventType enum)
+3. `spec/vectors/` — Write compliance vectors BEFORE serializer (TDD at spec level)
+4. `envelope.py` — CanonicalEnvelope and CanonicalPayload
+5. `serializer.py` — CanonicalSerializer
+6. `stable_id.py` — StableIdGenerator
 7. `compliance/validator.py` — Validation runner
 8. Tests — All test files
 
@@ -652,8 +793,12 @@ Phase 1A is complete when:
 | ✅ Stable IDs | StableIdGenerator produces content-hash-based IDs |
 | ✅ Invariant I-00 | Canonical representation stability passes |
 | ✅ Invariant I-08 | Referential transparency passes |
-| ✅ Compliance | All compliance vectors pass |
+| ✅ Compliance | All compliance vectors pass (including pathological) |
 | ✅ Roundtrip | serialize → deserialize → serialize is stable |
+| ✅ Two versions | rvcj_version and event_schema_version are independent |
+| ✅ Semantic content | Experience ID generation follows formal definition |
+| ✅ Canonical object | Serializer operates on canonical object graph |
+| ✅ Compliance vectors | Language-independent spec artifacts in spec/vectors/ |
 
 ---
 
@@ -681,6 +826,36 @@ Phase 1A is complete when:
 | Identity separation | Experience ID ≠ Event ID | Semantic content vs recording metadata |
 | Schema evolution | Never migrate history | Canonicalization adapters transform legacy events |
 | Replay input | Canonical events only | Architectural principle: replay is unaware of legacy |
+| Version axes | rvcj_version + event_schema_version | Independent evolution of envelope format and payload schema |
+| Compliance vectors | Language-independent spec artifacts | Vectors define compliance; validator merely executes |
+| Serializer method | content_digest() | Avoids Python builtin hash() conflict |
+| Canonical object | Intermediate layer | Serializer operates on normalized, validated object graph |
+| Payload namespace | meta reserved | Future extensions without breaking changes |
+
+---
+
+# 16. Implementation Notes for Integrators
+
+## 16.1 Version Compatibility
+
+v1.4.0 events are **not directly compatible** with v2.0 canonical events. They must be converted by Canonicalization Adapters before replay. The replay engine is intentionally unaware of legacy formats.
+
+## 16.2 Serialization Contract
+
+All implementations must use `CanonicalSerializer.serialize()` to produce canonical bytes. Direct use of `json.dumps()` is forbidden — it produces non-canonical output that breaks determinism.
+
+## 16.3 ID Format
+
+- **Display form:** 12 hexadecimal characters (e.g., `EXP-a1b2c3d4e5f6`)
+- **Internal form:** Full SHA-256 hash (256 bits, never truncated)
+- **Storage:** Full hash stored for future use; display form used for human interaction
+
+## 16.4 Two Version Axes
+
+- `rvcj_version`: Envelope format version. Changes when envelope structure changes.
+- `event_schema_version`: Payload schema version. Changes when payload structure changes.
+
+These evolve independently. A payload schema change does not require an envelope format change, and vice versa.
 
 ---
 
