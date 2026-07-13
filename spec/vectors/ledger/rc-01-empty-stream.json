@@ -1,0 +1,14 @@
+{
+  "schema": "ledger-compliance-v1",
+  "scenario": "RC-01",
+  "name": "Empty Stream",
+  "description": "Reading an empty stream returns zero events",
+  "setup": [],
+  "checks": [
+    {
+      "op": "read_stream",
+      "stream_id": "test-stream",
+      "expect_count": 0
+    }
+  ]
+}

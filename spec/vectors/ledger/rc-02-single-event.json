@@ -1,0 +1,24 @@
+{
+  "schema": "ledger-compliance-v1",
+  "scenario": "RC-02",
+  "name": "Single Event",
+  "description": "A single event appended to a stream can be read back",
+  "setup": [
+    {
+      "op": "append",
+      "stream_id": "test-stream",
+      "experience_id": "exp-test",
+      "events": [
+        {"sequence": 1, "event_type": "core/TestEvent", "payload": {}}
+      ]
+    }
+  ],
+  "checks": [
+    {
+      "op": "read_stream",
+      "stream_id": "test-stream",
+      "expect_count": 1,
+      "expect_sequences": [1]
+    }
+  ]
+}

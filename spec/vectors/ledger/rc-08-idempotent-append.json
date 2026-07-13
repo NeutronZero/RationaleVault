@@ -1,0 +1,29 @@
+{
+  "schema": "ledger-compliance-v1",
+  "scenario": "RC-08",
+  "name": "Idempotent Re-Run",
+  "description": "Appending an identical commit twice produces no duplication",
+  "setup": [
+    {
+      "op": "append",
+      "stream_id": "test-stream",
+      "experience_id": "exp-test",
+      "events": [
+        {"sequence": 1, "event_type": "core/TestEvent", "payload": {}}
+      ]
+    },
+    {
+      "op": "idempotent_append",
+      "commit_index": 0
+    }
+  ],
+  "checks": [
+    {
+      "op": "read_stream",
+      "stream_id": "test-stream",
+      "expect_count": 1,
+      "expect_sequences": [1],
+      "description": "Idempotent append must not create duplicate entries"
+    }
+  ]
+}

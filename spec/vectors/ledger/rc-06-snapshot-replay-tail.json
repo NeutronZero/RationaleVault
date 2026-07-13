@@ -1,0 +1,39 @@
+{
+  "schema": "ledger-compliance-v1",
+  "scenario": "RC-06",
+  "name": "Snapshot + Replay Tail",
+  "description": "Reading from a specific global_order point returns only subsequent events",
+  "setup": [
+    {
+      "op": "append",
+      "stream_id": "test-stream",
+      "experience_id": "exp-test",
+      "events": [
+        {"sequence": 1, "event_type": "core/TestEvent", "payload": {"n": 1}},
+        {"sequence": 2, "event_type": "core/TestEvent", "payload": {"n": 2}}
+      ]
+    },
+    {
+      "op": "append",
+      "stream_id": "test-stream",
+      "experience_id": "exp-test",
+      "events": [
+        {"sequence": 3, "event_type": "core/TestEvent", "payload": {"n": 3}},
+        {"sequence": 4, "event_type": "core/TestEvent", "payload": {"n": 4}}
+      ]
+    }
+  ],
+  "checks": [
+    {
+      "op": "read_stream",
+      "stream_id": "test-stream",
+      "expect_count": 4,
+      "expect_sequences": [1, 2, 3, 4]
+    },
+    {
+      "op": "read_from",
+      "from_global_order": 0,
+      "expect_count": 4
+    }
+  ]
+}

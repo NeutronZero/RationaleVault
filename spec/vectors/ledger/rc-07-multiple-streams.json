@@ -1,0 +1,46 @@
+{
+  "schema": "ledger-compliance-v1",
+  "scenario": "RC-07",
+  "name": "Multiple Independent Streams",
+  "description": "Independent streams maintain isolation",
+  "setup": [
+    {
+      "op": "append",
+      "stream_id": "stream-A",
+      "experience_id": "exp-test",
+      "events": [
+        {"sequence": 1, "event_type": "core/TestEvent", "payload": {"n": 1}},
+        {"sequence": 2, "event_type": "core/TestEvent", "payload": {"n": 2}}
+      ]
+    },
+    {
+      "op": "append",
+      "stream_id": "stream-B",
+      "experience_id": "exp-test",
+      "events": [
+        {"sequence": 1, "event_type": "core/TestEvent", "payload": {"n": 1}},
+        {"sequence": 2, "event_type": "core/TestEvent", "payload": {"n": 2}},
+        {"sequence": 3, "event_type": "core/TestEvent", "payload": {"n": 3}}
+      ]
+    }
+  ],
+  "checks": [
+    {
+      "op": "read_stream",
+      "stream_id": "stream-A",
+      "expect_count": 2,
+      "expect_sequences": [1, 2]
+    },
+    {
+      "op": "read_stream",
+      "stream_id": "stream-B",
+      "expect_count": 3,
+      "expect_sequences": [1, 2, 3]
+    },
+    {
+      "op": "read_stream",
+      "stream_id": "stream-C",
+      "expect_count": 0
+    }
+  ]
+}

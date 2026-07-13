@@ -1,0 +1,31 @@
+{
+  "schema": "ledger-compliance-v1",
+  "scenario": "RC-05",
+  "name": "Multi-Event Commit",
+  "description": "A single commit with multiple events preserves event order",
+  "setup": [
+    {
+      "op": "append",
+      "stream_id": "test-stream",
+      "experience_id": "exp-test",
+      "events": [
+        {"sequence": 1, "event_type": "core/TestEvent", "payload": {"n": 1}},
+        {"sequence": 2, "event_type": "core/TestEvent", "payload": {"n": 2}},
+        {"sequence": 3, "event_type": "core/TestEvent", "payload": {"n": 3}}
+      ]
+    }
+  ],
+  "checks": [
+    {
+      "op": "read_stream",
+      "stream_id": "test-stream",
+      "expect_count": 3,
+      "expect_sequences": [1, 2, 3]
+    },
+    {
+      "op": "read_from",
+      "from_global_order": 0,
+      "expect_count": 3
+    }
+  ]
+}
