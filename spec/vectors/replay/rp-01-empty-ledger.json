@@ -3,6 +3,10 @@
   "description": "Replay of empty Ledger produces empty Understanding",
   "ledger": {},
   "replay": {"scope": "global"},
-  "expected": {"projections": {}},
+  "expected": {
+    "projections": {
+      "counter": {}
+    }
+  },
   "invariants": ["I-01", "I-01a"]
 }

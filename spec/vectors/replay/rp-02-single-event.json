@@ -5,11 +5,10 @@
     "streams": {
       "test-stream": [
         {
-          "event_id": "EVT-a1b2c3d4e5f6",
           "sequence": 1,
           "global_order": 1,
-          "event_type": "core/TestEvent",
-          "payload": {"key": "value"}
+          "event_type": "decision_recorded",
+          "payload": {"value": 1}
         }
       ]
     }
@@ -17,7 +16,7 @@
   "replay": {"scope": "global"},
   "expected": {
     "projections": {
-      "counter": {"events_processed": 1}
+      "counter": {"count": 1, "last_value": 1}
     }
   },
   "invariants": ["I-01", "I-01a"]

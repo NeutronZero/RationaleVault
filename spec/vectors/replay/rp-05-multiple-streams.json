@@ -5,27 +5,24 @@
     "streams": {
       "stream-A": [
         {
-          "event_id": "EVT-a1b2c3d4e5f6",
           "sequence": 1,
           "global_order": 1,
-          "event_type": "core/TestEvent",
-          "payload": {"stream": "A", "seq": 1}
+          "event_type": "decision_recorded",
+          "payload": {"value": 1}
         },
         {
-          "event_id": "EVT-b2c3d4e5f6a7",
           "sequence": 2,
           "global_order": 3,
-          "event_type": "core/TestEvent",
-          "payload": {"stream": "A", "seq": 2}
+          "event_type": "decision_recorded",
+          "payload": {"value": 3}
         }
       ],
       "stream-B": [
         {
-          "event_id": "EVT-c3d4e5f6a7b8",
           "sequence": 1,
           "global_order": 2,
-          "event_type": "core/TestEvent",
-          "payload": {"stream": "B", "seq": 1}
+          "event_type": "decision_recorded",
+          "payload": {"value": 2}
         }
       ]
     }
@@ -33,7 +30,7 @@
   "replay": {"scope": "global"},
   "expected": {
     "projections": {
-      "counter": {"events_processed": 3}
+      "counter": {"count": 3, "last_value": 3}
     }
   },
   "invariants": ["I-01", "I-11"]

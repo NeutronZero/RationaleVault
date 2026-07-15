@@ -1,24 +1,22 @@
 {
   "name": "rp-08-schema-evolution",
-  "description": "Replay of historical Events with an older schema version succeeds",
+  "description": "Replay of historical Events with older schema versions succeeds",
   "ledger": {
     "streams": {
       "test-stream": [
         {
-          "event_id": "EVT-a1b2c3d4e5f6",
           "sequence": 1,
           "global_order": 1,
-          "event_type": "core/TestEvent",
+          "event_type": "decision_recorded",
           "event_schema_version": 0,
-          "payload": {"key": "value"}
+          "payload": {"value": 1}
         },
         {
-          "event_id": "EVT-b2c3d4e5f6a7",
           "sequence": 2,
           "global_order": 2,
-          "event_type": "core/TestEvent",
+          "event_type": "decision_recorded",
           "event_schema_version": 1,
-          "payload": {"key": "value", "extra": "field"}
+          "payload": {"value": 2}
         }
       ]
     }
@@ -26,7 +24,7 @@
   "replay": {"scope": "global"},
   "expected": {
     "projections": {
-      "counter": {"events_processed": 2}
+      "counter": {"count": 2, "last_value": 2}
     }
   },
   "invariants": ["I-08", "I-10"]
