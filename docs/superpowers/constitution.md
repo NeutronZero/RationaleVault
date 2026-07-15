@@ -64,7 +64,7 @@ Each layer depends only on the layer immediately below it. There are no skip dep
 | AF-001 | Canonical Representation | Frozen | `specs/2026-07-13-canonical-representation-layer.md` |
 | AF-002 | Ledger | Frozen | `specs/2026-07-14-reference-kernel-section1-ledger.md` |
 | AF-003 | Replay Engine | Frozen | `specs/2026-07-14-reference-kernel-section2-replay.md` |
-| AF-004 | Projection Runtime | Planned | — |
+| AF-004 | Projection Runtime | Draft | `specs/2026-07-15-reference-kernel-section3-projection-runtime.md` |
 | AF-005 | Context Runtime | Planned | — |
 | AF-006 | Reasoning Runtime | Planned | — |
 
@@ -97,6 +97,8 @@ An article is **ratified** when its specification, implementation, compliance su
 | I-10 | AF-003 | Schema evolution — historical events with older schemas replay successfully |
 | I-11 | AF-002/AF-003 | Ledger/replay completeness — all committed events are presented during replay |
 | I-12 | AF-003 | Reducer purity — reducers MUST NOT mutate inputs or have side effects |
+| I-13 | AF-004 | Projection isolation — a Projection observes only declared dependencies and the replayed event stream |
+| I-14 | AF-004 | Dependency acyclicity — Projection dependencies form a directed acyclic graph |
 
 ## 5. Compliance Suites
 
