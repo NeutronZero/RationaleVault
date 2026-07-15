@@ -3,19 +3,9 @@
 from __future__ import annotations
 
 from dataclasses import dataclass
-from typing import Any, Callable
+from typing import Any
 
-
-ReducerFunc = Callable[[dict[str, Any], dict[str, Any]], dict[str, Any]]
-"""A reducer takes (state, event_dict) and returns new state.
-
-state:  The current accumulated state for this projection (mutable copy).
-event_dict: A flat dict representation of a committed event, containing
-    at minimum: event_id, event_type, stream_id, sequence, global_order,
-    timestamp, payload, rvcj_version, event_schema_version, commit_id, experience_id.
-
-Returns an updated state dict.
-"""
+from rationalevault.replay.reducer import ReducerFunc
 
 
 @dataclass(frozen=True)

@@ -13,7 +13,8 @@ from rationalevault.canonical.types import EventType
 from rationalevault.ledger.commit import CommitBuilder
 from rationalevault.ledger.storage.memory import MemoryLedger
 from rationalevault.replay.interface import ReplayEngine
-from rationalevault.replay.registry import ProjectionRegistry, ReducerFunc
+from rationalevault.replay.registry import ProjectionRegistry
+from rationalevault.replay.reducer import ReducerFunc
 from rationalevault.replay.types import ReplayBoundary, ReplayMode, ReplayScope
 
 
