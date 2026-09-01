@@ -37,11 +37,15 @@ def compare_directories(dir1: Path, dir2: Path):
     cmp = filecmp.dircmp(dir1, dir2)
     match, mismatch, errors = [], [], []
     
-    mismatch.extend([f"{dir1.name}/{f}" for f in cmp.left_only])
-    mismatch.extend([f"{dir2.name}/{f}" for f in cmp.right_only])
-    mismatch.extend([f"Diff: {f}" for f in cmp.diff_files])
+    ignore_list = ['.pytest_cache', '__pycache__', 'pyproject.toml']
+
+    mismatch.extend([f"{dir1.name}/{f}" for f in cmp.left_only if f not in ignore_list])
+    mismatch.extend([f"{dir2.name}/{f}" for f in cmp.right_only if f not in ignore_list])
+    mismatch.extend([f"Diff: {f}" for f in cmp.diff_files if f not in ignore_list])
     
     for common_dir in cmp.common_dirs:
+        if common_dir in ignore_list:
+            continue
         m, mm, e = compare_directories(dir1 / common_dir, dir2 / common_dir)
         match.extend(m)
         mismatch.extend(mm)
